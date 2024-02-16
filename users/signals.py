@@ -6,7 +6,7 @@ from .models import User
 
 @receiver(post_save, sender=User)
 def activate_superuser(sender, instance:User, created, **kwargs):
-    if created and instance.is_superuser:
+    if created :
         instance.is_active = True
         instance.save()
         

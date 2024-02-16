@@ -13,9 +13,8 @@ class FreelancersSearchAPIView(ListAPIView):
     permission_classes = []
     serializer_class = FreelancerSerializer
 
-    def get_queryset(self):
-        search_params = get_url_search_params(self.request.get_full_path())
-
+    @classmethod
+    def make_query(cls, search_params:dict):
         category = search_params.get("category")
         location = search_params.get("location")
         badge = search_params.get("badge")
@@ -65,6 +64,10 @@ class FreelancersSearchAPIView(ListAPIView):
                     | Q(zip_code__icontains=location)
                 )
         return queryset.distinct()
+
+    
+    def get_queryset(self):
+        return FreelancersSearchAPIView.make_query(self.request.query_params)
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()

@@ -6,7 +6,7 @@ SECRET_KEY = "django-insecure-0l3#19c*dv9r=cfgci3nhnp%8a924d77c8ub++ptddu#@nr_+k
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1", "dokoola.onrender.com"]
+ALLOWED_HOSTS = ["127.0.0.1", "dokoola.onrender.com", "mtoure.pythonanywhere.com"]
 
 AUTH_USER_MODEL = "users.User"
 
