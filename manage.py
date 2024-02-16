@@ -2,7 +2,7 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
-
+import dotenv
 def main():
     """Run administrative tasks."""
 
@@ -16,7 +16,8 @@ def main():
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
-
+    
+    dotenv.load_dotenv()
     argv = sys.argv
 
     if 'automate' in sys.argv:
