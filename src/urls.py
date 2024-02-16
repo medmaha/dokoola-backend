@@ -1,20 +1,34 @@
 from django.contrib import admin
 
 from django.urls import path, re_path, include
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 
 
-def index(request):
+def index(request, *args, **kwargs):
     import os 
     DEFAULT_ROUTE = "https://dokoola.vercel.app"
     CLIENT_SITE_ROUTE = os.environ.get("CLIENT_SITE_ROUTE", DEFAULT_ROUTE)
     return HttpResponseRedirect(CLIENT_SITE_ROUTE)
+def not_found(request):
+    return HttpResponse(
+        "<h1>404 | Not Found!</h1>",
+        status=404
+    )
 
-def api_index(request):
-    return JsonResponse({
-        "message": "Welcome to Dokoola API",
+def api_index(request, *args, **kwargs):
+    try:
+        endpoint = args[0]
+        if not endpoint:
+            raise Exception("Endpoint not found")
+        return JsonResponse({
+            "Provider": "Dokoola",
+            "message":"Oops! API endpoint not found",
 
-    })
+        }, status=404)
+    except:
+        return JsonResponse({
+            "message": "Welcome to Dokoola API",
+        })
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -28,6 +42,8 @@ urlpatterns = [
     path("api/notifications/", include("notifications.urls")),
     path("api/messenging/", include("messenging.urls")),
     path("api/account/", include("users.account.urls")),
-    re_path(r"^api*.", api_index),
-    re_path(r".*", index),
+
+    re_path(r"^api/?(.*)?/?$", api_index),
+    path("", index),
+    re_path(r".*", not_found),
 ]
