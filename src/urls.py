@@ -6,7 +6,8 @@ from django.http import HttpResponseRedirect, JsonResponse
 
 def index(request):
     import os 
-    CLIENT_SITE_ROUTE = os.environ.get("CLIENT_SITE_ROUTE")
+    DEFAULT_ROUTE = "https://dokoola.vercel.app"
+    CLIENT_SITE_ROUTE = os.environ.get("CLIENT_SITE_ROUTE", DEFAULT_ROUTE)
     return HttpResponseRedirect(CLIENT_SITE_ROUTE)
 
 def api_index(request):
