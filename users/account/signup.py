@@ -1,13 +1,11 @@
 import random
 import re
-from rest_framework.decorators import (
-    api_view,
-    permission_classes,
-    authentication_classes,
-)
+from django.core.mail import send_mail
+from django.db import transaction
+from django.template.loader import render_to_string
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import UpdateAPIView
+from rest_framework.generics import UpdateAPIView, GenericAPIView
 
 from staffs.models import Staff
 from clients.models import Client
@@ -20,21 +18,127 @@ from ..token import GenerateToken
 from ..serializer import UserCreateSerializer, UserUpdateSerializer
 
 import re
+import threading
 
 
-@api_view(["POST"])
-@permission_classes([])
-def check_email(request):
-    email = request.data.get("email")
-    exists = User.objects.filter(email=email).exists()
-    return Response(
-        {
-            "exists": exists,
-            "message": "An account with this email already exist"
-            if exists
-            else "No account with this email",
-        }
-    )
+class CheckEmailView(GenericAPIView):
+    permission_classes = ()
+    authentication_classes = ()
+
+    def send_verification_code(self, email):
+        code, save_otp = User.generate_otp(identifier=email)
+
+        html = render_to_string("users/email_verification.html", context={"code": code})
+
+        def mailer():
+            response = send_mail(
+                "Dokoola - Email Verification",
+                f"""
+                    Please use the following code to verify your email address: {code}
+                """,
+                None,
+                [email],
+                html_message=html,
+                fail_silently=False,
+            )
+            if response:
+                save_otp(True)
+                print("code:", code)
+                return
+            save_otp(False)
+
+        try:
+            threading.Thread(target=mailer).start()
+        except Exception as _:
+            mailer()
+        except:
+            pass
+
+    def post(self, request, *args, **kwargs):
+        email = request.data.get("email")
+        exists = User.objects.select_related("email").filter(email=email).exists()
+
+        if not exists:
+            self.send_verification_code(email)
+
+        return Response(
+            {
+                "exists": exists,
+                "message": (
+                    "An account with this email already exist"
+                    if exists
+                    else "No account with this email"
+                ),
+            },
+            status=400 if exists else 200,
+        )
+
+
+class ResendCodeView(GenericAPIView):
+    permission_classes = ()
+    authentication_classes = ()
+
+    def resend_verification_code(self, email):
+        code, save_otp = User.generate_otp(identifier=email)
+        html = render_to_string("users/email_verification.html", context={"code": code})
+
+        def mailer():
+            response = send_mail(
+                "Dokoola - Email Verification",
+                f"""
+                    Please use the following code to verify your email address: {code}
+                """,
+                None,
+                [email],
+                html_message=html,
+                fail_silently=False,
+            )
+            if response:
+                save_otp()
+                print("code:", code)
+
+        try:
+            threading.Thread(target=mailer).start()
+        except:
+            pass
+
+    def post(self, request, *args, **kwargs):
+        email = request.data.get("email")
+        self.resend_verification_code(email)
+        return Response(
+            {
+                "message": ("Successfully sent the code"),
+            }
+        )
+
+
+class VerifyCodeView(GenericAPIView):
+    permission_classes = ()
+    authentication_classes = ()
+
+    def verify_verification_code(self, code, email):
+        return User.check_otp(code, email)
+
+    def post(self, request, *args, **kwargs):
+        code = request.data.get("code")
+        email = request.data.get("email")
+        verified, invalidate = self.verify_verification_code(code, email)
+
+        if verified:
+            invalidate()
+            return Response(
+                {
+                    "verified": True,
+                    "message": ("Successfully sent the code"),
+                }
+            )
+        return Response(
+            {
+                "verified": False,
+                "message": "Invalid verification code",
+            },
+            status=400,
+        )
 
 
 class SignUpView(APIView):
@@ -66,10 +170,10 @@ class SignUpView(APIView):
         serializer = UserCreateSerializer(data=data)
 
         if serializer.is_valid():
-            user = serializer.save()
+            user: User = serializer.save()  # type: ignore
             user.is_active = False
             token_generator = GenerateToken()
-            tokens = token_generator.tokens(user, context={"request": request})
+            tokens = token_generator.tokens(user, init=True, context={"request": request})  # type: ignore
             user.set_password(data.get("password", "dokoola"))
 
             if user.is_staff:
@@ -79,11 +183,12 @@ class SignUpView(APIView):
             if user.is_freelancer:
                 Freelancer.objects.get_or_create(user=user)
 
+            # TODO: send a welcome email to the user
             return Response(tokens, status=201)
 
         message = ""
 
-        for error in serializer.errors.items():
+        for error in serializer.errors.items():  # type: ignore
             field, text = error[0], error[1][0]
 
             if re.search(rf"{field}", text, re.IGNORECASE):
@@ -97,6 +202,7 @@ class SignUpView(APIView):
 
 
 class SignupUserInformation(UpdateAPIView):
+
     def update(self, request, *args, **kwargs):
         user: User = request.user
 
@@ -107,56 +213,61 @@ class SignupUserInformation(UpdateAPIView):
         if "avatar" in data and not len(data.get("avatar", "")):
             del data["avatar"]
 
-        if profile:
-            username = data.get("username")
-            username_exists = User.objects.filter(username=username).exists()
-
-            if username_exists:
-                return Response(
-                    {"message": "Sorry! this username already exist"}, status=400
+        with transaction.atomic():
+            if profile:
+                username = data.get("username")
+                username_exists = (
+                    User.objects.select_related("id", "username")
+                    .select_for_update()
+                    .filter(username=username)
+                    .exclude(id=user.id)
+                    .exists()
                 )
-            data["is_valid"] = True
-            user_data = UserUpdateSerializer(instance=request.user, data=data)
 
-            if user_data.is_valid():
-                user_data.save()
+                if username_exists:
+                    return Response(
+                        {"message": "Sorry! this username already exist"}, status=400
+                    )
+                data["is_valid"] = True
+                user_serializer = UserUpdateSerializer(instance=request.user, data=data)
 
-            if isinstance(profile, Freelancer):
-                serializer = FreelancerUpdateSerializer(instance=profile, data=data)
-                if serializer.is_valid():
-                    serializer.save()
+                if user_serializer.is_valid():
+                    user_serializer.save()
+                else:
+                    return Response("Failed to update user", status=400)
 
-                    serializer = UserUpdateSerializer(instance=user, data=data)
-                    if serializer.is_valid():
-                        serializer.save()
+                if isinstance(profile, Freelancer):
+                    profile_serializer = FreelancerUpdateSerializer(
+                        instance=profile, data=data
+                    )
+                    if profile_serializer.is_valid():
+                        profile_serializer.save()
 
                         token_generator = GenerateToken()
-                        tokens = token_generator.tokens(
+                        tokens = token_generator.tokens(  # type: ignore
+                            user, context={"request": request}
+                        )
+                        return Response(tokens, status=200)
+                    return Response(
+                        {"message": "Invalid values are passed to the payload"},
+                        status=400,
+                    )
+
+                if isinstance(profile, Client):
+                    profile_serializer = ClientUpdateSerializer(
+                        instance=profile, data=data
+                    )
+                    if profile_serializer.is_valid():
+                        profile_serializer.save()
+                        token_generator = GenerateToken()
+                        tokens = token_generator.tokens(  # type: ignore
                             user, context={"request": request}
                         )
                         return Response(tokens, status=200)
 
-                return Response(
-                    {"message": "Invalid values are passed to the payload"}, status=400
-                )
-
-            if isinstance(profile, Client):
-                serializer = ClientUpdateSerializer(instance=profile, data=data)
-                if serializer.is_valid():
-                    serializer.save()
-
-                    serializer = UserUpdateSerializer(instance=user, data=data)
-                    if serializer.is_valid():
-                        serializer.save()
-                        token_generator = GenerateToken()
-                        tokens = token_generator.tokens(
-                            user, context={"request": request}
-                        )
-                        return Response(tokens, status=200)
-
-                print(serializer.errors)
-                return Response(
-                    {"message": "Invalid values are passed to the payload"}, status=400
-                )
+                    return Response(
+                        {"message": "Invalid values are passed to the payload"},
+                        status=400,
+                    )
 
         return Response({"message": "Request is forbidden/unauthorize"}, status=403)

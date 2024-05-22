@@ -19,7 +19,7 @@ class Proposal(models.Model):
     attachments = models.ManyToManyField("Attachment", related_name="proposal")
 
     budget = models.FloatField(default=0, blank=True)
-    discount = models.FloatField(default=0.06, blank=True)
+    service_fee = models.FloatField(default=0.06, blank=True, help_text="In percentage")
     bits_amount = models.IntegerField(default=12, blank=True)
 
     is_decline = models.BooleanField(default=False)

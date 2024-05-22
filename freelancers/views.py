@@ -4,7 +4,11 @@ from rest_framework.response import Response
 
 from .search import FreelancersSearchAPIView
 
-from .serializers import FreelancerDetailSerializer, FreelancerSerializer
+from .serializers import (
+    FreelancerDetailSerializer,
+    FreelancerSerializer,
+    FreelancerMiniInfoSerializer,
+)
 
 from .models import Freelancer
 
@@ -18,7 +22,7 @@ class FreelancerListAPIView(ListAPIView):
     serializer_class = FreelancerSerializer
 
     def get_queryset(self):
-        return FreelancersSearchAPIView.make_query(self.request.query_params)
+        return FreelancersSearchAPIView.make_query(self.request.query_params)  # type: ignore
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -26,6 +30,20 @@ class FreelancerListAPIView(ListAPIView):
         serializer = self.get_serializer(page, many=True, context={"request": request})
 
         return self.get_paginated_response(serializer.data)
+
+
+class FreelanceMiniInfoView(RetrieveAPIView):
+    serializer_class = FreelancerMiniInfoSerializer
+
+    def retrieve(self, request, username, **kwargs):
+        freelancer = Freelancer.objects.filter(user__username=username).first()
+
+        if not freelancer:
+            return Response({"message": "This request is prohibited"}, status=403)
+
+        serializer = self.get_serializer(freelancer)
+
+        return Response(serializer.data, status=200)
 
 
 class FreelanceRetrieveAPIView(RetrieveAPIView):
@@ -39,7 +57,5 @@ class FreelanceRetrieveAPIView(RetrieveAPIView):
             return Response({"message": "This request is prohibited"}, status=403)
 
         serializer = self.get_serializer(freelancer)
-
-        print(serializer.data)
 
         return Response(serializer.data, status=200)

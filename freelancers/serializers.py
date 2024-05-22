@@ -44,13 +44,31 @@ class FreelancerSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        user = UserSerializer(instance=instance.user).data
+        user: User = UserSerializer(instance=instance.user).data  # type: ignore
 
         return {**user, **data}
 
 
+class FreelancerMiniInfoSerializer(serializers.ModelSerializer):
+    """
+    An Serializer for the freelancer information
+    """
+
+    class Meta:
+        model = Freelancer
+        fields = ("id", "bits", "pricing", "location", "skills")
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["pricing"] = float(data["pricing"])
+        data["skills"] = data.get("skills", "").split(", ")
+        return data
+
+
 class FreelancerDetailSerializer(serializers.ModelSerializer):
-    """Serializer for the user object"""
+    """
+    An API View for the freelancer data statistics
+    """
 
     class Meta:
         model = Freelancer
@@ -58,7 +76,7 @@ class FreelancerDetailSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        user = UserSerializer(instance=instance.user).data
+        user: dict = UserSerializer(instance=instance.user).data  # type: ignore
 
         return {**user, **data}
 

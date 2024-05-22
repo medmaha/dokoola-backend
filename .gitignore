@@ -1,3 +1,6 @@
-/venv/
 venv/
+scripts/
 .env
+
+# ignore __pycache__
+/*/**/__pycache__*

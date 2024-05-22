@@ -26,7 +26,7 @@ class ProposalListSerializer(serializers.ModelSerializer):
             "id",
             "job",
             "budget",
-            "discount",
+            "service_fee",
             "freelancer",
             "bits_amount",
             "attachments",
@@ -50,7 +50,7 @@ class ProposalDetailSerializer(serializers.ModelSerializer):
             "id",
             "job",
             "budget",
-            "discount",
+            "service_fee",
             "freelancer",
             "bits_amount",
             "attachments",
@@ -63,20 +63,19 @@ class ProposalDetailSerializer(serializers.ModelSerializer):
         ]
 
 
-class ProposalEditViewSerializer(serializers.ModelSerializer):
+class ProposalUpdateSerializer(serializers.ModelSerializer):
     job = JobMiniSerializer()
     attachments = AttachmentSerializer(many=True)
 
     class Meta:
         model = Proposal
         fields = [
-            "id",
-            "job",
             "budget",
-            "discount",
+            "service_fee",
             "bits_amount",
             "attachments",
             "cover_letter",
+            "job",
             "created_at",
         ]
 
@@ -84,7 +83,7 @@ class ProposalEditViewSerializer(serializers.ModelSerializer):
 class ProposalEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = Proposal
-        fields = ["cover_letter", "bits_amount", "budget", "attachments"]
+        fields = ["cover_letter", "bits_amount", "budget"]
 
 
 class ProposalCreateSerializer(serializers.ModelSerializer):
@@ -92,8 +91,7 @@ class ProposalCreateSerializer(serializers.ModelSerializer):
         model = Proposal
         fields = [
             "budget",
-            "discount",
-            # "attachments",
+            "service_fee",
             "bits_amount",
             "cover_letter",
         ]

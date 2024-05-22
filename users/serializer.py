@@ -21,8 +21,8 @@ class AuthUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            "avatar",
             "name",
+            "avatar",
             "username",
             "is_active",
         )
@@ -70,4 +70,4 @@ class UserCreateSerializer(serializers.ModelSerializer):
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("avatar", "first_name", "last_name", "username")
+        fields = ("avatar", "first_name", "last_name", "username", "gender")

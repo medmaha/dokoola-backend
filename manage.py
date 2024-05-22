@@ -2,7 +2,8 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
-import dotenv
+
+
 def main():
     """Run administrative tasks."""
 
@@ -16,14 +17,13 @@ def main():
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
-    
-    dotenv.load_dotenv()
+
     argv = sys.argv
 
-    if 'automate' in sys.argv:
-        argv = ['manage.py', 'automate']
-    if 'reset_app' in sys.argv:
-        argv = ['manage.py', 'reset_app']
+    if "automate" in sys.argv:
+        argv = ["manage.py", "automate"]
+    if "reset_app" in sys.argv:
+        argv = ["manage.py", "reset_app"]
 
     execute_from_command_line(argv)
 

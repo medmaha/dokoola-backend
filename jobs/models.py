@@ -1,4 +1,5 @@
 from django.db import models
+from freelancers.models import Freelancer
 from utilities.generator import hex_generator
 
 from clients.models import Client
@@ -11,6 +12,7 @@ class Pricing(models.Model):
     will_pay_more = models.BooleanField(default=False, blank=True)
     addition = models.CharField(max_length=100)
     payment_type = models.CharField(max_length=100, default="PROJECT")
+    deleted = models.BooleanField(default=False, blank=True)
 
 
 class Job(models.Model):
@@ -18,11 +20,11 @@ class Job(models.Model):
         primary_key=True, default=hex_generator, editable=False, max_length=64
     )
     slug = models.SlugField(max_length=200, blank=True, default="")
-
     title = models.CharField(max_length=200)
     description = models.TextField()
     location = models.CharField(max_length=200)
-    active_state = models.BooleanField(default=True, blank=True)
+    is_valid = models.BooleanField(default=True, blank=True)
+    active_state = models.BooleanField(default=False, blank=True)
     budget = models.DecimalField(max_digits=10, decimal_places=2)
     pricing = models.ForeignKey(
         Pricing, on_delete=models.CASCADE, related_name="job_pricing"
@@ -30,6 +32,9 @@ class Job(models.Model):
     activities = models.ForeignKey(
         "Activities", on_delete=models.CASCADE, related_name="job"
     )
+    deleted = models.BooleanField(default=False, blank=True)
+    completed = models.BooleanField(default=False, blank=True)
+
     category = models.CharField(max_length=1000, blank=True, default="")
     required_skills = models.CharField(max_length=1000, blank=True, default="")
 
@@ -42,7 +47,8 @@ class Job(models.Model):
         return self.title[:50]
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(f"{hex_generator(6)}-") + slugify(self.title[:16])
+        if not self.slug:
+            self.slug = slugify(f"{hex_generator(6)}-") + slugify(self.title[:16])
         return super(Job, self).save(*args, **kwargs)
 
     @property
@@ -61,5 +67,24 @@ class Job(models.Model):
 from proposals.models import Proposal
 
 
-class Activities(models.Model):
+class Invitation(models.Model):
+    interview_count = models.IntegerField(default=0)
+    deleted = models.BooleanField(default=False, blank=True)
+    client_last_visit = models.DateTimeField(null=True, blank=True)
+    freelancer = models.ForeignKey(Freelancer, on_delete=models.CASCADE)
     proposals = models.ManyToManyField(Proposal, related_name="job_proposals")
+    proposal = models.ForeignKey(Proposal, on_delete=models.CASCADE, null=True)
+    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="invitations")
+
+
+class Activities(models.Model):
+    deleted = models.BooleanField(default=False, blank=True)
+    hired_count = models.IntegerField(default=0)
+    invite_count = models.IntegerField(default=0)
+    proposal_count = models.IntegerField(default=0)
+    interview_count = models.IntegerField(default=0)
+    unanswered_invites = models.IntegerField(default=0)
+    hired = models.ManyToManyField(Freelancer, blank=True)
+    client_last_visit = models.DateTimeField(null=True, blank=True)
+    proposals = models.ManyToManyField(Proposal, related_name="proposals")
+    invitations = models.ManyToManyField(Invitation, related_name="activity")

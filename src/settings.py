@@ -1,4 +1,9 @@
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -9,6 +14,8 @@ DEBUG = True
 ALLOWED_HOSTS = ["127.0.0.1", "dokoola.onrender.com", "mtoure.pythonanywhere.com"]
 
 AUTH_USER_MODEL = "users.User"
+
+APPEND_SLASH = True
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -34,17 +41,12 @@ INSTALLED_APPS = [
     "notifications",
 ]
 
-# APPEND_SLASH = True
-
-STATIC_ROOT = BASE_DIR / "static"
-STATIC_URL = "/static/"
-
 REST_FRAMEWORK = {
-    "PAGE_SIZE": 12,
+    "PAGE_SIZE": 15,
     "DEFAULT_PAGINATION_CLASS": "src.features.paginator.DokoolaPaginator",
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "src.features.dokoola_auth.DokoolaAuthentication",
-        # "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_PARSER_CLASSES": [
@@ -54,6 +56,12 @@ REST_FRAMEWORK = {
     ],
 }
 
+CSRF_COOKIE_AGE = 60 * 30  # 30 minutes
+CSRF_TRUSTED_ORIGINS = [
+    os.environ.get("FRONTEND_URL"),
+    "http://localhost:80",
+    "http://localhost:3000",
+]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -75,12 +83,13 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_METHODS = (
-    "DELETE",
     "GET",
-    "OPTIONS",
+    "PUT",
+    "UPDATE",
     "PATCH",
     "POST",
-    "PUT",
+    "DELETE",
+    "OPTIONS",
 )
 
 
@@ -89,8 +98,9 @@ CORS_ALLOW_HEADERS = (
     "authorization",
     "content-type",
     "user-agent",
-    "x-csrftoken",
     "x-requested-with",
+    "x-token",
+    "x-csrftoken",
 )
 
 ROOT_URLCONF = "src.urls"
@@ -114,13 +124,53 @@ TEMPLATES = [
 WSGI_APPLICATION = "src.wsgi.application"
 
 
+# DATABASE SETTINGS
+
+DB_NAME = os.environ.get("DB_NAME")
+DB_USER = os.environ.get("DB_USER")
+DB_HOST = os.environ.get("DB_HOST")
+DB_PORT = os.environ.get("DB_PORT")
+DB_ENGINE = os.environ.get("DB_ENGINE")
+DB_PASSWORD = os.environ.get("DB_PASSWORD")
+
+
+def missing_db_credentials():
+    credentials = [
+        "DB_NAME",
+        "DB_USER",
+        "DB_HOST",
+        "DB_PORT",
+        "DB_ENGINE",
+        "DB_PASSWORD",
+    ]
+    message = ""
+    for credential in credentials:
+        if not os.environ.get(credential):
+            message = f"{credential}"
+            break
+
+    return f"Missing Database credentials: {message}"
+
+
+assert DB_ENGINE and DB_USER and DB_HOST and DB_PORT, missing_db_credentials()
+
 DATABASES = {
+    # "default": {
+    #     "ENGINE": "django.db.backends.sqlite3",
+    #     "NAME": "db.sqlite3",
+    # },
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+        "USER": DB_USER,
+        "NAME": DB_NAME,
+        "HOST": DB_HOST,
+        "PORT": DB_PORT,
+        "ENGINE": DB_ENGINE,
+        "PASSWORD": DB_PASSWORD,
+    },
 }
 
+
+# PASSWORD VALIDATORS
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -137,7 +187,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 LANGUAGE_CODE = "en-us"
 
 TIME_ZONE = "GMT"
@@ -147,19 +196,12 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
-
 STATIC_URL = "static/"
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
+STATIC_ROOT = BASE_DIR / "static"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
 from datetime import timedelta
-
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(weeks=4),
@@ -177,3 +219,28 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_LIFETIME": timedelta(weeks=4),
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(weeks=5),
 }
+
+
+# EMAIL BACKEND SETTINGS
+
+# EMAIL_SUBJECT_PREFIX = "Dokoola - "
+EMAIL_HOST = os.environ.get("EMAIL_HOST")
+EMAIL_USER = os.environ.get("EMAIL_USER")
+EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 0))
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_PASSWORD")
+EMAIL_USE_TLS = bool(int(os.environ.get("EMAIL_USE_TLS", 0)))
+
+
+assert (
+    EMAIL_HOST
+    and EMAIL_USER
+    and EMAIL_HOST_PASSWORD
+    and EMAIL_PORT
+    and EMAIL_HOST
+    and EMAIL_USE_TLS
+), "All EMAIL_Backend* environment variables must be set"
+
+
+EMAIL_HOST_USER = EMAIL_USER
+# EMAIL_HOST_USER = f"Dokoola <{EMAIL_USER}>"
