@@ -5,10 +5,14 @@ from users.models import User
 
 class GenerateToken(TokenObtainPairSerializer):
     def get_token(self, user, **kwargs):
+        try:
+            init = kwargs.pop("init")
+        except:
+            init = None
         token = self.token_class.for_user(user)
         serialized_data = AuthUserSerializer(user, **kwargs).data
 
-        is_active = False if "init" in kwargs else user.is_active
+        is_active = False if init is not None else user.is_active
 
         token["user"] = {}
 

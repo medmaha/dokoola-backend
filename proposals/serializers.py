@@ -33,6 +33,7 @@ class ProposalListSerializer(serializers.ModelSerializer):
             "cover_letter",
             "is_decline",
             "is_accepted",
+            "duration",
             "is_reviewed",
             "is_proposed",
             "created_at",
@@ -56,6 +57,7 @@ class ProposalDetailSerializer(serializers.ModelSerializer):
             "attachments",
             "cover_letter",
             "is_decline",
+            "duration",
             "is_accepted",
             "is_reviewed",
             "is_proposed",
@@ -74,6 +76,7 @@ class ProposalUpdateSerializer(serializers.ModelSerializer):
             "service_fee",
             "bits_amount",
             "attachments",
+            "duration",
             "cover_letter",
             "job",
             "created_at",
@@ -83,7 +86,12 @@ class ProposalUpdateSerializer(serializers.ModelSerializer):
 class ProposalEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = Proposal
-        fields = ["cover_letter", "bits_amount", "budget"]
+        fields = [
+            "cover_letter",
+            "bits_amount",
+            "budget",
+            "duration",
+        ]
 
 
 class ProposalCreateSerializer(serializers.ModelSerializer):
@@ -93,5 +101,42 @@ class ProposalCreateSerializer(serializers.ModelSerializer):
             "budget",
             "service_fee",
             "bits_amount",
+            "duration",
             "cover_letter",
         ]
+
+
+class ProposalPendingListSerializer(serializers.ModelSerializer):
+    """
+    This is a serializer for the list of pending proposals for the request user (freelancer)
+    """
+
+    def get_job(self, obj: Proposal):
+        return {
+            "slug": obj.job.slug,
+            "title": obj.job.title,
+            "description": obj.job.description[:100],
+            "client": {
+                "avatar": obj.job.client.user.avatar,
+                "username": obj.job.client.user.username,
+                "name": obj.job.client.user.name,
+            },
+        }
+
+    class Meta:
+        model = Proposal
+        fields = [
+            "id",
+            "budget",
+            "service_fee",
+            "freelancer",
+            "duration",
+            "created_at",
+        ]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data.update({"job": self.get_job(instance)})
+        data["cover_letter"] = instance.cover_letter[:150]
+
+        return data

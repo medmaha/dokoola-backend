@@ -45,6 +45,10 @@ def get_csrf_token(request):
     return JsonResponse({"csrf": get_token(request)})
 
 
+def health(request):
+    return JsonResponse({"status": "OK"})
+
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/csrf/", get_csrf_token, name="csrf_token"),
@@ -58,6 +62,7 @@ urlpatterns = [
     path("api/notifications/", include("notifications.urls")),
     path("api/messenging/", include("messenging.urls")),
     path("api/account/", include("users.account.urls")),
+    path("api/health/", health),
     re_path(r"^api/?(.*)?/?$", api_index),
     path("", index),
     re_path(r".*", not_found),

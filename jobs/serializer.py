@@ -59,7 +59,7 @@ class JobMiniSerializer(serializers.ModelSerializer):
 
 
 class JobsSerializer(serializers.ModelSerializer):
-    client = ClientSerializer()
+    client = serializers.SerializerMethodField()
     has_proposed = serializers.SerializerMethodField()
 
     class Meta:
@@ -71,6 +71,8 @@ class JobsSerializer(serializers.ModelSerializer):
             "budget",
             "category",
             "location",
+            "duration",
+            "bits_count",
             "active_state",
             "has_proposed",
             "description",
@@ -121,6 +123,14 @@ class JobsSerializer(serializers.ModelSerializer):
             pass
         return data
 
+    def get_client(self, instance: Job):
+        return {
+            "name": instance.client.user.name,
+            "avatar": instance.client.user.avatar,
+            "username": instance.client.user.username,
+            "rating": instance.client.calculate_rating(),
+        }
+
     def to_representation(self, instance: Job):
         representation = super().to_representation(instance)
         data = self.update_categories_and_skills(representation)
@@ -169,6 +179,7 @@ class JobsDetailSerializer(serializers.ModelSerializer):
             "pricing",
             "category",
             "location",
+            "duration",
             "created_at",
             "activities",
             "has_proposed",

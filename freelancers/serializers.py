@@ -12,11 +12,12 @@ class FreelancerMiniSerializer(serializers.ModelSerializer):
         model = Freelancer
         fields = []
 
-    def to_representation(self, instance):
+    def to_representation(self, instance: Freelancer):
         return {
             "username": instance.user.username,
             "avatar": instance.user.avatar,
             "name": instance.user.name,
+            "rating": instance.calculate_rating(),
         }
 
 
@@ -49,6 +50,59 @@ class FreelancerSerializer(serializers.ModelSerializer):
         return {**user, **data}
 
 
+class FreelancerUpdateDataSerializer(serializers.ModelSerializer):
+    """
+    A readonly serializer for retrieving the updatable data of a freelancer
+    """
+
+    class Meta:
+        model = Freelancer
+        fields = []
+
+    def to_representation(self, instance: Freelancer):
+        return {
+            # Client Info
+            "bio": instance.bio,
+            "phone": instance.phone,
+            # Address Info
+            **instance.get_address(),
+            # User Info
+            "email": instance.user.email,
+            "name": instance.user.name,
+            "avatar": instance.user.avatar,
+            "gender": instance.user.gender,
+            "username": instance.user.username,
+            "first_name": instance.user.first_name,
+            "last_name": instance.user.last_name,
+            "pricing": instance.pricing,
+            "skills": instance.skills.split(",") if instance.skills else [],
+            "date_joined": instance.user.date_joined,
+        }
+
+
+class FreelancerUpdateSerializer(serializers.ModelSerializer):
+    """
+    This serializer is used for the freelancer update view
+    Exposes the freelancer's updatable fields
+    """
+
+    class Meta:
+        model = Freelancer
+        fields = (
+            "title",
+            "bio",
+            "phone",
+            "phone_code",
+            "country",
+            "country_code",
+            "state",
+            "district",
+            "city",
+            "zip_code",
+            "pricing",
+        )
+
+
 class FreelancerMiniInfoSerializer(serializers.ModelSerializer):
     """
     An Serializer for the freelancer information
@@ -79,11 +133,3 @@ class FreelancerDetailSerializer(serializers.ModelSerializer):
         user: dict = UserSerializer(instance=instance.user).data  # type: ignore
 
         return {**user, **data}
-
-
-class FreelancerUpdateSerializer(serializers.ModelSerializer):
-    """Serializer for the user object"""
-
-    class Meta:
-        model = Freelancer
-        fields = ("bio", "phone", "city", "address", "zip_code", "country", "city")

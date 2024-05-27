@@ -9,7 +9,7 @@ from users.models import User
 from .models import Thread, Messenging
 from .serializer import (
     ThreadListSerializer,
-    MessengingListSerializer,
+    MessagingListSerializer,
     MessengingCreateSerializer,
 )
 
@@ -93,13 +93,17 @@ class ThreadSearchAPIView(ListAPIView):
 
 
 class ThreadMessagesAPIView(ListAPIView):
-    serializer_class = MessengingListSerializer
+    serializer_class = MessagingListSerializer
 
-    def get_queryset(self):
+    def get_queryset(self, query_params):
         user = self.request.user
-        search_params = get_url_search_params(self.request.get_full_path())
+        thread_unique_id = query_params.get("id", "")
 
-        thread_unique_id = search_params.get("id", "")
+        print(thread_unique_id)
+        if isinstance(thread_unique_id, list):
+            thread_unique_id = thread_unique_id[0]
+        print(thread_unique_id)
+
         thread = Thread.objects.filter(owner=user, unique_id=thread_unique_id).first()
 
         if thread:
@@ -108,7 +112,7 @@ class ThreadMessagesAPIView(ListAPIView):
         return
 
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
+        queryset = self.get_queryset(request.query_params)
 
         if not queryset:
             return Response(status=403)
@@ -166,7 +170,7 @@ class MessengingCreateAPIView(CreateAPIView):
             user_thread.messenging.add(message)
             recipient_thread.messenging.add(message)
 
-            serializer = MessengingListSerializer(message, context={"request": request})
+            serializer = MessagingListSerializer(message, context={"request": request})
 
             response = {"chat": serializer.data}
 

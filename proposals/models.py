@@ -15,6 +15,7 @@ class Proposal(models.Model):
         Freelancer, on_delete=models.CASCADE, related_name="proposals"
     )
 
+    duration = models.CharField(max_length=100, null=True, blank=True)
     cover_letter = models.TextField(max_length=1500)
     attachments = models.ManyToManyField("Attachment", related_name="proposal")
 
@@ -26,6 +27,7 @@ class Proposal(models.Model):
     is_accepted = models.BooleanField(default=False)
     is_reviewed = models.BooleanField(default=False)
     is_proposed = models.BooleanField(default=False)
+    is_pending = models.BooleanField(default=True)
 
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)

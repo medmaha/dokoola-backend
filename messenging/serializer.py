@@ -9,7 +9,7 @@ class MessengingCreateSerializer(serializers.ModelSerializer):
         fields = ["content"]
 
 
-class MessengingListSerializer(serializers.ModelSerializer):
+class MessagingListSerializer(serializers.ModelSerializer):
     from_me = serializers.SerializerMethodField()
     created_at = serializers.SerializerMethodField()
 
@@ -31,10 +31,6 @@ class MessengingListSerializer(serializers.ModelSerializer):
 class ThreadListSerializer(serializers.ModelSerializer):
     recipient = serializers.SerializerMethodField()
     messenging = serializers.SerializerMethodField()
-    id = serializers.SerializerMethodField()
-
-    def get_id(self, instance: Thread):
-        return instance.unique_id
 
     def get_recipient(self, instance: Thread):
         return {
@@ -59,4 +55,4 @@ class ThreadListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Thread
-        fields = ["id", "recipient", "messenging"]
+        fields = ["id", "unique_id", "recipient", "messenging"]

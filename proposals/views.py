@@ -17,6 +17,7 @@ from .serializers import (
     ProposalListSerializer,
     ProposalEditSerializer,
     ProposalUpdateSerializer,
+    ProposalPendingListSerializer,
 )
 
 from users.models import User
@@ -52,13 +53,9 @@ class ProposalListApiView(ListAPIView):
     def list(self, request, *args, **kwargs):
         print("hits")
         queryset = self.get_queryset()
-        if queryset:
-            page = self.paginate_queryset(queryset)
-            serializer = self.get_serializer(
-                page, many=True, context={"request": request}
-            )
-            return self.get_paginated_response(serializer.data)
-        return Response({"message": "Request is forbidden"}, status=403)
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(page, many=True, context={"request": request})
+        return self.get_paginated_response(serializer.data)
 
 
 class ProposalUpdateAPIView(GenericAPIView):
@@ -163,10 +160,17 @@ class ProposalCreateAPIView(CreateAPIView):
         if serializer.is_valid():
             proposal: Proposal = serializer.save(job=job, freelancer=freelancer)
             job.activities.proposals.add(proposal)
+            job.bits_count = job.bits_count + 1
             job.activities.save()
             freelancer.bits = freelancer.bits - proposal.bits_amount
             freelancer.save()
-            return Response(serializer.data, status=201)
+            return Response(
+                {
+                    "proposal_id": proposal.id,
+                    "message": "Proposal created successfully",
+                },
+                status=201,
+            )
 
         return Response({"message": "Bad request"}, status=400)
 
@@ -193,3 +197,28 @@ class ProposalCheckAPIView(RetrieveAPIView):
         proposal = Proposal.objects.filter(job=job, freelancer=freelancer).exists()
 
         return Response({"proposed": proposal}, status=200)
+
+
+class ProposalPendingListView(ListAPIView):
+    serializer_class = ProposalPendingListSerializer
+
+    def get_queryset(self, username: str):
+        try:
+            freelancer = Freelancer.objects.select_related().get(
+                user__username=username
+            )
+        except Freelancer.DoesNotExist:
+            return None
+        proposals = Proposal.objects.filter(
+            job__is_valid=True, freelancer=freelancer, is_pending=True
+        )
+        return proposals
+
+    def list(self, request, username, *args, **kwargs):
+        queryset = self.get_queryset(username)
+        if not queryset:
+            return Response({"message": "This request is prohibited"}, status=403)
+        serializer = self.get_serializer(
+            queryset, many=True, context={"request": request}
+        )
+        return Response(serializer.data)

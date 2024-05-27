@@ -58,9 +58,12 @@ class Client(models.Model):
         return self.user.username or self.country
 
     def get_address(self):
+        """Returns the client's address in a dictionary format"""
         return {
             "zip_code": self.zip_code,
             "country": self.country,
+            "country_code": self.country_code,
+            "phone_code": self.phone_code,
             "state": self.state,
             "district": self.district,
             "city": self.city,
@@ -69,8 +72,15 @@ class Client(models.Model):
     def get_location(self):
         return f"{self.country} | {self.city or self.state}"
 
+    @property
+    def address(self):
+        return f"{self.country} | {self.city or self.state}"
+
     # Calculates the client's average rating
     def calculate_rating(self):
-        return self.reviews.select_related().aggregate(rating=models.Avg("rating"))[
-            "rating"
-        ]
+        return (
+            self.reviews.select_related().aggregate(rating=models.Avg("rating"))[
+                "rating"
+            ]
+            or 0.0
+        )

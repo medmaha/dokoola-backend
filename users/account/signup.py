@@ -149,56 +149,57 @@ class SignUpView(APIView):
 
         if str(suffix) == _suffix:
             return self.username_suffix(suffix)
-
         return str(suffix)
 
     def post(self, request, *args, **kwargs):
         data = request.data.copy()
 
         username = data.get("username")
-        while True:
-            username_exists = User.objects.filter(username=username).exists()
-            if username_exists:
-                _username = re.sub(r"[0-9]", "", username)
-                username = _username + self.username_suffix(
-                    username[: len(username) - 3]
-                )
-            else:
+
+        with transaction.atomic():
+            while True:
+                username_exists = User.objects.filter(username=username).exists()
+                if username_exists:
+                    _username = re.sub(r"[0-9]", "", username)
+                    username = _username + self.username_suffix(
+                        username[: len(username) - 3]
+                    )
+                else:
+                    break
+
+            data["username"] = username
+            serializer = UserCreateSerializer(data=data)
+
+            if serializer.is_valid():
+                user: User = serializer.save()  # type: ignore
+                user.is_active = False
+                token_generator = GenerateToken()
+                tokens = token_generator.tokens(user, init=True, context={"request": request})  # type: ignore
+                user.set_password(data.get("password", "dokoola"))
+
+                if user.is_staff:
+                    Staff.objects.get_or_create(user=user)
+                if user.is_client:
+                    Client.objects.get_or_create(user=user)
+                if user.is_freelancer:
+                    Freelancer.objects.get_or_create(user=user)
+
+                # TODO: send a welcome email to the user
+                return Response(tokens, status=201)
+
+            message = ""
+
+            for error in serializer.errors.items():  # type: ignore
+                field, text = error[0], error[1][0]
+
+                if re.search(rf"{field}", text, re.IGNORECASE):
+                    message = text.capitalize()
+                    break
+
+                message = field.capitalize() + ": " + text
                 break
 
-        data["username"] = username
-        serializer = UserCreateSerializer(data=data)
-
-        if serializer.is_valid():
-            user: User = serializer.save()  # type: ignore
-            user.is_active = False
-            token_generator = GenerateToken()
-            tokens = token_generator.tokens(user, init=True, context={"request": request})  # type: ignore
-            user.set_password(data.get("password", "dokoola"))
-
-            if user.is_staff:
-                Staff.objects.get_or_create(user=user)
-            if user.is_client:
-                Client.objects.get_or_create(user=user)
-            if user.is_freelancer:
-                Freelancer.objects.get_or_create(user=user)
-
-            # TODO: send a welcome email to the user
-            return Response(tokens, status=201)
-
-        message = ""
-
-        for error in serializer.errors.items():  # type: ignore
-            field, text = error[0], error[1][0]
-
-            if re.search(rf"{field}", text, re.IGNORECASE):
-                message = text.capitalize()
-                break
-
-            message = field.capitalize() + ": " + text
-            break
-
-        return Response({"message": message}, status=400)
+            return Response({"message": message}, status=400)
 
 
 class SignupUserInformation(UpdateAPIView):

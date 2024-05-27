@@ -6,6 +6,9 @@ from clients.models import Client
 from django.utils.text import slugify
 
 
+from django.utils import timezone, duration
+
+
 class Pricing(models.Model):
     fixed_price = models.BooleanField(default=True, blank=True)
     negotiable_price = models.BooleanField(default=False, blank=True)
@@ -16,6 +19,7 @@ class Pricing(models.Model):
 
 
 class Job(models.Model):
+
     id = models.CharField(
         primary_key=True, default=hex_generator, editable=False, max_length=64
     )
@@ -35,9 +39,11 @@ class Job(models.Model):
     deleted = models.BooleanField(default=False, blank=True)
     completed = models.BooleanField(default=False, blank=True)
 
+    duration = models.CharField(max_length=1000, blank=True, null=True)
     category = models.CharField(max_length=1000, blank=True, default="")
     required_skills = models.CharField(max_length=1000, blank=True, default="")
 
+    bits_count = models.IntegerField(default=0)
     client = models.ForeignKey(Client, related_name="jobs", on_delete=models.DO_NOTHING)
 
     updated_at = models.DateTimeField(auto_now=True)
@@ -48,7 +54,7 @@ class Job(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(f"{hex_generator(6)}-") + slugify(self.title[:16])
+            self.slug = slugify(f"{hex_generator(12)}-") + slugify(self.title[:5])
         return super(Job, self).save(*args, **kwargs)
 
     @property
