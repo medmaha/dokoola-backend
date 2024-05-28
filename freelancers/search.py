@@ -14,7 +14,7 @@ class FreelancersSearchAPIView(ListAPIView):
     serializer_class = FreelancerSerializer
 
     @classmethod
-    def make_query(cls, search_params:dict):
+    def make_query(cls, search_params: dict):
         category = search_params.get("category")
         location = search_params.get("location")
         badge = search_params.get("badge")
@@ -36,7 +36,7 @@ class FreelancersSearchAPIView(ListAPIView):
                     | Q(education__course__icontains=query)
                     | Q(education__description__icontains=query)
                 )
-   
+
         if category:
             if category.lower() != "all":
                 category = category.replace("%20", " ")
@@ -52,22 +52,21 @@ class FreelancersSearchAPIView(ListAPIView):
             if badge.lower() != "all":
                 badge = badge.replace("%20", " ")
                 queryset = queryset.filter(Q(badge__icontains=badge))
-           
+
         if location:
             if location.lower() != "all":
                 location = location.replace("%20", " ")
                 queryset = queryset.filter(
                     Q(country__icontains=location)
-                    | Q(region__icontains=location)
+                    | Q(state__icontains=location)
                     | Q(city__icontains=location)
                     | Q(address__icontains=location)
                     | Q(zip_code__icontains=location)
                 )
         return queryset.distinct()
 
-    
     def get_queryset(self):
-        return FreelancersSearchAPIView.make_query(self.request.query_params)
+        return FreelancersSearchAPIView.make_query(self.request.query_params)  # type: ignore
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -76,5 +75,3 @@ class FreelancersSearchAPIView(ListAPIView):
         serializer = self.get_serializer(page, many=True, context={"request": request})
 
         return self.get_paginated_response(serializer.data)
-
-
