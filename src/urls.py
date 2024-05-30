@@ -1,26 +1,20 @@
 import os
 from django.contrib import admin
+from django.core.mail import send_mail
 from django.urls import path, re_path, include
 
-from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.http import JsonResponse
-from django.middleware.csrf import get_token
-
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 
-DEFAULT_URL = "https://dokoola.vercel.app"
-FRONTEND_URL = os.environ.get("FRONTEND_URL", DEFAULT_URL)
+
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "")
 
 
-def index(request, *args, **kwargs):
+def base_index(request, *args, **kwargs):
     return HttpResponseRedirect(FRONTEND_URL)
 
 
-def not_found(request):
-    return HttpResponse("<h1>404 | Not Found!</h1>", status=404)
-
-
-def api_index(request, *args, **kwargs):
+def base_api_index(request, *args, **kwargs):
     try:
         endpoint = args[0]
         if not endpoint:
@@ -40,18 +34,29 @@ def api_index(request, *args, **kwargs):
         )
 
 
-@ensure_csrf_cookie
-def get_csrf_token(request):
-    return JsonResponse({"csrf": get_token(request)})
-
-
-def health(request):
+def api_health(request):
     return JsonResponse({"status": "OK"})
+
+
+def not_found(request):
+    return HttpResponse("<h1>404 | Not Found!</h1>", status=404)
+
+
+def mailer_health(request):
+    response = send_mail(
+        "Dokoola - Email Testing",
+        f"""
+            This is a test
+        """,
+        None,
+        ["toure925@outlook.com"],
+        fail_silently=False,
+    )
+    return JsonResponse({"status": "Ok" if bool(response) else "Failed"})
 
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/csrf/", get_csrf_token, name="csrf_token"),
     path("api/jobs/", include("jobs.urls")),
     path("api/users/", include("users.urls")),
     path("api/staffs/", include("staffs.urls")),
@@ -62,8 +67,11 @@ urlpatterns = [
     path("api/notifications/", include("notifications.urls")),
     path("api/messenging/", include("messenging.urls")),
     path("api/account/", include("users.account.urls")),
-    path("api/health/", health),
-    re_path(r"^api/?(.*)?/?$", api_index),
-    path("", index),
+    path("api/health", api_health),
+    path("api/health/", api_health),
+    path("api/health/mail", mailer_health),
+    path("api/health/mail/", mailer_health),
+    re_path(r"/?", base_index),
+    re_path(r"api/?", base_api_index),
     re_path(r".*", not_found),
 ]
