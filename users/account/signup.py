@@ -27,7 +27,6 @@ class CheckEmailView(GenericAPIView):
 
     def send_verification_code(self, email):
         code, save_otp = User.generate_otp(identifier=email)
-
         html = render_to_string("users/email_verification.html", context={"code": code})
 
         def mailer():
@@ -43,7 +42,6 @@ class CheckEmailView(GenericAPIView):
             )
             if response:
                 save_otp(True)
-                print("code:", code)
                 return
             save_otp(False)
 
@@ -95,10 +93,11 @@ class ResendCodeView(GenericAPIView):
             )
             if response:
                 save_otp()
-                print("code:", code)
 
         try:
             threading.Thread(target=mailer).start()
+        except Exception as _:
+            mailer()
         except:
             pass
 

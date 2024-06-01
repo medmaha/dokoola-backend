@@ -1,16 +1,20 @@
 from django.db import models
-from datetime import datetime
+from utilities.generator import hex_generator
 from jobs.models import Job
 from freelancers.models import Freelancer
-from utilities.generator import hex_generator
 
 
 class Proposal(models.Model):
-    id = models.CharField(
-        primary_key=True, default=hex_generator, editable=False, max_length=64
-    )
+
+    class ProposalStatusType(models.TextChoices):
+        ACCEPTED = "ACCEPTED"
+        DECLINED = "DECLINED"
+        PENDING = "PENDING"
+
+    uid = models.CharField(default=hex_generator, editable=False, max_length=64)
 
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="proposals")
+
     freelancer = models.ForeignKey(
         Freelancer, on_delete=models.CASCADE, related_name="proposals"
     )
@@ -26,19 +30,18 @@ class Proposal(models.Model):
     is_decline = models.BooleanField(default=False)
     is_accepted = models.BooleanField(default=False)
     is_reviewed = models.BooleanField(default=False)
-    is_proposed = models.BooleanField(default=False)
     is_pending = models.BooleanField(default=True)
+
+    status = models.CharField(
+        max_length=200, choices=ProposalStatusType.choices, default="PENDING"
+    )
+
+    deleted = models.BooleanField(default=False, blank=True)
+
+    is_proposed = models.BooleanField(default=False)  # Might not be used
 
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    @property
-    def status(self):
-        if self.is_accepted:
-            return "ACCEPTED".capitalize()
-        if self.is_decline:
-            return "DECLINE".capitalize()
-        return "PENDING".capitalize()
 
 
 class Attachment(models.Model):

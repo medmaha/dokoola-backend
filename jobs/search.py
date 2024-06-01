@@ -25,7 +25,9 @@ class JobsSearchAPIView(ListAPIView):
         budget_rate = search_params.get("budget")
         order_by = search_params.get("order", "-created_at")
 
-        self.queryset = Job.objects.filter(is_valid=True)
+        self.queryset = Job.objects.filter(
+            Q(is_valid=True, status="PUBLISHED") | Q(client__user=self.request.user)
+        )
 
         if duration:
             self.filter_by_duration(duration)

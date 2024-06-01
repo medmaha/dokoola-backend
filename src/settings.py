@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "django-insecure-0l3#19c*dv9r=cfgci3nhnp%8a924d77c8ub++ptddu#@nr_+k"
 
-DEBUG = True
+DEBUG = bool(int(os.environ.get(("DEBUG"), 0)))
 
 ALLOWED_HOSTS = ["127.0.0.1", "dokoola.onrender.com", "mtoure.pythonanywhere.com"]
 
@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "users",
     "staffs",
     "clients",
+    "contracts",
     "freelancers",
     "reviews",
     "jobs",
@@ -152,22 +153,25 @@ def missing_db_credentials():
     return f"Missing Database credentials: {message}"
 
 
-assert DB_ENGINE and DB_USER and DB_HOST and DB_PORT, missing_db_credentials()
+if not DEBUG:
+    assert DB_ENGINE and DB_USER and DB_HOST and DB_PORT, missing_db_credentials()
 
-DATABASES = {
-    # "default": {
-    #     "ENGINE": "django.db.backends.sqlite3",
-    #     "NAME": "db.sqlite3",
-    # },
-    "default": {
+default_db = {
+    "ENGINE": "django.db.backends.sqlite3",
+    "NAME": "db.sqlite3",
+}
+
+if not DEBUG:
+    default_db = {
         "USER": DB_USER,
         "NAME": DB_NAME,
         "HOST": DB_HOST,
         "PORT": DB_PORT,
         "ENGINE": DB_ENGINE,
         "PASSWORD": DB_PASSWORD,
-    },
-}
+    }
+
+DATABASES = {"default": default_db}
 
 
 # PASSWORD VALIDATORS

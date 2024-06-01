@@ -24,17 +24,15 @@ class FreelancerMiniSerializer(serializers.ModelSerializer):
 class FreelancerSerializer(serializers.ModelSerializer):
     """Serializer for the user object"""
 
-    ratings = serializers.SerializerMethodField()
+    rating = serializers.SerializerMethodField()
     skills = serializers.SerializerMethodField()
 
     class Meta:
         model = Freelancer
-        fields = ("bio", "badge", "skills", "title", "pricing", "ratings", "location")
+        fields = ("bio", "badge", "skills", "title", "pricing", "rating", "location")
 
-    def get_ratings(self, instance):
-        [prefix, suffix] = str(random.uniform(0.50, 5)).split(".")
-        suffix = suffix[0]
-        return f"{prefix}.{suffix}0"
+    def get_rating(self, instance: Freelancer):
+        return instance.calculate_rating()
 
     def get_skills(self, instance):
         skills = instance.skills.split(",")

@@ -33,14 +33,9 @@ class JobsListAPIView(ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        if user:
-            queryset = Job.objects.filter(
-                Q(is_valid=True)
-                | Q(active_state=False, client__user=user)
-                | Q(active_state=True)
-            )
-        else:
-            queryset = Job.objects.filter(active_state=True, is_valid=True)
+        queryset = Job.objects.filter(
+            Q(is_valid=True, status="PUBLISHED") | Q(client__user=user)
+        )
         return queryset
 
     def list(self, request, *args, **kwargs):

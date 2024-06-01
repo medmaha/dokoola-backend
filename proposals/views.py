@@ -1,11 +1,10 @@
-import re
+from django.db.models import Q
 from rest_framework.generics import (
     ListAPIView,
     RetrieveAPIView,
     CreateAPIView,
     GenericAPIView,
 )
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.request import Request
 from freelancers.models import Freelancer
@@ -14,6 +13,7 @@ from .models import Proposal, Attachment
 
 from .serializers import (
     ProposalCreateSerializer,
+    ProposalDetailSerializer,
     ProposalListSerializer,
     ProposalEditSerializer,
     ProposalUpdateSerializer,
@@ -21,15 +21,13 @@ from .serializers import (
 )
 
 from users.models import User
-from utilities.text import get_url_search_params
 
 
 class ProposalListApiView(ListAPIView):
     serializer_class = ProposalListSerializer
 
     def get_queryset(self):
-        queryset = None
-        username = get_url_search_params(self.request.get_full_path()).get("u")
+        username = self.request.query_params.get("u")  # type: ignore
         if username:
             user = User.objects.filter(username=username).first()
             if user:
@@ -51,32 +49,69 @@ class ProposalListApiView(ListAPIView):
         return queryset
 
     def list(self, request, *args, **kwargs):
-        print("hits")
         queryset = self.get_queryset()
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True, context={"request": request})
         return self.get_paginated_response(serializer.data)
 
 
+class ProposalDetailsApiView(RetrieveAPIView):
+    serializer_class = ProposalDetailSerializer
+
+    def get_queryset(self, proposal_id: str):
+        if not self.request.user.is_authenticated:
+            return "Unauthorized! Please log in"
+
+        user = self.request.user
+
+        try:
+            # Only retrieve proposals for the current user
+            # and if the proposal is for the current user
+            # or from the current user
+            proposal = Proposal.objects.get(
+                Q(job__client__user=user) | Q(freelancer__user=user),
+                pk=proposal_id,
+            )
+        except Proposal.DoesNotExist:
+            return "Proposal not found"
+        except:
+            return "Error! failed to get proposal"
+
+        return proposal
+
+    def retrieve(self, request, pid, *args, **kwargs):
+        queryset = self.get_queryset(pid)
+
+        if isinstance(queryset, str):
+            return Response({"message": queryset}, status=400)
+        serializer = self.get_serializer(queryset, context={"request": request})
+        return Response(serializer.data, status=200)
+
+
 class ProposalUpdateAPIView(GenericAPIView):
     serializer_class = ProposalUpdateSerializer
 
     def get(self, request, *args, **kwargs):
-        url = request.get_full_path()
-        proposal_id = get_url_search_params(url).get("slug")
+        proposal_id = self.request.query_params.get("slug")  # type: ignore
+        if not proposal_id:
+            return Response({"message": "Invalid proposal"}, status=400)
 
-        if proposal_id:
-            proposal = Proposal.objects.filter(id=proposal_id).first()
-            if proposal:
-                [profile, _] = request.user.profile
-                if proposal.freelancer.pk == profile.pk:
-                    serializer = self.get_serializer(
-                        proposal, context={"request": request}
-                    )
-                    return Response(serializer.data, status=200)
-            return Response({"message": "Request is forbidden"}, status=400)
+        user = request.user
 
-        return Response({"message": "Invalid proposal"}, status=400)
+        [profile, profile_name] = user.profile
+
+        if profile_name.lower() != "freelancer":
+            return Response({"message": "Bad request attempted"}, status=400)
+
+        try:
+            proposal = Proposal.objects.get(freelancer=profile, id=proposal_id)
+            serializer = self.get_serializer(proposal, context={"request": request})
+            return Response(serializer.data, status=200)
+        except Proposal.DoesNotExist:
+            return Response({"message": "Bad request attempted"}, status=400)
+
+        except:
+            return Response({"message": "An unexpected error occurred"}, status=400)
 
     def put(self, request, *args, **kwargs):
         proposal_id = request.data.get("proposal_id")
@@ -166,7 +201,7 @@ class ProposalCreateAPIView(CreateAPIView):
             freelancer.save()
             return Response(
                 {
-                    "proposal_id": proposal.id,
+                    "proposal_id": proposal.pk,
                     "message": "Proposal created successfully",
                 },
                 status=201,

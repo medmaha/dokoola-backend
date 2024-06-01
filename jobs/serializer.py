@@ -44,7 +44,7 @@ class JobMiniSerializer(serializers.ModelSerializer):
             "client",
             "budget",
             "pricing",
-            "active_state",
+            "status",
             "description",
             "created_at",
         ]
@@ -73,7 +73,7 @@ class JobsSerializer(serializers.ModelSerializer):
             "location",
             "duration",
             "bits_count",
-            "active_state",
+            "status",
             "has_proposed",
             "description",
             "payment_type",
@@ -148,7 +148,7 @@ class JobsUpdateSerializer(serializers.ModelSerializer):
             "budget",
             "category",
             "location",
-            "active_state",
+            "status",
             "description",
             "required_skills",
         ]
@@ -183,7 +183,7 @@ class JobsDetailSerializer(serializers.ModelSerializer):
             "created_at",
             "activities",
             "has_proposed",
-            "active_state",
+            "status",
             "description",
             "required_skills",
         ]

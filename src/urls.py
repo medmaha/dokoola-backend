@@ -63,6 +63,7 @@ urlpatterns = [
     path("api/clients/", include("clients.urls")),
     path("api/reviews/", include("reviews.urls")),
     path("api/proposals/", include("proposals.urls")),
+    path("api/contracts/", include("contracts.urls")),
     path("api/freelancers/", include("freelancers.urls")),
     path("api/notifications/", include("notifications.urls")),
     path("api/messenging/", include("messenging.urls")),
@@ -71,7 +72,7 @@ urlpatterns = [
     path("api/health/", api_health),
     path("api/health/mail", mailer_health),
     path("api/health/mail/", mailer_health),
-    re_path(r"/?", base_index),
-    re_path(r"api/?", base_api_index),
+    re_path(r"api/$", base_api_index),
+    path("", base_index),
     re_path(r".*", not_found),
 ]

@@ -58,6 +58,7 @@ class ProposalDetailSerializer(serializers.ModelSerializer):
             "cover_letter",
             "is_decline",
             "duration",
+            "status",
             "is_accepted",
             "is_reviewed",
             "is_proposed",
