@@ -33,4 +33,8 @@ urlpatterns = [
         views.FreelanceMiniInfoView.as_view(),
         name="freelancer_statistics",
     ),
+    path(
+        "<username>/portfolios/",
+        views.FreelancerPortfolioAPIView.as_view(),
+    ),
 ]

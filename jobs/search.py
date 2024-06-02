@@ -48,6 +48,8 @@ class JobsSearchAPIView(ListAPIView):
                 self.queryset = self.queryset.order_by("created_at")
             elif order_by == "oldest":
                 self.queryset = self.queryset.order_by("-created_at")
+        else:
+            self.queryset = self.queryset.order_by("-created_at")
 
         return self.queryset
 

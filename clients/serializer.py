@@ -115,6 +115,41 @@ class ClientDetailSerializer(serializers.ModelSerializer):
         return representation
 
 
+class ClientProfileDetailSerializer(serializers.ModelSerializer):
+    """
+    A serializer for the client detail api view \n
+    Securely serialize all the necessary information of this client
+    * The return data will vary depending on the requesting user
+    """
+
+    class Meta:
+        model = Client
+        fields = [
+            "bio",
+            "website",
+            "industry",
+            "jobs_active",
+            "jobs_created",
+            "jobs_completed",
+        ]
+
+    def get_address(self, instance: Client):
+        request = self.context.get("request")
+        user = request.user if request else None
+        if user and user.pk == instance.user.pk:
+            return instance.get_address()
+        return instance.address
+
+    def to_representation(self, instance: Client):
+        data = super().to_representation(instance)
+        user: dict = UserSerializer(instance=instance.user).data  # type: ignore
+        data.update(user)
+        data.update({"rating": instance.calculate_rating()})
+        data.update({"address": self.get_address(instance)})
+        data.update({"reviews": []})
+        return data
+
+
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review

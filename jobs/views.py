@@ -35,15 +35,13 @@ class JobsListAPIView(ListAPIView):
         user = self.request.user
         queryset = Job.objects.filter(
             Q(is_valid=True, status="PUBLISHED") | Q(client__user=user)
-        )
+        ).order_by("-created_at")
         return queryset
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         page = self.paginate_queryset(queryset)
-
         serializer = self.get_serializer(page, many=True, context={"request": request})
-
         return self.get_paginated_response(serializer.data)
 
 
@@ -143,6 +141,8 @@ class JobCreateAPIView(CreateAPIView):
             )
 
         data: dict = request.data.copy()  # type: ignore
+
+        print(data)
 
         pricing_data = data["pricing"]
         del data["pricing"]

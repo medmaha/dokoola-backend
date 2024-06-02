@@ -37,16 +37,6 @@ class UserSerializer(serializers.ModelSerializer):
         [_, name] = instance.profile
         return name
 
-    def to_representation(self, instance: User):
-        data = super().to_representation(instance)
-        if instance.is_staff:
-            data.update({"is_staff": True})
-        if instance.is_client:
-            data.update({"is_client": True})
-        if instance.is_freelancer:
-            data.update({"is_freelancer": True})
-        return data
-
     class Meta:
         model = User
         fields = ("avatar", "name", "username", "profile")

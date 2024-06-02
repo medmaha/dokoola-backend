@@ -1,7 +1,7 @@
 # create a u serializer class
 import random
 from rest_framework import serializers
-from .models import Freelancer
+from .models import Freelancer, Portfolio
 from users.serializer import UserSerializer
 
 
@@ -131,3 +131,58 @@ class FreelancerDetailSerializer(serializers.ModelSerializer):
         user: dict = UserSerializer(instance=instance.user).data  # type: ignore
 
         return {**user, **data}
+
+
+class FreelancerProfileDetailSerializer(serializers.ModelSerializer):
+    """
+    An serializer class for the freelancer profile page
+    """
+
+    class Meta:
+        model = Freelancer
+        fields = [
+            "bio",
+            "title",
+            "badge",
+            "skills",
+            "pricing",
+            "jobs_completed",
+        ]
+
+    def get_address(self, instance: Freelancer):
+        request = self.context.get("request")
+        user = request.user if request else None
+        if user and user.pk == instance.user.pk:
+            return instance.get_address()
+        return instance.location
+
+    def to_representation(self, instance: Freelancer):
+        data = super().to_representation(instance)
+        user: dict = UserSerializer(instance=instance.user).data  # type: ignore
+        data.update(user)
+        data.update({"rating": instance.calculate_rating()})
+        data.update({"address": self.get_address(instance)})
+        data.update({"reviews": []})
+        data.update({"education": []})
+        return data
+
+
+class FreelancerPortfolioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Portfolio
+        fields = "__all__"
+
+    def is_valid(self, *, raise_exception=False):
+        self.initial_data = {
+            "url": self.initial_data.get("url"),
+            "name": self.initial_data.get("name"),
+            "image": self.initial_data.get("image"),
+            "description": self.initial_data.get("description"),
+        }
+        return super().is_valid(raise_exception=raise_exception)
+
+
+class FreelancerPortfolioCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Portfolio
+        fields = ("image", "title", "description", "url")

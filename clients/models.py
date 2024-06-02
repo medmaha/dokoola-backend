@@ -1,22 +1,7 @@
 from django.db import models
+from reviews.models import Review
 from utilities.generator import id_generator
 from users.models import User
-
-
-class Review(models.Model):
-    """A class that represent the reviews of job-creators"""
-
-    rating = models.IntegerField(default=0)
-    content = models.TextField(max_length=500, default="")
-    id = models.CharField(
-        primary_key=True, default=id_generator, editable=False, max_length=64
-    )
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviewer")
-
-    deleted = models.BooleanField(default=False, blank=True)
-
-    def __str__(self):
-        return f"<{self.author.username}>: {self.content[:15]}"
 
 
 class Client(models.Model):

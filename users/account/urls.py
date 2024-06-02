@@ -3,8 +3,10 @@ from . import login
 from . import signup
 from . import verify
 from . import logout
+from . import at
 
 
+# Reference -> /api/account/*/**/
 urlpatterns = [
     path("login", login.LoginView.as_view(), name="login"),
     path("verify", verify.verifyEmail, name="verify"),
@@ -13,5 +15,6 @@ urlpatterns = [
     path("signup/mail-check/", signup.CheckEmailView.as_view(), name="check_email"),
     path("signup/mail-resend/", signup.ResendCodeView.as_view(), name="resend_code"),
     path("signup/mail-verify/", signup.VerifyCodeView.as_view(), name="verify_code"),
-    path("info/", signup.SignupUserInformation.as_view(), name="signup"),
+    path("info/", signup.SignupUserInformation.as_view(), name="signup-info"),
+    path("at/<username>/", at.UserProfile.as_view(), name="profile"),
 ]

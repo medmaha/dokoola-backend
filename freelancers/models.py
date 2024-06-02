@@ -5,6 +5,19 @@ from users.models import User
 from reviews.models import Review
 
 
+class Portfolio(models.Model):
+    name = models.CharField(max_length=200)
+    description = models.TextField()
+    url = models.URLField()
+    image = models.CharField(max_length=2000)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Education(models.Model):
     course = models.CharField(max_length=200)
     institution = models.CharField(max_length=200)
@@ -12,6 +25,9 @@ class Education(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     present = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.institution[:25]
@@ -48,6 +64,8 @@ class Freelancer(models.Model):
     reviews = models.ManyToManyField(
         Review, blank=True, related_name="freelancer_reviews"
     )
+
+    portfolio = models.ManyToManyField(Portfolio, related_name="freelancer", blank=True)
 
     jobs_completed = models.IntegerField(default=0)
     badge = models.CharField(max_length=200, default="basic")

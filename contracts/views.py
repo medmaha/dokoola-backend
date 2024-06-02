@@ -1,3 +1,4 @@
+import random
 from django.db import transaction
 from django.db.models import Q
 from rest_framework.generics import GenericAPIView, RetrieveAPIView, UpdateAPIView
@@ -52,6 +53,7 @@ class ContractAcceptAPIView(UpdateAPIView):
                         recipient=contract.freelancer.user,
                         object_api_link=f"/contracts/view/{contract.pk}",
                     )
+                    # TODO: Notify 1 through email
 
                 if profile_name.lower() == "freelancer":
                     if contract.freelancer_acknowledgement != "PENDING":
@@ -66,6 +68,7 @@ class ContractAcceptAPIView(UpdateAPIView):
                         recipient=contract.freelancer.user,
                         object_api_link=f"/contracts/view/{contract.pk}",
                     )
+                    # TODO: Notify 2 through email
 
                     Notification.objects.create(
                         hint_text="Contract Accepted",
@@ -74,6 +77,7 @@ class ContractAcceptAPIView(UpdateAPIView):
                         sender=contract.freelancer.user,
                         object_api_link=f"/contracts/view/{contract.pk}",
                     )
+                    # TODO: Notify 3 through email
 
                 if contract.status == "ACCEPTED":
                     contract.progress = "ACTIVE"
@@ -84,12 +88,16 @@ class ContractAcceptAPIView(UpdateAPIView):
                         recipient=contract.freelancer.user,
                         object_api_link=f"/contracts/view/{contract.pk}",
                     )
+                    # TODO: Notify 5 through email
+
                     Notification.objects.create(
                         hint_text="Project Started",
                         content_text=f"Your contract <strong>{contract.job.title}</strong> with <strong>{contract.freelancer.user.name}</strong> has commenced",
                         recipient=contract.client.user,
                         object_api_link=f"/contracts/view/{contract.pk}",
                     )
+                    # TODO: Notify 6 through email
+
                     contract.job.status = "IN_PROGRESS"
                     contract.job.save()
                 contract.save()
@@ -214,21 +222,39 @@ class ContractCreateView(GenericAPIView):
 
                     freelancer_notification = Notification()
                     freelancer_notification.recipient = proposal.freelancer.user
-                    freelancer_notification.hint_text = "New Contract Received"
+                    freelancer_messages = [
+                        "New Contract",
+                        "You've got a new contract.",
+                        "A new contract has been created for you.",
+                        "You have a new contract for a project you've proposed to",
+                    ]
+                    freelancer_notification.hint_text = random.choice(
+                        freelancer_messages
+                    )
                     freelancer_notification.content_text = (
-                        "You've received a new contract. Please check it out."
+                        "You've received a contract for <strong>%s<strong/> project, from <strong>%s<strong/>. Please check it out."
+                        % proposal.job.title
+                        % proposal.freelancer.user.name
                     )
                     freelancer_notification.object_api_link = (
                         "/contracts/view/%s" % contract.pk
                     )
+
+                    # TODO: Notify 7 through email
                     freelancer_notification.save()
 
                     client_notification = Notification()
                     client_notification.recipient = proposal.job.client.user
-                    client_notification.hint_text = "New Contract Created"
+                    client_messages = [
+                        "New Contract",
+                        "You've got a new contract.",
+                        "A new contract has been created for you.",
+                        "You have a new contract for a project you're working on.",
+                    ]
+                    client_notification.hint_text = random.choice(client_messages)
                     client_notification.content_text = (
-                        "Your contract for %s project, has been created. Please check it out."
-                        % proposal.job.title
+                        "You've created a contract for <strong>%s<strong/> project, with <strong>%s<strong/>. Please check it out."
+                        % (proposal.job.title, proposal.freelancer.user.name)
                     )
                     client_notification.object_api_link = (
                         "/contracts/view/%s" % contract.pk
@@ -236,9 +262,13 @@ class ContractCreateView(GenericAPIView):
                     proposal.status = "ACCEPTED"
                     proposal.is_pending = False
                     proposal.is_accepted = True
+                    proposal.is_reviewed = True
+                    proposal.job.activities.hired.add(proposal.freelancer)
                     proposal.save()
-                    client_notification.save()
+                    proposal.job.save()
 
+                    # TODO: Notify 8 through email
+                    client_notification.save()
                     return Response(
                         {
                             "contract_id": contract.pk,

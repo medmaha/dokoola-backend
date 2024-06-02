@@ -8,13 +8,20 @@ from .models import Notification
 class NotificationListAPIView(ListAPIView):
     serializer_class = NotificationSerializer
 
-    def get_queryset(self):
+    def get_queryset(self, latest=False):
         user = self.request.user
-        queryset = Notification.objects.filter(recipient=user).order_by("-created_at")
+        if latest:
+            queryset = Notification.objects.filter(
+                recipient=user, is_seen=False
+            ).order_by("-created_at")
+        else:
+            queryset = Notification.objects.filter(recipient=user).order_by(
+                "-created_at"
+            )
         return queryset
 
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
+        queryset = self.get_queryset("latest" in request.query_params)  # type: ignore
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True, context={"request": request})
         response = self.get_paginated_response(serializer.data)

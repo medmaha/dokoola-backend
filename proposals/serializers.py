@@ -34,6 +34,7 @@ class ProposalListSerializer(serializers.ModelSerializer):
             "is_decline",
             "is_accepted",
             "duration",
+            "status",
             "is_reviewed",
             "is_proposed",
             "created_at",

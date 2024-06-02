@@ -72,7 +72,6 @@ class JobsSerializer(serializers.ModelSerializer):
             "category",
             "location",
             "duration",
-            "bits_count",
             "status",
             "has_proposed",
             "description",
@@ -136,6 +135,7 @@ class JobsSerializer(serializers.ModelSerializer):
         data = self.update_categories_and_skills(representation)
         description = representation.get("description", "")
         data.update({"description": description[:200]})
+        data["bits_count"] = instance.activities.proposal_count
 
         return data
 

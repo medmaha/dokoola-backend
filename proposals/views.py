@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.db import transaction
 from rest_framework.generics import (
     ListAPIView,
     RetrieveAPIView,
@@ -104,7 +105,9 @@ class ProposalUpdateAPIView(GenericAPIView):
             return Response({"message": "Bad request attempted"}, status=400)
 
         try:
-            proposal = Proposal.objects.get(freelancer=profile, id=proposal_id)
+            proposal = Proposal.objects.get(
+                freelancer=profile, id=proposal_id, is_pending=True
+            )
             serializer = self.get_serializer(proposal, context={"request": request})
             return Response(serializer.data, status=200)
         except Proposal.DoesNotExist:
@@ -163,51 +166,54 @@ class ProposalCreateAPIView(CreateAPIView):
         # Copy the request data to avoid mutating the original request
         data: dict = request.data.copy()  # type: ignore
 
-        try:
-            # Check if the job exists
-            job = Job.objects.select_related().get(slug=data.get("job", ""))
+        with transaction.atomic():
+            try:
+                # Check if the job exists
+                job = Job.objects.select_related().get(slug=data.get("job", ""))
 
-            # Check if the user has already applied for this job
-            existing_proposal = Proposal.objects.filter(
-                job=job, freelancer=freelancer, is_accepted=False
-            ).exists()
+                # Check if the user has already applied for this job
+                existing_proposal = Proposal.objects.filter(
+                    job=job, freelancer=freelancer, is_accepted=False
+                ).exists()
 
-            # If the user has already applied for this job, return an error
-            if existing_proposal:
-                return Response({"message": "Already applied for this job"}, status=400)
+                # If the user has already applied for this job, return an error
+                if existing_proposal:
+                    return Response(
+                        {"message": "Already applied for this job"}, status=400
+                    )
 
-        # If the job doesn't exist, return an error
-        except Job.DoesNotExist:
-            return Response({"message": "Bad request attempted"}, status=400)
+            # If the job doesn't exist, return an error
+            except Job.DoesNotExist:
+                return Response({"message": "Bad request attempted"}, status=400)
 
-        except Exception as e:
-            # If an unexpected error occurs, return an error
-            return Response({"message": "An unexpected error occurred"}, status=400)
+            except Exception as e:
+                # If an unexpected error occurs, return an error
+                return Response({"message": "An unexpected error occurred"}, status=400)
 
-        # Get the attachment data of the request
-        attachment_data = data.get("attachments")  # TODO: Handle attachments
+            # Get the attachment data of the request
+            attachment_data = data.get("attachments")  # TODO: Handle attachments
 
-        # Remove the attachment data from the request data
-        data.pop("attachments", None)
+            # Remove the attachment data from the request data
+            data.pop("attachments", None)
 
-        serializer = self.get_serializer(data=data, context={"request": request})
+            serializer = self.get_serializer(data=data, context={"request": request})
 
-        if serializer.is_valid():
-            proposal: Proposal = serializer.save(job=job, freelancer=freelancer)
-            job.activities.proposals.add(proposal)
-            job.bits_count = job.bits_count + 1
-            job.activities.save()
-            freelancer.bits = freelancer.bits - proposal.bits_amount
-            freelancer.save()
-            return Response(
-                {
-                    "proposal_id": proposal.pk,
-                    "message": "Proposal created successfully",
-                },
-                status=201,
-            )
+            if serializer.is_valid():
+                proposal: Proposal = serializer.save(job=job, freelancer=freelancer)
+                job.activities.proposals.add(proposal)
+                job.activities.bits_count = job.bits_count + 1
+                job.activities.save()
+                freelancer.bits = freelancer.bits - proposal.bits_amount
+                freelancer.save()
+                return Response(
+                    {
+                        "proposal_id": proposal.pk,
+                        "message": "Proposal created successfully",
+                    },
+                    status=201,
+                )
 
-        return Response({"message": "Bad request"}, status=400)
+            return Response({"message": "Bad request"}, status=400)
 
     def get_serializer(self, *args, **kwargs) -> ProposalCreateSerializer:
         return super().get_serializer(*args, **kwargs)
