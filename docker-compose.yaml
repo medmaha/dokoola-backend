@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  nginx: # NginX
+    container_name: dokoola-nginx-service
+    build:
+      context: ./nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+    command: nginx -g "daemon off;"
+
+  backend: # Django
+    container_name: dokoola-backend-service
+    build:
+      context: ./
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env
+    command: gunicorn src.wsgi:application --workers 2 --threads 2 --preload --bind 0.0.0.0:8000

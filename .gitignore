@@ -1,5 +1,5 @@
 venv/
-scripts/
+dev-scripts/
 .env
 
 # ignore __pycache__
