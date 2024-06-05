@@ -1,5 +1,6 @@
 FROM nginx:1.25.3-alpine-slim
 
-COPY ./app.conf /etc/nginx/conf.d/app.conf
+WORKDIR /etc/nginx/templates
 
-COPY ./index.html /var/www/html/index.html
+COPY ./app.conf.template /etc/nginx/templates/default.conf.template
+

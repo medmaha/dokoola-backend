@@ -11,7 +11,7 @@ SECRET_KEY = "django-insecure-0l3#19c*dv9r=cfgci3nhnp%8a924d77c8ub++ptddu#@nr_+k
 
 DEBUG = bool(int(os.environ.get(("DEBUG"), 0)))
 
-ALLOWED_HOSTS = ["127.0.0.1", "dokoola.onrender.com", "mtoure.pythonanywhere.com"]
+ALLOWED_HOSTS = ["*"]
 
 AUTH_USER_MODEL = "users.User"
 
@@ -170,6 +170,10 @@ if not DEBUG:
         "ENGINE": DB_ENGINE,
         "PASSWORD": DB_PASSWORD,
     }
+
+
+print("DEBUG:", DEBUG)
+
 
 DATABASES = {"default": default_db}
 

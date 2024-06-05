@@ -3,6 +3,7 @@ version: "3"
 services:
   nginx: # NginX
     container_name: dokoola-nginx-service
+    restart: always
     build:
       context: ./nginx
     ports:
@@ -20,4 +21,5 @@ services:
       - "8000:8000"
     env_file:
       - ./.env
+    # command: python manage.py runserver 5000
     command: gunicorn src.wsgi:application --workers 2 --threads 2 --preload --bind 0.0.0.0:8000
