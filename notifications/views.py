@@ -1,5 +1,5 @@
 from rest_framework.response import Response
-from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView, GenericAPIView
 
 from .serializer import NotificationSerializer
 from .models import Notification
@@ -26,6 +26,17 @@ class NotificationListAPIView(ListAPIView):
         serializer = self.get_serializer(page, many=True, context={"request": request})
         response = self.get_paginated_response(serializer.data)
         return response
+
+
+class NotificationSeenAPIView(GenericAPIView):
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        notifications = request.data.get("data")
+        Notification.objects.select_related().filter(
+            recipient=user, id__in=notifications
+        ).update(is_seen=True)
+        return Response({}, status=200)
 
 
 class NotificationCheckAPIView(RetrieveAPIView):

@@ -1,17 +1,18 @@
 import os
+from django.shortcuts import render
 from django.contrib import admin
 from django.core.mail import send_mail
 from django.urls import path, re_path, include
 
 from django.http import JsonResponse
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse
 
 
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "")
 
 
 def base_index(request, *args, **kwargs):
-    return HttpResponseRedirect(FRONTEND_URL)
+    return render(request, "core/index.html")
 
 
 def base_api_index(request, *args, **kwargs):
@@ -72,7 +73,8 @@ urlpatterns = [
     path("api/health/", api_health),
     path("api/health/mail", mailer_health),
     path("api/health/mail/", mailer_health),
-    re_path(r"api/$", base_api_index),
-    path("", base_index),
-    re_path(r".*", not_found),
+    path("", include("core.urls")),
+    # re_path(r"api/$", base_api_index),
+    # path("", base_index),
+    # re_path(r".*", not_found),
 ]

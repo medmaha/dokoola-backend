@@ -115,6 +115,35 @@ class ContractAcceptAPIView(UpdateAPIView):
         return Response(serializer.data, status=200)
 
 
+class ContractCompleteAPIView(UpdateAPIView):
+
+    def update(self, request, contract_id, *args, **kwargs):
+        if not contract_id:
+            return Response({"message": "Bad request"}, status=400)
+
+        user = self.request.user
+        _, profile_name = user.profile  # type: ignore
+
+        if profile_name.lower() == "client":
+            return Response({"message": "Forbidden"}, status=403)
+
+        if profile_name.lower() == "freelancer":
+            try:
+                contract = Contract.objects.get(id=contract_id, freelancer__user=user)
+                contract.progress = "COMPLETED"
+                contract.save()
+
+                # TODO: Notify 4 through email and create a notification for both users
+                return Response(
+                    {"message": "Contract completed successfully"}, status=200
+                )
+            except Exception as e:
+                print(e)
+                return Response({"message": "Resource not found"}, status=404)
+
+        return Response({"message": "Bad request"}, status=400)
+
+
 class ContractRetrieveAPIView(RetrieveAPIView):
     serializer_class = ContractListSerializer
 

@@ -1,0 +1,43 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static 'core/index.css' %}" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Dokoola Backend</title>
+  </head>
+  <body>
+    <header class="bg-red-400">
+      <nav>
+        <a class="brand" href="#">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="h-6 w-6"
+          >
+            <path d="m8 3 4 8 5-5 5 15H2L8 3z"></path>
+          </svg>
+          <span class="sr-only">Dokoola</span>
+        </a>
+        <ul class="nav-links">
+          <li class="">
+            <a class="" href="#"> Features </a>
+          </li>
+        </ul>
+      </nav>
+    </header>
+    <main class="flex-1">
+      <!-- prettier-ignore -->
+      {% block content %} {% endblock %}
+    </main>
+  </body>
+</html>

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dokoola Backend</title>
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+  </head>
+  <body>
+    <div class="flex flex-col min-h-[100dvh]">
+      <header class="px-4 lg:px-6 h-14 flex items-center">
+        <a class="flex items-center justify-center" href="#">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="h-6 w-6"
+          >
+            <path d="m8 3 4 8 5-5 5 15H2L8 3z"></path>
+          </svg>
+          <span class="sr-only">Freelance Marketplace</span>
+        </a>
+        <nav class="ml-auto flex gap-4 sm:gap-6">
+          <a
+            class="text-sm font-medium hover:underline underline-offset-4"
+            href="#"
+          >
+            Features
+          </a>
+          <a
+            class="text-sm font-medium hover:underline underline-offset-4"
+            href="#"
+          >
+            Pricing
+          </a>
+          <a
+            class="text-sm font-medium hover:underline underline-offset-4"
+            href="#"
+          >
+            About
+          </a>
+          <a
+            class="text-sm font-medium hover:underline underline-offset-4"
+            href="#"
+          >
+            Contact
+          </a>
+        </nav>
+      </header>
+      <main class="flex-1">
+        <section class="w-full pt-12 md:pt-24 lg:pt-32 border-y">
+          <div class="px-4 md:px-6 space-y-10 xl:space-y-16">
+            <div
+              class="grid max-w-[1300px] mx-auto gap-4 px-4 sm:px-6 md:px-10 md:grid-cols-2 md:gap-16"
+            >
+              <div>
+                <h1
+                  class="lg:leading-tighter text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl xl:text-[3.4rem] 2xl:text-[3.75rem]"
+                >
+                  Welcome to Dokoola
+                </h1>
+                <p
+                  class="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400"
+                >
+                  Focuses on micro-tasks translates to cost-effective solutions
+                  for businesses and individuals alike.
+                </p>
+              </div>
+              <div class="flex flex-col items-start space-y-4">
+                <a
+                  class="inline-flex h-9 items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-gray-300"
+                  href="#"
+                >
+                  Get Started
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- <section class="w-full py-12 md:py-24 lg:py-32">
+          <div class="container space-y-12 px-4 md:px-6">
+            <div
+              class="flex flex-col items-center justify-center space-y-4 text-center"
+            >
+              <div class="space-y-2">
+                <div
+                  class="inline-block rounded-lg bg-gray-100 px-3 py-1 text-sm dark:bg-gray-800"
+                >
+                  Key Features
+                </div>
+                <h2 class="text-3xl font-bold tracking-tighter sm:text-5xl">
+                  Streamline Your Freelance Journey
+                </h2>
+                <p
+                  class="max-w-[900px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400"
+                >
+                  Our platform offers a suite of tools to help you find, manage,
+                  and collaborate with top-tier freelance talent.
+                </p>
+              </div>
+            </div>
+            <div
+              class="mx-auto grid items-start gap-8 sm:max-w-4xl sm:grid-cols-2 md:gap-12 lg:max-w-5xl lg:grid-cols-3"
+            >
+              <div class="grid gap-1">
+                <h3 class="text-lg font-bold">Talent Matching</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  Our advanced algorithms match you with the perfect freelancer
+                  for your project.
+                </p>
+              </div>
+              <div class="grid gap-1">
+                <h3 class="text-lg font-bold">Seamless Collaboration</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  Collaborate with your freelancers through our intuitive
+                  project management tools.
+                </p>
+              </div>
+              <div class="grid gap-1">
+                <h3 class="text-lg font-bold">Transparent Pricing</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  Our transparent pricing structure ensures you get the best
+                  value for your money.
+                </p>
+              </div>
+              <div class="grid gap-1">
+                <h3 class="text-lg font-bold">Secure Payments</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  Rest easy with our secure payment processing and escrow
+                  services.
+                </p>
+              </div>
+              <div class="grid gap-1">
+                <h3 class="text-lg font-bold">Flexible Contracts</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  Customize your contracts to fit your unique business needs.
+                </p>
+              </div>
+              <div class="grid gap-1">
+                <h3 class="text-lg font-bold">Dedicated Support</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  Our experienced team is here to help you every step of the
+                  way.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section
+          class="w-full py-12 md:py-24 lg:py-32 bg-gray-100 dark:bg-gray-800"
+        >
+          <div
+            class="container grid items-center justify-center gap-4 px-4 text-center md:px-6"
+          >
+            <div class="space-y-3">
+              <h2 class="text-3xl font-bold tracking-tighter md:text-4xl/tight">
+                The Benefits of Our Freelance Marketplace
+              </h2>
+              <p
+                class="mx-auto max-w-[600px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400"
+              >
+                Our platform offers a range of benefits to help you scale your
+                business with top-tier freelance talent.
+              </p>
+            </div>
+            <div
+              class="mx-auto grid max-w-5xl items-start gap-6 py-12 lg:grid-cols-2 lg:gap-12"
+            >
+              <div class="flex flex-col justify-center space-y-4">
+                <ul class="grid gap-6">
+                  <li>
+                    <div class="grid gap-1">
+                      <h3 class="text-xl font-bold">Access to Top Talent</h3>
+                      <p class="text-gray-500 dark:text-gray-400">
+                        Our rigorous vetting process ensures you connect with
+                        the best freelance talent in the industry.
+                      </p>
+                    </div>
+                  </li>
+                  <li>
+                    <div class="grid gap-1">
+                      <h3 class="text-xl font-bold">Streamlined Workflows</h3>
+                      <p class="text-gray-500 dark:text-gray-400">
+                        Manage your projects, communicate with freelancers, and
+                        make payments all in one place.
+                      </p>
+                    </div>
+                  </li>
+                  <li>
+                    <div class="grid gap-1">
+                      <h3 class="text-xl font-bold">Scalable Solutions</h3>
+                      <p class="text-gray-500 dark:text-gray-400">
+                        Easily scale your team up or down to meet the demands of
+                        your business.
+                      </p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+              <img
+                src="/placeholder.svg"
+                width="550"
+                height="310"
+                alt="Benefits"
+                class="mx-auto aspect-video overflow-hidden rounded-xl object-cover object-center sm:w-full lg:order-last"
+              />
+            </div>
+          </div>
+        </section>
+        <section class="w-full py-12 md:py-24 lg:py-32">
+          <div
+            class="container grid items-center justify-center gap-4 px-4 text-center md:px-6 lg:gap-10"
+          >
+            <div class="space-y-3">
+              <h2
+                class="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl"
+              >
+                What Our Clients Say
+              </h2>
+              <p
+                class="mx-auto max-w-[700px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400"
+              >
+                Hear from the businesses that have found success with our
+                freelance marketplace.
+              </p>
+            </div>
+            <div class="divide-y rounded-lg border">
+              <div
+                class="grid w-full grid-cols-1 items-stretch justify-center divide-y md:grid-cols-2 md:divide-x"
+              >
+                <div
+                  class="mx-auto flex w-full items-center justify-center p-8"
+                >
+                  <div class="grid gap-4">
+                    <div class="flex items-center gap-2">
+                      <span
+                        class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full"
+                      >
+                        <img src="/placeholder.svg" />
+                        <span
+                          class="flex h-full w-full items-center justify-center rounded-full bg-muted"
+                          >JD</span
+                        >
+                      </span>
+                      <div>
+                        <h4 class="text-lg font-semibold">John Doe</h4>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                          CEO, Acme Inc.
+                        </p>
+                      </div>
+                    </div>
+                    <p class="text-gray-500 dark:text-gray-400">
+                      "The freelance marketplace has been a game-changer for
+                      our\n business. We've been able to scale our team with\n
+                      top-quality talent, and the platform's tools have made\n
+                      collaboration a breeze."
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="mx-auto flex w-full items-center justify-center p-8"
+                >
+                  <div class="grid gap-4">
+                    <div class="flex items-center gap-2">
+                      <span
+                        class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full"
+                      >
+                        <img src="/placeholder.svg" />
+                        <span
+                          class="flex h-full w-full items-center justify-center rounded-full bg-muted"
+                          >JD</span
+                        >
+                      </span>
+                      <div>
+                        <h4 class="text-lg font-semibold">Jane Smith</h4>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                          Founder, Startup X
+                        </p>
+                      </div>
+                    </div>
+                    <p class="text-gray-500 dark:text-gray-400">
+                      "I've been using the freelance marketplace for over a
+                      year\n now, and it's been an invaluable resource for my\n
+                      business. The talent pool is incredible, and the
+                      platform\n makes it easy to find the right freelancers for
+                      our\n projects."
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section
+          class="w-full py-12 md:py-24 lg:py-32 bg-gray-100 dark:bg-gray-800"
+        >
+          <div
+            class="container grid items-center gap-6 px-4 md:px-6 lg:grid-cols-2 lg:gap-10"
+          >
+            <div class="space-y-2">
+              <h2 class="text-3xl font-bold tracking-tighter md:text-4xl/tight">
+                Pricing to Fit Your Needs
+              </h2>
+              <p
+                class="max-w-[600px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400"
+              >
+                Choose the plan that works best for your business and scale as
+                needed.
+              </p>
+            </div>
+            <div class="flex flex-col gap-4">
+              <div
+                class="rounded-lg border bg-card text-card-foreground shadow-sm"
+                data-v0-t="card"
+              >
+                <div class="flex flex-col space-y-1.5 p-6">
+                  <h3
+                    class="whitespace-nowrap text-2xl font-semibold leading-none tracking-tight"
+                  >
+                    Starter
+                  </h3>
+                  <p class="text-sm text-muted-foreground">
+                    Perfect for small businesses
+                  </p>
+                </div>
+                <div class="p-6">
+                  <div class="grid gap-4">
+                    <div class="flex items-center justify-between">
+                      <span>Monthly Fee</span>
+                      <span class="font-bold">$99</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span>Projects per Month</span>
+                      <span class="font-bold">5</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span>Freelancers</span>
+                      <span class="font-bold">10</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span>Support</span>
+                      <span class="font-bold">Email</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center p-6">
+                  <a
+                    class="inline-flex h-10 items-center justify-center rounded-md bg-gray-900 px-8 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-gray-300"
+                    href="#"
+                  >
+                    Get Started
+                  </a>
+                </div>
+              </div>
+              <div
+                class="rounded-lg border bg-card text-card-foreground shadow-sm"
+                data-v0-t="card"
+              >
+                <div class="flex flex-col space-y-1.5 p-6">
+                  <h3
+                    class="whitespace-nowrap text-2xl font-semibold leading-none tracking-tight"
+                  >
+                    Pro
+                  </h3>
+                  <p class="text-sm text-muted-foreground">
+                    For growing businesses
+                  </p>
+                </div>
+                <div class="p-6">
+                  <div class="grid gap-4">
+                    <div class="flex items-center justify-between">
+                      <span>Monthly Fee</span>
+                      <span class="font-bold">$299</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span>Projects per Month</span>
+                      <span class="font-bold">20</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span>Freelancers</span>
+                      <span class="font-bold">50</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span>Support</span>
+                      <span class="font-bold">Email &amp; Phone</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section> -->
+      </main>
+    </div>
+  </body>
+</html>

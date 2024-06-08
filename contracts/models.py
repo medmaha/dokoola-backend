@@ -40,9 +40,15 @@ class Contract(models.Model):
 
     deleted = models.BooleanField(default=False, blank=True)
 
+    # Whether the client has acknowledged the contract sent to the freelancer
     client_acknowledgement = models.CharField(
         max_length=200, choices=ContractStatusType.choices, default="PENDING"
     )
+    # Whether the client has acknowledged the work done by the freelancer
+    client_project_acknowledgement = models.CharField(
+        max_length=200, choices=ContractStatusType.choices, default="PENDING"
+    )
+    # Whether the freelancer has acknowledged the contract sent by the client
     freelancer_acknowledgement = models.CharField(
         max_length=200, choices=ContractStatusType.choices, default="PENDING"
     )

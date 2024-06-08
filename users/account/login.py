@@ -1,3 +1,4 @@
+from typing import Any
 from rest_framework.response import Response
 from django.contrib.auth import authenticate, login
 
@@ -14,15 +15,11 @@ class LoginView(TokenObtainPairView):
 
     jwt_token_generator = GenerateToken()
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request: Any, *args, **kwargs):
         email = request.data.get("email")
         password = request.data.get("password")
-
-        print(email)
-        print(password)
-
         user = User.objects.filter(email=email).first()
-
+        print(user)
         if user:
             auth = user.check_password(password)
             if auth:
@@ -31,7 +28,6 @@ class LoginView(TokenObtainPairView):
                 )
 
                 if auth_tokens:
-                    user.online = True
                     user.save()
                     message = f"Welcome back {user.name or user.username}"  # type: ignore
                     return Response(

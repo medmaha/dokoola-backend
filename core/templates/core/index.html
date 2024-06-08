@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dokoola Backend</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <div class="flex flex-col">
+      <header class="px-4 shadow lg:px-6 h-14 flex items-center">
+        <a
+          class="flex items-center justify-center italic font-extrabold text-2xl text-orange-500"
+          href="#"
+        >
+          Dokoola
+        </a>
+        <nav class="ml-auto flex gap-4 sm:gap-6">
+          <a
+            class="text-sm font-medium hover:underline underline-offset-4"
+            href="{{ frontend_url }}"
+          >
+            Platform
+          </a>
+          <a
+            class="text-sm font-medium hover:underline underline-offset-4"
+            href="#"
+          >
+            Blog
+          </a>
+          <a
+            class="text-sm font-medium hover:underline underline-offset-4"
+            href="#"
+          >
+            Features
+          </a>
+          <a
+            class="text-sm font-medium hover:underline underline-offset-4"
+            href="#"
+          >
+            Pricing
+          </a>
+          <a
+            class="text-sm font-medium hover:underline underline-offset-4"
+            href="#"
+          >
+            About
+          </a>
+        </nav>
+      </header>
+      <main class="flex-1 pt-12 relative">
+        {% if messages %}
+        <div class="absolute top-4 z-10 w-full justify-center items-center">
+          {% for message in messages %}
+          <p
+            class="mx-auto max-w-[60ch] text-center p-2 {% if message.level == 25 %} text-green-500/80 {% elif message.level == 40 %} text-red-500/80 {% endif %}font-semibold rounded-lg text-white"
+          >
+            {{message}}
+          </p>
+          {% endfor %}
+        </div>
+        {% endif %}
+        <div class="flex flex-col pt-8">
+          {% if subscriber %}
+          <div class="pb-12">
+            <p class="text-center text-lg max-w-[70ch] mx-auto">
+              Thank you <strong>{{ subscriber.name }}</strong> for joining our
+              waitlist!
+              <br />
+              We'll send you an email when once we launch.
+            </p>
+          </div>
+          {% endif %}
+
+          <div class="mx-auto w-max laptop:pt-16 space-y-4 mb-6">
+            <h2 class="font-bold text-3xl text-center">
+              <!-- prettier-ignore -->
+              Service available soon...
+            </h2>
+            <p
+              class="text-center text-muted-foreground max-w-[70ch] text-gray-700"
+            >
+              We're working hard to bring you the best customer experience for
+              your home needs. Stay tuned for updates and be the first to know
+              when we launch.
+            </p>
+          </div>
+          {% if not subscriber %}
+          <form
+            method="POST"
+            action="{% url 'waitlist' %}"
+            class="mx-auto w-full mt-6 flex flex-col justify-center gap-4 items-center"
+          >
+            {% csrf_token %}
+            <input
+              type="text"
+              name="name"
+              required
+              class="max-w-[350px] w-full p-2 bg-gray-300 rounded-md placeholder:text-black/80"
+              placeholder="Your Name"
+            />
+            <input
+              type="email"
+              name="email"
+              required
+              class="max-w-[350px] w-full p-2 bg-gray-300 rounded-md placeholder:text-black/80"
+              placeholder="Your Email"
+            />
+            <button
+              class="p-2 px-4 bg-orange-500 font-semibold text-lg w-full max-w-[350px] hover:bg-orange-500/90 transition-all text-white rounded-md shadow"
+            >
+              Notify Me
+            </button>
+          </form>
+          {% endif %}
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
