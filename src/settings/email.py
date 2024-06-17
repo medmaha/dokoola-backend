@@ -19,3 +19,13 @@ assert (
 
 
 EMAIL_HOST_USER = EMAIL_USER
+
+
+__all__ = [
+    "EMAIL_HOST",
+    "EMAIL_USER",
+    "EMAIL_BACKEND",
+    "EMAIL_PORT",
+    "EMAIL_HOST_PASSWORD",
+    "EMAIL_USE_TLS",
+]

@@ -12,3 +12,6 @@ REST_FRAMEWORK = {
         "rest_framework.parsers.MultiPartParser",
     ],
 }
+
+
+__all__ = ["REST_FRAMEWORK"]

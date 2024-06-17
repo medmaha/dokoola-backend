@@ -1,9 +1,3 @@
-import os
-
-CSRF_COOKIE_AGE = 60 * 30  # 30 minutes
-CSRF_TRUSTED_ORIGINS = [os.environ.get("FRONTEND_URL")]
-
-
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
@@ -24,3 +18,11 @@ CORS_ALLOW_HEADERS = (
     "x-token",
     "x-csrftoken",
 )
+
+
+__all__ = [
+    "CORS_ALLOW_ALL_ORIGINS",
+    "CORS_ALLOW_CREDENTIALS",
+    "CORS_ALLOW_METHODS",
+    "CORS_ALLOW_HEADERS",
+]

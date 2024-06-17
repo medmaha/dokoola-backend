@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -8,6 +9,9 @@ from .cors import *
 from .db import *
 from .email import *
 from .jwt import *
+
+
+DEBUG = bool(int(os.environ.get("DEBUG", 0)))
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
