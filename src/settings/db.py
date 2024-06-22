@@ -4,7 +4,7 @@ DEBUG = bool(int(os.environ.get("DEBUG", 0)))
 
 default_db = {
     "ENGINE": "django.db.backends.sqlite3",
-    "NAME": "_db/db.sqlite3",
+    "NAME": os.path.join("_db", "db.sqlite"),
 }
 
 if not DEBUG:
