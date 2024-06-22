@@ -30,6 +30,8 @@ class Contract(models.Model):
     payment_method = models.CharField(max_length=100, null=True, blank=True)
     additional_terms = models.TextField(max_length=1500, null=True, blank=True)
 
+    completed_at = models.DateTimeField(null=True, blank=True)
+
     status = models.CharField(
         max_length=200, choices=ContractStatusType.choices, default="PENDING"
     )

@@ -60,6 +60,10 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+# Add a request logger middleware class
+if not DEBUG:
+    MIDDLEWARE.append("core.middleware.logger.DokoolaLoggerMiddleware")
+
 ROOT_URLCONF = "src.urls"
 
 TEMPLATES = [

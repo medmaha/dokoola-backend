@@ -61,3 +61,22 @@ class UserDetailAPIView(RetrieveAPIView):
             serializer = self.get_serializer(self.get_queryset())
             return Response(serializer.data, status=200)
         return Response({}, status=404)
+
+
+class UserDashboardAPIView(RetrieveAPIView):
+
+    def retrieve(self, request, *args, **kwargs):
+        user: User = request.user
+        profile, profile_name = user.profile
+        data = {}
+        status = 200
+
+        if profile_name == "Freelancer":
+            data["projects_count"] = 1
+            status = 200
+
+        if profile_name == "Client":
+            data["projects_count"] = profile.jobs.count()
+            status = 200
+
+        return Response(data, status=status)

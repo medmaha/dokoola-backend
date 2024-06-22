@@ -93,7 +93,7 @@ class User(AbstractUser):
     is_active = models.BooleanField(default=False)
     is_client = models.BooleanField(default=False)
     is_freelancer = models.BooleanField(default=False)
-
+    email_verified = models.BooleanField(default=False)
     is_online = models.BooleanField(default=False)
     websocket_id = models.CharField(default="", blank=True, max_length=300)
 

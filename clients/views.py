@@ -1,12 +1,16 @@
 from rest_framework.generics import ListAPIView, RetrieveAPIView, GenericAPIView
 from rest_framework.response import Response
+from rest_framework.request import Request
+from django.http import HttpRequest
 
+from users.models import User
 from jobs.models import Job
 from .serializer import (
     ClientSerializer,
     ClientUpdateDataSerializer,
     ClientJobDetailSerializer,
     ClientUpdateSerializer,
+    ClientDashboardStatsSerializer,
 )
 from .models import Client
 
@@ -141,6 +145,35 @@ class ClientJobDetailView(RetrieveAPIView):
             client, job = self.get_queryset(request.query_params)  # type: ignore
             client_serializer = self.get_serializer(
                 instance=client, context={"request": request}
+            )
+            return Response(client_serializer.data, status=200)
+        except Exception as e:
+            print("Exception:", e)
+            return Response(
+                {"message": "The provided query, doesn't match our database"},
+                status=404,
+            )
+
+
+class ClientDashboardView(RetrieveAPIView):
+    """
+    This view is used for the client dashboard view
+    Retrieves all information/statistics related to the client
+    """
+
+    permission_classes = []
+    serializer_class = ClientDashboardStatsSerializer
+
+    def get_queryset(self, user: User):
+        client = Client.objects.get(user=user)
+        return client
+
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            client = self.get_queryset(request.user)  # type: ignore
+            client_serializer = self.get_serializer(
+                instance=client,
+                context={"request": request},
             )
             return Response(client_serializer.data, status=200)
         except Exception as e:

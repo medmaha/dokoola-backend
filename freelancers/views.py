@@ -1,8 +1,11 @@
+from datetime import datetime
 from django.db import transaction
-from django.db.models import Q
+
+from django.db.models import Q, F, Sum, Avg, Count
 from rest_framework.generics import RetrieveAPIView, ListAPIView, GenericAPIView
 from rest_framework.response import Response
 
+from core.middleware.logger import DokoolaLogger
 from proposals.serializers import ProposalPendingListSerializer
 from jobs.models import Job
 from proposals.models import Proposal
@@ -16,6 +19,7 @@ from .serializers import (
     FreelancerMiniInfoSerializer,
     FreelancerUpdateSerializer,
     FreelancerUpdateDataSerializer,
+    FreelancerDashboardSerializer,
 )
 
 from .models import Freelancer, Portfolio
@@ -210,3 +214,15 @@ class FreelancerPortfolioAPIView(GenericAPIView):
             return Response({"message": "This request is prohibited"}, status=403)
         except:
             return Response({"message": "Bad request attempted"}, status=400)
+
+
+class FreelancerDashboardStatsView(GenericAPIView):
+    serializer_class = FreelancerDashboardSerializer
+
+    def get(self, request, *args, **kwargs):
+        profile, profile_type = request.user.profile
+        if not profile_type == "Freelancer":
+            return Response({}, status=403)
+
+        serializer = self.get_serializer(profile)
+        return Response(serializer.data, status=200)
