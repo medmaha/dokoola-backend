@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-docker build -t  mahamedtoure/dokoola:backend-001 .
+docker build -t  intrasoft0/dokoola:backend-001 .

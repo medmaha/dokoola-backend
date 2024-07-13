@@ -2,7 +2,7 @@ venv/
 dev-scripts/
 .env
 .env.*
-
+seed.json
 
 # ignore __pycache__
 /*/**/__pycache__*

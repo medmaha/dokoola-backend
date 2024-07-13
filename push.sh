@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-docker push mahamedtoure/dokoola:backend-001
+docker push intrasoft0/dokoola:backend-001
