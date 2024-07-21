@@ -245,10 +245,13 @@ class ProposalPendingListView(ListAPIView):
 
     def get_queryset(self, username: str):
         try:
-            freelancer = Freelancer.objects.select_related().get(
-                user__username=username
-            )
+            user = User.objects.get(username=username)
+            freelancer = Freelancer.objects.select_related().get(user_id=user.pk)
+        except User.DoesNotExist:
+            return None
         except Freelancer.DoesNotExist:
+            return None
+        except Exception as e:
             return None
         proposals = Proposal.objects.filter(
             job__is_valid=True, freelancer=freelancer, is_pending=True
@@ -257,7 +260,8 @@ class ProposalPendingListView(ListAPIView):
 
     def list(self, request, username, *args, **kwargs):
         queryset = self.get_queryset(username)
-        if not queryset:
+        print("queryset", queryset)
+        if queryset is None:
             return Response({"message": "This request is prohibited"}, status=403)
         serializer = self.get_serializer(
             queryset, many=True, context={"request": request}

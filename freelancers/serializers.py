@@ -346,7 +346,7 @@ class FreelancerDashboardSerializer(serializers.ModelSerializer):
         portfolio = float(instance.portfolio.exists()) or 0.017
         proposals = float(instance.proposals.exists()) or 0.021  # type: ignore
         education = float(instance.education.exists()) or 0.016
-        biography = 1 if len(instance.bio) else 0.024
+        biography = 1 if len(instance.bio) else 0.02
         email_verified = int(instance.user.email_verified) or 0.01
 
         avg = ((email_verified + portfolio + proposals + education + biography) / 5) * (
@@ -357,7 +357,7 @@ class FreelancerDashboardSerializer(serializers.ModelSerializer):
         return {
             "percentage": avg,
             "portfolio": (
-                "Add a portfolio or review that proves your profession"
+                "Add a portfolio or resume that proves your profession"
                 if not 1 == portfolio
                 else "Done"
             ),

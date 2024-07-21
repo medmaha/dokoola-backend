@@ -1,5 +1,5 @@
 import random
-import re
+import re, os, threading
 from django.core.mail import send_mail
 from django.db import transaction
 from django.template.loader import render_to_string
@@ -16,9 +16,6 @@ from users.models import User
 
 from ..token import GenerateToken
 from ..serializer import UserCreateSerializer, UserUpdateSerializer
-
-import re
-import threading
 
 
 class CheckEmailView(GenericAPIView):
@@ -81,6 +78,7 @@ class ResendCodeView(GenericAPIView):
         html = render_to_string("users/email_verification.html", context={"code": code})
 
         def mailer():
+
             response = send_mail(
                 "Dokoola - Email Verification",
                 f"""

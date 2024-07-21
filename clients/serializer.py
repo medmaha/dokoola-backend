@@ -499,7 +499,6 @@ class ClientDashboardStatsSerializer(serializers.ModelSerializer):
                     }
 
                     computed[i] = data
-            raise ValueError("Column does not exists")
         except Exception as e:
             message = f"{e} - [FILE:clients.serializer.py BLOCK:ClientDashboardStatsSerializer.get_recent_projects]"
             DokoolaLogger.critical(message)
