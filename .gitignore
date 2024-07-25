@@ -1,7 +1,5 @@
 venv/
 dev-scripts/
-.env
-.env.*
 seed.json
 
 # ignore __pycache__

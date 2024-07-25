@@ -61,3 +61,9 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("avatar", "first_name", "last_name", "username", "gender")
+
+
+    def validate_gender(self, value):
+        if not value:
+            raise serializers.ValidationError("Gender cannot be blank")
+        return value

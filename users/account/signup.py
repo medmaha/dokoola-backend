@@ -3,6 +3,7 @@ import re, os, threading
 from django.core.mail import send_mail
 from django.db import transaction
 from django.template.loader import render_to_string
+from src.settings.email import EMAIL_HOST_DOMAIN
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import UpdateAPIView, GenericAPIView
@@ -28,11 +29,11 @@ class CheckEmailView(GenericAPIView):
 
         def mailer():
             response = send_mail(
-                "Dokoola - Email Verification",
+                "Email Verification",
                 f"""
                     Please use the following code to verify your email address: {code}
                 """,
-                None,
+                EMAIL_HOST_DOMAIN,
                 [email],
                 html_message=html,
                 fail_silently=False,
@@ -80,11 +81,11 @@ class ResendCodeView(GenericAPIView):
         def mailer():
 
             response = send_mail(
-                "Dokoola - Email Verification",
+                "Email Verification",
                 f"""
                     Please use the following code to verify your email address: {code}
                 """,
-                None,
+                EMAIL_HOST_DOMAIN,
                 [email],
                 html_message=html,
                 fail_silently=False,
@@ -232,7 +233,8 @@ class SignupUserInformation(UpdateAPIView):
                 if user_serializer.is_valid():
                     user_serializer.save()
                 else:
-                    return Response("Failed to update user", status=400)
+                    error_message = user_serializer.errors
+                    return Response(dict(message=error_message), status=400)
 
                 if isinstance(profile, Freelancer):
                     profile_serializer = FreelancerUpdateSerializer(
@@ -262,7 +264,7 @@ class SignupUserInformation(UpdateAPIView):
                             user, context={"request": request}
                         )
                         return Response(tokens, status=200)
-
+                    
                     return Response(
                         {"message": "Invalid values are passed to the payload"},
                         status=400,
