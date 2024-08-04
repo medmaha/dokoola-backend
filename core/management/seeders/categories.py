@@ -68,8 +68,7 @@ categories = [
     },
 ]
 
-
 def categories_seeders():
-    Category.objects.filter().delete()
     for category in categories:
+        Category.objects.filter(slug=category.get("slug")).delete()
         Category.objects.create(**category)

@@ -1,4 +1,5 @@
 venv/
+static/
 dev-scripts/
 seed.json
 

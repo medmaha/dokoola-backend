@@ -1,0 +1,29 @@
+name: Scaffold Commands
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+
+    container: python
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - uses: actions/checkout@v3
+      - name: Copy the production env
+        run: rm .env && mv ./.env.prod ./.env
+
+      - uses: actions/checkout@v3
+      - name: Run Scafollding
+        run: |
+          python manage.py scaffold
