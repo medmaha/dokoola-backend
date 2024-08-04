@@ -1,4 +1,4 @@
-name: Dokoola Backend Scaffolding CI/CD
+name: Dokoola Backend Scaffold-Setup CI/CD
 
 on:
   push:
