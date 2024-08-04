@@ -12,7 +12,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - run: docker login -u
       - run: echo ${{secrets.DOCKER_HUB_ACCESS_TOKEN}} | docker login -u ${{secrets.DOCKER_HUB_ACCOUNT}} --password-stdin
 
       - uses: actions/checkout@v4
