@@ -19,12 +19,12 @@ class Command(BaseCommand):
         gender = os.getenv('SUPER_ADMIN_GENDER', 'MALE')
         avatar = os.getenv('SUPER_ADMIN_AVATAR')
 
+        print("Creating Super user account...")
+
         try:
             user = User.objects.get(email=email)
-
             if not user.is_superuser:
-                raise Exception('User with email "%s" already exists' % email)
-            
+                raise Exception('User with email "%s" already exists' % email)        
             self.stdout.write(self.style.SUCCESS('Superadmin already exists'))
             return
                 

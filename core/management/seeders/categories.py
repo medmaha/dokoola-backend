@@ -1,3 +1,4 @@
+from calendar import c
 from core.models import Category
 
 
@@ -68,7 +69,17 @@ categories = [
     },
 ]
 
+
 def categories_seeders():
+    """Seed categories."""
+    
     for category in categories:
-        Category.objects.filter(slug=category.get("slug")).delete()
+        # Check if the category already exists
+        existing = Category.objects.filter(slug=category.get("slug")).exists()
+
+        # Skip if the category already exists
+        if existing:
+            continue
+        
+        # Create the category
         Category.objects.create(**category)

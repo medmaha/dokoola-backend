@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Dokoola Backend-Image CI/CD
 
 on:
   push:
