@@ -1,0 +1,25 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build_and_push:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Docker Hub Authentication
+    - run: docker login -u ${{secrets.DOCKER_HUB_ACCOUNT}}
+    
+    - name: Build the Docker image
+      run: sh build.sh
+    
+    - name: Push the Docker image
+      run: sh push.sh
