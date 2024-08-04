@@ -22,7 +22,7 @@ urlpatterns = [
     path("api/contracts/", include("contracts.urls")),
     path("api/freelancers/", include("freelancers.urls")),
     path("api/notifications/", include("notifications.urls")),
-    path("api/messenging/", include("messenging.urls")),
+    path("api/messaging/", include("messaging.urls")),
     path("api/account/", include("users.account.urls")),
     path("", include("core.urls")),
     # re_path(r"api/$", base_api_index),

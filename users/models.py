@@ -121,6 +121,16 @@ class User(AbstractUser):
         if self.is_freelancer:
             return [self.freelancer_profile, "Freelancer"]  # type: ignore
         return [None, ""]
+    
+    @property
+    def account_type(self):
+        if self.is_staff:
+            return "Staff"
+        if self.is_client:
+            return "Client"
+        if self.is_freelancer:
+            return "Freelancer"
+        return "User"
 
     @classmethod
     def generate_otp(cls, user=None, identifier=None):

@@ -1,4 +1,5 @@
 from django.db import models
+from core.models import Category
 from freelancers.models import Freelancer
 from utilities.generator import hex_generator
 from clients.models import Client
@@ -12,14 +13,13 @@ class Pricing(models.Model):
     payment_type = models.CharField(max_length=100, default="PROJECT")
     deleted = models.BooleanField(default=False, blank=True)
 
-
-class Job(models.Model):
-
-    class JobStatusType(models.TextChoices):
+class JobStatusChoices(models.TextChoices):
         CLOSED = "CLOSED"
         PUBLISHED = "PUBLISHED"
         SUSPENDED = "SUSPENDED"
         IN_PROGRESS = "IN_PROGRESS"
+
+class Job(models.Model):
 
     id = models.CharField(
         primary_key=True, default=hex_generator, editable=False, max_length=64
@@ -31,7 +31,7 @@ class Job(models.Model):
     location = models.CharField(max_length=200)
 
     status = models.CharField(
-        max_length=200, choices=JobStatusType.choices, default="CLOSED"
+        max_length=200, choices=JobStatusChoices.choices, default="CLOSED"
     )
     is_valid = models.BooleanField(default=True, blank=True)
     budget = models.DecimalField(max_digits=10, decimal_places=2)
@@ -45,8 +45,8 @@ class Job(models.Model):
     completed = models.BooleanField(default=False, blank=True)
 
     duration = models.CharField(max_length=1000, blank=True, null=True)
-    category = models.CharField(max_length=1000, blank=True, default="")
     required_skills = models.CharField(max_length=1000, blank=True, default="")
+    category_obj = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
 
     bits_count = models.IntegerField(default=0)
     client = models.ForeignKey(Client, related_name="jobs", on_delete=models.DO_NOTHING)
@@ -56,6 +56,10 @@ class Job(models.Model):
 
     def __str__(self):
         return self.title[:50]
+    
+    @property
+    def category(self):
+        return self.category_obj.name if self.category_obj else None
 
     @property
     def payment_type(self):

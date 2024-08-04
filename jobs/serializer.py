@@ -27,7 +27,6 @@ class JobsCreateSerializer(serializers.ModelSerializer):
             "activities_id",
             "required_skills",
             "location",
-            "category",
         ]
 
 
@@ -146,7 +145,6 @@ class JobsUpdateSerializer(serializers.ModelSerializer):
         fields = [
             "title",
             "budget",
-            "category",
             "location",
             "status",
             "description",

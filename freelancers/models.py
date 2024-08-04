@@ -73,6 +73,14 @@ class Freelancer(models.Model):
 
     objects = FreelancerManager()
 
+    @property
+    def email(self):
+        return self.user.email
+    
+    @property
+    def name(self):
+        return self.user.name
+
     def __str__(self) -> str:
         return self.user.email
 

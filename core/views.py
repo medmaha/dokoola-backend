@@ -2,9 +2,10 @@ import os
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpRequest
-from django.core.exceptions import ValidationError
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from core.models import Waitlist
+from core.models import Category, Waitlist
 
 frontend_url = os.environ.get("FRONTEND_URL")
 
@@ -44,3 +45,10 @@ def waitlist(request: HttpRequest):
         return render(request, "core/index.html", global_context)
 
     return HttpResponseRedirect("/")
+
+
+class CategoriesView(APIView):
+    permission_classes = []
+    def get(self, request):
+        categories = Category.objects.filter(disabled=False).values("slug", "name", "image_url", "description")
+        return Response(categories)

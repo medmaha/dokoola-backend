@@ -13,6 +13,11 @@ urlpatterns = [
         name="contract-accept",
     ),
     path(
+        "reject/<contract_id>/",
+        views.ContractAcceptAPIView.as_view(),
+        name="contract-reject",
+    ),
+    path(
         "completed/<contract_id>/",
         views.ContractCompleteAPIView.as_view(),
         name="contract-completed",

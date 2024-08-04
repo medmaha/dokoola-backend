@@ -18,14 +18,7 @@ def main():
             "forget to activate a virtual environment?"
         ) from exc
 
-    argv = sys.argv
-
-    if "automate" in sys.argv:
-        argv = ["manage.py", "automate"]
-    if "reset_app" in sys.argv:
-        argv = ["manage.py", "reset_app"]
-
-    execute_from_command_line(argv)
+    execute_from_command_line(sys.argv)
 
 
 if __name__ == "__main__":

@@ -4,17 +4,19 @@ from proposals.models import Proposal, Job, Freelancer
 from utilities.generator import hex_generator
 
 
-class Contract(models.Model):
-    class ContractStatusType(models.TextChoices):
-        PENDING = "PENDING"
-        ACCEPTED = "ACCEPTED"
-        REJECTED = "REJECTED"
-
-    class ContractProgressType(models.TextChoices):
+class ContractProgressChoices(models.TextChoices):
         NONE = "NONE"
         ACTIVE = "ACTIVE"
         CANCELLED = "CANCELLED"
         COMPLETED = "COMPLETED"
+
+
+class ContractStatusChoices(models.TextChoices):
+        PENDING = "PENDING"
+        ACCEPTED = "ACCEPTED"
+        REJECTED = "REJECTED"
+
+class Contract(models.Model):
 
     uid = models.CharField(default=hex_generator, editable=False, max_length=64)
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
@@ -33,30 +35,30 @@ class Contract(models.Model):
     completed_at = models.DateTimeField(null=True, blank=True)
 
     status = models.CharField(
-        max_length=200, choices=ContractStatusType.choices, default="PENDING"
+        max_length=200, choices=ContractStatusChoices.choices, default=ContractStatusChoices.PENDING
     )
 
     progress = models.CharField(
-        max_length=200, choices=ContractProgressType.choices, default="NONE"
+        max_length=200, choices=ContractProgressChoices.choices, default=ContractProgressChoices.NONE
     )
 
     deleted = models.BooleanField(default=False, blank=True)
 
     # Whether the client has acknowledged the contract sent to the freelancer
     client_acknowledgement = models.CharField(
-        max_length=200, choices=ContractStatusType.choices, default="PENDING"
+        max_length=200, choices=ContractStatusChoices.choices, default="PENDING"
     )
     # Whether the client has acknowledged the work done by the freelancer
     client_project_acknowledgement = models.CharField(
-        max_length=200, choices=ContractStatusType.choices, default="PENDING"
+        max_length=200, choices=ContractStatusChoices.choices, default="PENDING"
     )
     # Whether the freelancer has acknowledged the contract sent by the client
     freelancer_acknowledgement = models.CharField(
-        max_length=200, choices=ContractStatusType.choices, default="PENDING"
+        max_length=200, choices=ContractStatusChoices.choices, default="PENDING"
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return "Contract: " + self.uid
+        return f"Contract: {self.job.title}"

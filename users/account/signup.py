@@ -30,9 +30,7 @@ class CheckEmailView(GenericAPIView):
         def mailer():
             response = send_mail(
                 "Email Verification",
-                f"""
-                    Please use the following code to verify your email address: {code}
-                """,
+                f"Please use the following code to verify your email address: {code}", 
                 EMAIL_HOST_DOMAIN,
                 [email],
                 html_message=html,

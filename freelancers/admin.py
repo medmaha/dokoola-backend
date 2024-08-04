@@ -1,8 +1,9 @@
+
+from unfold.admin import ModelAdmin
 from django.contrib import admin
+from . import models
 
-from .models import Freelancer
-
-# Register your models here.
-
-
-admin.site.register(Freelancer)
+@admin.register(models.Freelancer)
+class FreelancerAdminClass(ModelAdmin):
+    search_fields = ( 'phone', "country", "state", "district", 'website')
+    list_display = ('name', "email", "badge", 'pricing', 'phone')

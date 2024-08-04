@@ -10,6 +10,7 @@ from rest_framework.generics import (
 from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework.request import Request
+from core.models import Category
 from clients.models import Client
 from users.models import User
 
@@ -23,9 +24,15 @@ from .serializer import (
     JobsCreateSerializer,
     JobsUpdateSerializer,
 )
+
+
 import re
 from django.utils import timezone
 
+
+def get_category(slug:str):
+    category = Category.objects.filter(Q(slug=slug)|Q(name=slug)).first()
+    return category
 
 class JobsListAPIView(ListAPIView):
     permission_classes = []
@@ -63,12 +70,17 @@ class JobUpdateAPIView(UpdateAPIView):
 
         if not instance:
             return Response({"message": "Job not found"}, status=404)
-
+        
+        category = get_category(data.pop("category", "None")) or instance.category_obj
+        if not category:
+            return Response({"message": "Invalid job category"}, status=400) 
+            
         serializer = self.get_serializer(
             instance=instance, data=data, partial=True, context={"request": request}
         )
+
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(category_obj=category)
             return Response({"message": "Job updated successfully"}, status=200)
 
         return Response({"message": "Failed to update job"}, status=404)
@@ -142,10 +154,15 @@ class JobCreateAPIView(CreateAPIView):
 
         data: dict = request.data.copy()  # type: ignore
 
-        print(data)
+        category = get_category(data.pop("category", "None"))
 
-        pricing_data = data["pricing"]
-        del data["pricing"]
+        if not category:
+            return Response({"message": "Invalid job category"}, status=400) 
+
+        if "pricing" in data:
+            pricing_data: dict = data.pop("pricing")
+        else:
+            return Response({"message": "Invalid pricing data"}, status=400) 
 
         serializer = self.get_serializer(data=data)
 
@@ -167,7 +184,7 @@ class JobCreateAPIView(CreateAPIView):
                 pass
 
             job = Job.objects.create(
-                **data, activities=activities, pricing=pricing, client=client
+                **data, activities=activities, pricing=pricing, client=client, category_obj=category
             )
             serializer = JobsDetailSerializer(instance=job)
             return Response({"slug": job.slug}, status=201)

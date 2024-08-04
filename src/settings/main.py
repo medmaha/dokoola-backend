@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
 from .api import *
@@ -9,11 +10,12 @@ from .cors import *
 from .db import *
 from .email import *
 from .jwt import *
+from .unfold import *
 
+# DEBUG = bool(int(os.environ.get("DEBUG", 0)))
+DEBUG = True
 
-DEBUG = bool(int(os.environ.get("DEBUG", 0)))
-
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
@@ -24,6 +26,7 @@ AUTH_USER_MODEL = "users.User"
 APPEND_SLASH = True
 
 INSTALLED_APPS = [
+    "unfold",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -45,7 +48,7 @@ INSTALLED_APPS = [
     "reviews",
     "jobs",
     "proposals",
-    "messenging",
+    "messaging",
     "notifications",
 ]
 
@@ -69,7 +72,9 @@ ROOT_URLCONF = "src.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [
+            # BASE_DIR / "templates",
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -109,8 +114,11 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
-STATIC_ROOT = BASE_DIR / "static"
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 
-STATIC_DIRS = BASE_DIR / "core/static"
+STATIC_ROOT = BASE_DIR / "static_root"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+

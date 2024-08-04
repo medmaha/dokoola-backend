@@ -1,8 +1,8 @@
 from django.db import models
+
 from reviews.models import Review
 from utilities.generator import id_generator
 from users.models import User
-
 
 class Client(models.Model):
     id = models.CharField(
@@ -59,7 +59,7 @@ class Client(models.Model):
 
     @property
     def address(self):
-        return f"{self.country} | {self.city or self.state}"
+        return self.get_location()
 
     # Calculates the client's average rating
     def calculate_rating(self):
@@ -69,3 +69,11 @@ class Client(models.Model):
             ]
             or 0.0
         )
+    
+    @property
+    def name(self):
+        return self.user.name
+    @property
+    def email(self):
+        return self.user.name
+
