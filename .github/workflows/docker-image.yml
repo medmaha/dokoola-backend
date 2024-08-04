@@ -12,12 +12,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - run: docker login -u
+      - run: echo ${{secrets.DOCKER_HUB_ACCESS_TOKEN}} | docker login -u ${{secrets.DOCKER_HUB_ACCOUNT}} --password-stdin
 
-      - name: Docker Hub Authentication
-      - run: docker login -u ${{secrets.DOCKER_HUB_ACCOUNT}}
-
+      - uses: actions/checkout@v4
       - name: Build the Docker image
         run: sh build.sh
 
+      - uses: actions/checkout@v4
       - name: Push the Docker image
         run: sh push.sh
