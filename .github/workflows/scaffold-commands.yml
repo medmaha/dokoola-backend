@@ -14,15 +14,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - uses: actions/checkout@v3
-      - name: Setup Environment
-        run: cp ./.env.prod ./.env
-
-      - uses: actions/checkout@v3
       - name: Run Scafollding
         run: cp ./.env.prod ./.env && python manage.py scaffold
