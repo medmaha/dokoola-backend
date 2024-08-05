@@ -25,7 +25,4 @@ urlpatterns = [
     path("api/messaging/", include("messaging.urls")),
     path("api/account/", include("users.account.urls")),
     path("", include("core.urls")),
-    # re_path(r"api/$", base_api_index),
-    # path("", base_index),
-    # re_path(r".*", not_found),
 ]

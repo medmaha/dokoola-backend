@@ -2,8 +2,11 @@ from django.urls import path
 
 from . import views
 
+
 urlpatterns = [
-    path("", views.index, name="index"),
-    path("waitlist/", views.waitlist, name="waitlist"),
-    path("api/categories/", views.CategoriesView.as_view(), name="categories"),
+    path("health", views.health, name="health_1"),
+    path("health/", views.health, name="health_2"),
+    # path("waitlist/", views.waitlist, name="waitlist"),
+    # path("api/categories/", views.CategoriesView.as_view(), name="categories"),
+    # path("", views.index, name="index"),
 ]

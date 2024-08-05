@@ -1,7 +1,8 @@
+import json
 import os
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.http import HttpResponseRedirect, HttpRequest
+from django.http import HttpResponseRedirect, HttpRequest, HttpResponse, JsonResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -24,6 +25,16 @@ def index(request: HttpRequest):
     else:
         global_context["subscriber"] = None
     return render(request, "core/index.html", global_context)
+
+
+def health(request: HttpRequest):
+    try:
+        Waitlist.objects.first()
+        return JsonResponse({"status": "OK", "message": "Backend Web-server up and running"})
+    except Exception as e:
+        return JsonResponse({"status": "ERROR", "message": str(e)},  status=400)
+    
+
 
 
 def waitlist(request: HttpRequest):
