@@ -1,5 +1,6 @@
 import random
 import re, os, threading
+from xmlrpc.client import Boolean
 from django.core.mail import send_mail
 from django.db import transaction
 from django.template.loader import render_to_string
@@ -27,26 +28,29 @@ class CheckEmailView(GenericAPIView):
         code, save_otp = User.generate_otp(identifier=email)
         html = render_to_string("users/email_verification.html", context={"code": code})
 
-        def mailer():
-            response = send_mail(
-                "Email Verification",
-                f"Please use the following code to verify your email address: {code}", 
-                EMAIL_HOST_DOMAIN,
-                [email],
-                html_message=html,
-                fail_silently=False,
-            )
-            if response:
-                save_otp(True)
-                return
-            save_otp(False)
-
         try:
+            def mailer():
+                try:
+                    saved = save_otp(sent=False)
+                    if not saved:
+                        return 
+                    response = send_mail(
+                        "Email Verification",
+                        f"Please use the following code to verify your email address: {code}", 
+                        EMAIL_HOST_DOMAIN,
+                        [email],
+                        html_message=html,
+                        fail_silently=True,
+                    )
+                    save_otp(sent=Boolean(response))
+                except Exception as _:
+                    pass 
+            
             threading.Thread(target=mailer).start()
         except Exception as _:
             mailer()
         except:
-            pass
+            save_otp(False)
 
     def post(self, request, *args, **kwargs):
         email = request.data.get("email")
@@ -77,20 +81,23 @@ class ResendCodeView(GenericAPIView):
         html = render_to_string("users/email_verification.html", context={"code": code})
 
         def mailer():
-
-            response = send_mail(
-                "Email Verification",
-                f"""
-                    Please use the following code to verify your email address: {code}
-                """,
-                EMAIL_HOST_DOMAIN,
-                [email],
-                html_message=html,
-                fail_silently=False,
-            )
-            if response:
-                save_otp()
-
+            try:
+                saved = save_otp(sent=False)
+                if not saved:
+                    return 
+                response = send_mail(
+                    "Email Verification",
+                    f"""
+                        Please use the following code to verify your email address: {code}
+                    """,
+                    EMAIL_HOST_DOMAIN,
+                    [email],
+                    html_message=html,
+                    fail_silently=True,
+                )
+                save_otp(sent=Boolean(response))
+            except Exception as _:
+                pass 
         try:
             threading.Thread(target=mailer).start()
         except Exception as _:
@@ -120,6 +127,8 @@ class VerifyCodeView(GenericAPIView):
         email = request.data.get("email")
         verified, invalidate = self.verify_verification_code(code, email)
 
+
+        print(request.data)
         if verified:
             invalidate()
             return Response(

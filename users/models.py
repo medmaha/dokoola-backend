@@ -64,6 +64,16 @@ class OTP(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     @classmethod
+    def save_code(cls, user, code:str, is_sent:bool, identifier:str|None) -> bool:
+        OTP.objects.select_related().filter(
+            identifier=identifier
+        ).update(is_valid=False)
+        created = OTP.objects.create(
+            code=code, user=user, is_sent=is_sent, is_valid=True, identifier=identifier
+        )
+        return created is not None
+
+    @classmethod
     def generate_code(cls):
         return random.randrange(10000, 99999).__str__()
 
@@ -137,15 +147,10 @@ class User(AbstractUser):
 
         code = OTP.generate_code()
 
-        def save_otp(sent=False):
-            OTP.objects.select_related("identifier").filter(
-                identifier=identifier
-            ).update(is_valid=False)
-            OTP.objects.create(
-                code=code, user=user, is_sent=sent, is_valid=True, identifier=identifier
-            )
+        def callback (sent:bool):
+            OTP.save_code(user=user, code=code, identifier=identifier, is_sent=sent)
 
-        return (code, save_otp)
+        return (code, callback)
 
     @classmethod
     def check_otp(cls, code, identifier):

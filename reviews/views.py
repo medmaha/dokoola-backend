@@ -9,20 +9,19 @@ from .models import Review
 
 class ReviewsGenericAPIView(GenericAPIView):
 
-    def get_profile(self, username):
-        if username:
-            try:
-                user = User.objects.get(username=username)
-                profile, _ = user.profile
-                return profile
-            except User.DoesNotExist:
-                return None
-            except Exception as e:
-                print("ERROR!", e)
+    def get_profile(self):
+        username = self.request.query_params.get("user")  # type: ignore
+        try:
+            user = User.objects.get(username=username)
+            profile, _ = user.profile
+            return profile
+        except User.DoesNotExist:
+            return None
+        except Exception as e:
+            print("ERROR!", e)
 
     def get_queryset(self):
-        username = self.request.query_params.get("user")  # type: ignore
-        profile = self.get_profile(username)
+        profile = self.get_profile()
         if not profile:
             return None
         return profile.reviews.all().order_by("-created_at")
@@ -36,12 +35,11 @@ class ReviewsGenericAPIView(GenericAPIView):
         return self.get_paginated_response(serializer.data)
 
     def post(self, request, *args, **kwargs):
-        profile = self.get_profile(request.user.username)
+        profile = self.get_profile()
         if not profile:
             return Response({"message": "This request is prohibited"}, status=403)
 
         serializer = ReviewCreateSerializer(data=request.data)
-        print(request.data)
         if serializer.is_valid():
             review = serializer.save(author=request.user)
             profile.reviews.add(review)
