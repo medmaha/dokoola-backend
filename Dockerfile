@@ -9,6 +9,6 @@ COPY . .
 # global env across build images
 COPY .env.prod ./.env
 
-EXPOSE 8000
+EXPOSE 80 443 222 8000
 
 CMD gunicorn src.wsgi:application --bind 0.0.0.0:8000
