@@ -168,7 +168,7 @@ class ContractCompleteAPIView(UpdateAPIView):
                     {"message": "Contract completed successfully"}, status=200
                 )
             except Exception as e:
-                print(e)
+                
                 return Response({"message": "Resource not found"}, status=404)
 
         return Response({"message": "Bad request"}, status=400)
@@ -291,7 +291,7 @@ class ContractCreateView(GenericAPIView):
                         freelancer_messages
                     )
 
-                    print(proposal.job.title, proposal.freelancer.user.name)
+                    
                     freelancer_notification.content_text = (
                         "You've received a contract for <strong>%s<strong/> project, from <strong>%s<strong/>. Please check it out."
                         % ( proposal.job.title, proposal.freelancer.user.name
@@ -340,5 +340,5 @@ class ContractCreateView(GenericAPIView):
         except Proposal.DoesNotExist:
             return Response({"message": "Bad request attempted"}, status=400)
         # except Exception as e:
-        #     print(e)
+        #     
         #     return Response({"message": str(e)}, status=400)

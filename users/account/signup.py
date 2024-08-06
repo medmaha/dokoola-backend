@@ -128,7 +128,7 @@ class VerifyCodeView(GenericAPIView):
         verified, invalidate = self.verify_verification_code(code, email)
 
 
-        print(request.data)
+        
         if verified:
             invalidate()
             return Response(

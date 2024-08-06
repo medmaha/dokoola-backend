@@ -99,10 +99,10 @@ class ThreadMessagesAPIView(ListAPIView):
         user = self.request.user
         thread_unique_id = query_params.get("id", "")
 
-        print(thread_unique_id)
+        
         if isinstance(thread_unique_id, list):
             thread_unique_id = thread_unique_id[0]
-        print(thread_unique_id)
+        
 
         thread = Thread.objects.filter(owner=user, unique_id=thread_unique_id).first()
 

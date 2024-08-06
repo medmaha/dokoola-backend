@@ -108,8 +108,8 @@ class ClientDashboardQuery():
                 "percentage": int(percentage),
             }
         except Exception as e:
-            message = f"{e} - [FILE:clients.serializer.py BLOCK:ClientDashboardStatsSerializer.get_total_spending]"
-            print(message)
+            
+            
             return {"spent": 0.00}
 
 
@@ -134,8 +134,8 @@ class ClientDashboardQuery():
                 "percentage": int(percentage),
             }
         except Exception as e:
-            message = f"{e} - [FILE:clients.serializer.py BLOCK:ClientDashboardStatsSerializer.get_total_projects]"
-            print(message)
+            
+            
             return {"total": 0.00}
 
 
@@ -185,9 +185,9 @@ class ClientDashboardQuery():
                 )
             return result
         except Exception as e:
-            message = f"{e} - [FILE:clients.serializer.py BLOCK:ClientDashboardStatsSerializer.get_project_spending]"
+            
             # DokoolaLogger.critical(message)
-            print(message)
+            
 
             return []
 
@@ -214,8 +214,8 @@ class ClientDashboardQuery():
             if (data["percentage"]) > 100:
                 data["percentage"] = 100
         except Exception as e:
-            message = f"{e} - [FILE:clients.serializer.py BLOCK:ClientDashboardStatsSerializer.get_average_rating]"
-            print(message)
+            pass
+            
 
         return data
     
@@ -252,8 +252,8 @@ class ClientDashboardQuery():
                 for project in projects
             ]
         except Exception as e:
-            message = f"{e} - [FILE:clients.serializer.py BLOCK:ClientDashboardStatsSerializer.get_project_types]"
-            print(message)
+            pass
+            
 
 
     def get_recent_projects(self):
@@ -292,8 +292,8 @@ class ClientDashboardQuery():
 
                     computed[i] = data
         except Exception as e:
-            message = f"{e} - [FILE:clients.serializer.py BLOCK:ClientDashboardStatsSerializer.get_recent_projects]"
-            print(message)
+            pass
+            
         return computed
 
 
@@ -328,6 +328,6 @@ class ClientDashboardQuery():
             ]
             return result
         except Exception as e:
-            message = f"{e} - [FILE:clients.serializer.py BLOCK:ClientDashboardStatsSerializer.get_freelancer_reviews]"
-            print(message)
+            
+            
             return []

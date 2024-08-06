@@ -80,7 +80,7 @@ class JobsSearchAPIView(ListAPIView):
     def filter_by_location(self, country: str):
         country = country.lower()
 
-        print(country)
+        
 
         qs = self.queryset.filter(location__icontains=country)
 
@@ -174,9 +174,9 @@ class JobsSearchAPIView(ListAPIView):
                 filters &= Q(budget__lte=float(max_value))
 
         except Exception as e:
-            print("---------------------------------")
-            print("Failed to filter by budget:", e)
-            print("---------------------------------")
+            pass            
+            
+            
 
         if filters:
             self.queryset = self.queryset.filter(filters)

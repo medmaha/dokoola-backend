@@ -26,28 +26,39 @@ AUTH_USER_MODEL = "users.User"
 APPEND_SLASH = True
 
 INSTALLED_APPS = [
-    "unfold",
+    "unfold", # Third party app
+
+    # Django apps
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # "django_extensions",
+
+    # Third party apps
     "corsheaders",
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
-    # "_automation",
+
+    # The core application services and utilities
     "core",
+
+    # Users Account & Profiles apps
     "users",
     "staffs",
     "clients",
-    "contracts",
     "freelancers",
     "reviews",
+
+    # Projects & Contracts apps
     "jobs",
     "proposals",
+    "contracts",
+    "projects",
+
+    # Messaging & Notifications apps
     "messaging",
     "notifications",
 ]
@@ -61,11 +72,12 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "core.middleware.logger.DokoolaLoggerMiddleware"
 ]
 
-# Add a request logger middleware class
-if not DEBUG:
-    MIDDLEWARE.append("core.middleware.logger.DokoolaLoggerMiddleware")
+# #  Add a request logger middleware class
+# if not DEBUG:
+#     MIDDLEWARE.append("core.middleware.logger.DokoolaLoggerMiddleware")
 
 ROOT_URLCONF = "src.urls"
 
@@ -73,7 +85,7 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            # BASE_DIR / "templates",
+            BASE_DIR / "templates",
         ],
         "APP_DIRS": True,
         "OPTIONS": {

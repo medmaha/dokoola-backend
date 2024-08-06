@@ -260,7 +260,7 @@ class ProposalPendingListView(ListAPIView):
 
     def list(self, request, username, *args, **kwargs):
         queryset = self.get_queryset(username)
-        print("queryset", queryset)
+        
         if queryset is None:
             return Response({"message": "This request is prohibited"}, status=403)
         serializer = self.get_serializer(

@@ -19,7 +19,7 @@ class LoginView(TokenObtainPairView):
         email = request.data.get("email")
         password = request.data.get("password")
         user = User.objects.filter(email=email).first()
-        print(user)
+        
         if user:
             auth = user.check_password(password)
             if auth:

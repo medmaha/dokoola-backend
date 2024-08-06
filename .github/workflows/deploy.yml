@@ -1,0 +1,14 @@
+name: Deploy The Backend-Service
+
+on:
+  workflow_run:
+    workflows: ["Dokoola Backend Scaffold-Setup CI/CD"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - run: https://api.render.com/deploy/srv-cprghhrqf0us738eu5k0?key=fxhL_YRSIik

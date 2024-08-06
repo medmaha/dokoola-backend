@@ -20,5 +20,5 @@ class LogoutView(APIView):
             request.user.online = False
             request.user.save()
         except TokenError as e:
-            print(e)
+            pass
         return Response({"success": True}, status=200)

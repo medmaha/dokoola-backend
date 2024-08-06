@@ -32,8 +32,9 @@ UNFOLD = {
     # "DASHBOARD_CALLBACK": "sample_app.dashboard_callback",
     # "THEME": "dark", # Force theme: "dark" or "light". Will disable theme switcher
     "LOGIN": {
-        "image": lambda request: static("sample/login-bg.jpg"),
-        "redirect_after": lambda request: reverse_lazy("admin:APP_MODEL_changelist"),
+        "redirect_after": lambda request: reverse_lazy("admin:index"),
+        "image": None,
+        # "image": lambda request: static("assets/hero.png"),
     },
     # "STYLES": [
     #     lambda request: static("css/style.css"),
@@ -75,13 +76,6 @@ UNFOLD = {
                 "separator": False,  # Top border
                 "collapsible": False,  # Collapsible group of links
                 "items": [
-                    {
-                        "title": _("Auth Groups"),
-                        "icon": "security",  # Supported icon set: https://fonts.google.com/icons
-                        "link": reverse_lazy("admin:auth_group_changelist"),
-                        # "badge": 3,
-                        "permission": lambda request: request.user.is_superuser,
-                    },
                     # {
                     #     "title": _("Dashboard"),
                     #     "icon": "dashboard",  # Supported icon set: https://fonts.google.com/icons
@@ -89,6 +83,14 @@ UNFOLD = {
                     #     "badge": 3,
                     #     "permission": lambda request: request.user.is_superuser,
                     # },
+                    # {
+                    #     "title": _("Auth Groups"),
+                    #     "icon": "security",  # Supported icon set: https://fonts.google.com/icons
+                    #     "link": reverse_lazy("admin:auth_group_changelist"),
+                    #     # "badge": 3,
+                    #     "permission": lambda request: request.user.is_superuser,
+                    # },
+                   
                     {
                         "title": _("Auth Users"),
                         "icon": "people",
@@ -105,7 +107,7 @@ UNFOLD = {
                         "link": reverse_lazy("admin:freelancers_freelancer_changelist"),
                     },
                     {
-                        "title": _("Job Postings"),
+                        "title": _("Job"),
                         "icon": "work",
                         "link": reverse_lazy("admin:jobs_job_changelist"),
                     },
@@ -114,6 +116,18 @@ UNFOLD = {
                         "title": _("Proposals"),
                         "icon": "article",
                         "link": reverse_lazy("admin:proposals_proposal_changelist"),
+                    },
+                    {
+                    
+                        "title": _("Contacts"),
+                        "icon": "contract",
+                        "link": reverse_lazy("admin:contracts_contract_changelist"),
+                    },
+                    {
+                    
+                        "title": _("Projects"),
+                        "icon": "badge",
+                        "link": reverse_lazy("admin:projects_project_changelist"),
                     },
                     {
                     

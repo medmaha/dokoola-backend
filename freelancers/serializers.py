@@ -273,8 +273,7 @@ class FreelancerDashboardSerializer(serializers.ModelSerializer):
             }
 
         except Exception as e:
-            message = f"{e} - [FILE:freelancers.serializer.py BLOCK:FreelancerDashboardSerializer.get_total_earning]"
-            DokoolaLogger.critical(message)
+            pass
             return {"spent": 0.00}
 
     def get_client_reviews(self, instance: Freelancer):
@@ -308,8 +307,7 @@ class FreelancerDashboardSerializer(serializers.ModelSerializer):
             ]
             return result
         except Exception as e:
-            message = f"{e} - [FILE:clients.serializer.py BLOCK:ClientDashboardStatsSerializer.get_freelancer_reviews]"
-            DokoolaLogger.critical(message)
+            pass
             return []
 
     def get_completed_projects(self, instance: Freelancer):

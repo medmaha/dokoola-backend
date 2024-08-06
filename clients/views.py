@@ -109,7 +109,7 @@ class ClientUpdateView(GenericAPIView):
                 status=404,
             )
         except Exception as e:
-            print("Exception:", e)
+            
             return Response(
                 {"message": "Error: Something went wrong!"},
                 status=500,
@@ -147,7 +147,7 @@ class ClientJobDetailView(RetrieveAPIView):
             )
             return Response(client_serializer.data, status=200)
         except Exception as e:
-            print("Exception:", e)
+            
             return Response(
                 {"message": "The provided query, doesn't match our database"},
                 status=404,

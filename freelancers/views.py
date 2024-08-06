@@ -59,7 +59,7 @@ class FreelancerUpdateAPIView(GenericAPIView):
             freelancer_serializer: FreelancerUpdateDataSerializer = self.get_serializer(
                 instance=freelancer, context={"request": request}
             )
-            print(freelancer_serializer.data)
+            
             return Response(freelancer_serializer.data, status=200)
         except Freelancer.DoesNotExist:
             return Response(
@@ -86,7 +86,7 @@ class FreelancerUpdateAPIView(GenericAPIView):
                 status=404,
             )
         except Exception as e:
-            print("Exception:", e)
+            
             return Response(
                 {"message": "Error: Something went wrong!"},
                 status=500,
@@ -161,7 +161,7 @@ class FreelancerPortfolioAPIView(GenericAPIView):
             return Response({"message": "This request is prohibited"}, status=403)
 
         except Exception as e:
-            print("Exception:", e)
+            
             return Response(
                 {"message": "Error: Something went wrong!"},
                 status=500,

@@ -19,7 +19,7 @@ class Command(BaseCommand):
         gender = os.getenv('SUPER_ADMIN_GENDER', 'MALE')
         avatar = os.getenv('SUPER_ADMIN_AVATAR')
 
-        print("Creating Super user account...")
+        
 
         try:
             user = User.objects.get(email=email)

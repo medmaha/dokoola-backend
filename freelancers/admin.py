@@ -7,3 +7,4 @@ from . import models
 class FreelancerAdminClass(ModelAdmin):
     search_fields = ( 'phone', "country", "state", "district", 'website')
     list_display = ('name', "email", "badge", 'pricing', 'phone')
+    list_display_links = ["name","email"]
