@@ -27,13 +27,20 @@ def index(request: HttpRequest):
     return render(request, "core/index.html", global_context)
 
 
-def health(request: HttpRequest):
+def database_health_check(request: HttpRequest):
     try:
         Waitlist.objects.first()
         return JsonResponse({"status": "OK", "message": "Backend Web-server up and running"})
     except Exception as e:
         return JsonResponse({"status": "ERROR", "message": str(e)},  status=400)
     
+
+def health_check(request: HttpRequest):
+    render_health_check_ips = ["10.203.26.24"]
+
+    if request.META.get("REMOTE_ADDR") in render_health_check_ips:
+        return JsonResponse({"status": "OK", "message": "Backend Web-server up and running"})
+    return database_health_check(request)
 
 
 

@@ -30,7 +30,7 @@ class DokoolaLoggerMiddleware:
         device="Unknown Device"
 
         list_devices = ["iphone", "ipad", "android", "windows", "linux", "mac"]
-        list_platforms = ["edge", "edg", "firefox", "safari", "opera", "edge", "curl", "postman", "chrome"]
+        list_platforms = ["edge", "edg", "firefox", "opera", "edge", "curl", "postman", "chrome",  "safari"]
 
         for _platform in list_platforms:
             if _platform in agent:
@@ -52,13 +52,13 @@ class DokoolaLoggerMiddleware:
         response: HttpResponse = self.get_response(request)
         timestamp = self.get_timestamp(start_time)
         status_code = response.status_code
-        req_ip_address = request.META.get('REMOTE_ADDR')
+        http_host = request.META.get('HTTP_HOST')
         req_user_agent = self.get_readable_from_user_agent(
             request.META.get('HTTP_USER_AGENT', '')
         )
 
         message = (f"[@{start_time.date()} {str(start_time.time()).split(".")[0]} | {timestamp}] "
-                f"{status_code} - {request.method.upper()} - {request.path} - {req_ip_address} - [{req_user_agent}]") # type: ignore
+                f"{status_code} - {request.method.upper()} - {request.path} - {http_host} - [{req_user_agent}]") # type: ignore
 
         if status_code in [200, 204, 304]:
             self.logger.log.info(message)
