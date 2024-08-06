@@ -1,8 +1,8 @@
-name: Dokoola Backend Docker-Image CI/CD
+name: Dokoola Backend Dockerizing CI/CD
 
 on:
   workflow_run:
-    workflows: ["Dokoola Backend Scaffold-Setup CI/CD"]
+    workflows: ["Dokoola Backend Scaffolding CI/CD"]
     types:
       - completed
 

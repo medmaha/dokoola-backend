@@ -1,4 +1,4 @@
-name: Dokoola Backend Scaffold-Setup CI/CD
+name: Dokoola Backend Scaffolding CI/CD
 
 on:
   push:
@@ -9,6 +9,7 @@ on:
 jobs:
   scaffold:
     runs-on: ubuntu-latest
+    name: Scaffold
 
     container: python
 
