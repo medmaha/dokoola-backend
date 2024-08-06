@@ -1,4 +1,3 @@
-import json
 import os
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -40,6 +39,10 @@ def health_check(request: HttpRequest):
 
     if request.META.get("REMOTE_ADDR") in render_health_check_ips:
         return JsonResponse({"status": "OK", "message": "Backend Web-server up and running"})
+    
+    if request.META.get("HTTP_HOST", "ABC") in os.environ.get("BASE_URL", ""):
+        return JsonResponse({"status": "OK", "message": "Backend Web-server up and running"})
+        
     return database_health_check(request)
 
 
@@ -65,8 +68,16 @@ def waitlist(request: HttpRequest):
     return HttpResponseRedirect("/")
 
 
+from rest_framework import serializers
+class CategoriesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ["slug", "name", "image_url", "description"]
+
 class CategoriesView(APIView):
     permission_classes = []
     def get(self, request):
         categories = Category.objects.filter(disabled=False).values("slug", "name", "image_url", "description")
-        return Response(categories)
+        response =  Response(categories, status=200)
+        return response
+      
