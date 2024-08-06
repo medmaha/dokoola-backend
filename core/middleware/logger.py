@@ -22,15 +22,43 @@ class DokoolaLoggerMiddleware:
         self.logger = Logger()
         self.get_response = get_response
 
+    def get_readable_from_user_agent(self, user_agent:str):
+        # Get the human friendly version for request user-agent
+
+        agent = user_agent.lower()
+        platform = "Unknown"
+        device="Unknown Device"
+
+        list_devices = ["iphone", "ipad", "android", "windows", "linux", "mac"]
+        list_platforms = ["edge", "edg", "firefox", "safari", "opera", "edge", "curl", "postman", "chrome"]
+
+        for _platform in list_platforms:
+            if _platform in agent:
+                if _platform == "edg":
+                    platform = "Edge"
+                else:
+                    platform = _platform.capitalize()
+                break
+        for _device in list_devices:
+            if _device in agent:
+                device = _device.capitalize()
+                break
+
+        return f"{device.capitalize()}/{platform}"
+    
     def __call__(self, request: HttpRequest):
 
         start_time = datetime.now()
         response: HttpResponse = self.get_response(request)
         timestamp = self.get_timestamp(start_time)
         status_code = response.status_code
+        req_ip_address = request.META.get('REMOTE_ADDR')
+        req_user_agent = self.get_readable_from_user_agent(
+            request.META.get('HTTP_USER_AGENT', '')
+        )
 
-        message = (f"\"@{start_time.date()} {str(start_time.time()).split(".")[0]}\" "
-                f"{request.method.upper()} - {request.path} - {status_code} - [{timestamp}]") # type: ignore
+        message = (f"[@{start_time.date()} {str(start_time.time()).split(".")[0]} | {timestamp}] "
+                f"{status_code} - {request.method.upper()} - {request.path} - {req_ip_address} - [{req_user_agent}]") # type: ignore
 
         if status_code in [200, 204, 304]:
             self.logger.log.info(message)
