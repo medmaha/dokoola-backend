@@ -8,7 +8,7 @@ from . import at
 
 # Reference -> /api/account/*/**/
 urlpatterns = [
-    path("login", login.LoginView.as_view(), name="login"),
+    path("login/", login.LoginView.as_view(), name="login"),
     path("verify", verify.verifyEmail, name="verify"),
     path("logout", logout.LogoutView.as_view(), name="logout"),
     path("signup/", signup.SignUpView.as_view(), name="signup"),

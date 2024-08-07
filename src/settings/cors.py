@@ -1,7 +1,11 @@
+import os
+
+
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_METHODS = (
+    "HEAD",
     "GET",
     "PUT",
     "POST",
@@ -17,6 +21,7 @@ CORS_ALLOW_HEADERS = (
     "x-requested-with",
     "x-token",
     "x-csrftoken",
+    os.environ.get("SERVICE_HTTP_HEADER")
 )
 
 
