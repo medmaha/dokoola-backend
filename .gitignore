@@ -4,4 +4,4 @@ dev-scripts/
 seed.json
 
 # ignore __pycache__
-/*/**/__pycache__*
+*.pyc

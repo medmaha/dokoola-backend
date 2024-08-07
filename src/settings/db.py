@@ -1,6 +1,5 @@
 import os
 
-DEBUG = bool(int(os.environ.get("DEBUG", 0)))
 DB_ENGINE = os.environ.get("DB_ENGINE")
 
 credentials = {

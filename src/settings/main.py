@@ -5,21 +5,32 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+DEBUG = bool(int(os.environ.get("DEBUG", 0)))
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+SECRET_KEY = os.environ.get("SECRET_KEY")
+
 from .api import *
 from .cors import *
 from .db import *
 from .email import *
 from .jwt import *
 from .unfold import *
+from .whitenoice import *
+from .logger import *
 
-# DEBUG = bool(int(os.environ.get("DEBUG", 0)))
-DEBUG = True
+ALLOWED_HOSTS = list(
+    set(
+        [
+            host
+            if host != ""
+            else "localhost"
+            for host in os.environ.get("ALLOWED_HOSTS", "").split(",")
+        ]
+    )
+)
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-
-SECRET_KEY = os.environ.get("SECRET_KEY")
-
-ALLOWED_HOSTS = ["*"]
 
 AUTH_USER_MODEL = "users.User"
 
@@ -65,6 +76,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -72,12 +84,12 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "core.middleware.logger.DokoolaLoggerMiddleware"
 ]
 
-# #  Add a request logger middleware class
-# if not DEBUG:
-#     MIDDLEWARE.append("core.middleware.logger.DokoolaLoggerMiddleware")
+
+#  Add a request logger middleware class
+if not DEBUG:
+    MIDDLEWARE.insert(0, "core.middleware.logger.DokoolaLoggerMiddleware")
 
 ROOT_URLCONF = "src.urls"
 

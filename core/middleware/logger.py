@@ -1,3 +1,4 @@
+from sys import exception
 from django.utils.log import  log_response
 from django.http import HttpRequest, HttpResponse
 
@@ -50,9 +51,10 @@ class DokoolaLoggerMiddleware:
 
         start_time = datetime.now()
         response: HttpResponse = self.get_response(request)
+
         timestamp = self.get_timestamp(start_time)
         status_code = response.status_code
-        http_host = request.META.get('HTTP_HOST')
+        http_host = request.META.get('HTTP_REFERER')
         req_user_agent = self.get_readable_from_user_agent(
             request.META.get('HTTP_USER_AGENT', '')
         )
