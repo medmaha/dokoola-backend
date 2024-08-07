@@ -84,12 +84,10 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "core.middleware.logger.DokoolaLoggerMiddleware",
+    "core.middleware.csrf.DokoolaCSRFMiddleware"
 ]
 
-
-#  Add a request logger middleware class
-if not DEBUG:
-    MIDDLEWARE.insert(0, "core.middleware.logger.DokoolaLoggerMiddleware")
 
 ROOT_URLCONF = "src.urls"
 

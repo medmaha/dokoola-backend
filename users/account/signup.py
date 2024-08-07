@@ -1,9 +1,10 @@
 import random
-import re, os, threading
-from xmlrpc.client import Boolean
+import re, threading
 from django.core.mail import send_mail
 from django.db import transaction
 from django.template.loader import render_to_string
+
+from core.services.email import email_service
 from src.settings.email import EMAIL_HOST_DOMAIN
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -42,7 +43,7 @@ class CheckEmailView(GenericAPIView):
                         html_message=html,
                         fail_silently=True,
                     )
-                    save_otp(sent=Boolean(response))
+                    save_otp(sent=bool(response))
                 except Exception as _:
                     pass 
             
@@ -78,32 +79,19 @@ class ResendCodeView(GenericAPIView):
 
     def resend_verification_code(self, email):
         code, save_otp = User.generate_otp(identifier=email)
-        html = render_to_string("users/email_verification.html", context={"code": code})
+        template_name = "users/email_verification.html"
+        text = f"Please use the following code to verify your email address: {code}"
+        html_context={"code": code}
 
-        def mailer():
-            try:
-                saved = save_otp(sent=False)
-                if not saved:
-                    return 
-                response = send_mail(
-                    "Email Verification",
-                    f"""
-                        Please use the following code to verify your email address: {code}
-                    """,
-                    EMAIL_HOST_DOMAIN,
-                    [email],
-                    html_message=html,
-                    fail_silently=True,
-                )
-                save_otp(sent=Boolean(response))
-            except Exception as _:
-                pass 
-        try:
-            threading.Thread(target=mailer).start()
-        except Exception as _:
-            mailer()
-        except:
-            pass
+        email_service.send(
+            email=email,
+            text=text,
+            subject="Email Verification",
+            html_template_name=template_name,
+            html_template_context=html_context,
+        )
+
+        saved = save_otp(sent=False)
 
     def post(self, request, *args, **kwargs):
         email = request.data.get("email")

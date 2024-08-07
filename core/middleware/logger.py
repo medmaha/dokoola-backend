@@ -1,10 +1,7 @@
-from sys import exception
-from django.utils.log import  log_response
-from django.http import HttpRequest, HttpResponse
-
 import logging
 from datetime import  datetime
 
+from django.http import HttpRequest, HttpResponse
 
 class Logger:
     def __init__(self):
