@@ -9,7 +9,7 @@ COPY . .
 # global env across build images
 COPY .env.prod ./.env
 
-RUN manage.py collectstatic --noinput
+RUN python /app/manage.py collectstatic --noinput
 
 EXPOSE 80 443 222 8000
 
