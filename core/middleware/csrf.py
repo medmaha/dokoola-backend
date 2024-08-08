@@ -7,7 +7,7 @@ from datetime import  datetime
 DOKOOLA_ACCESS_SERVICES = [
     "DOKOOLA-FRONTEND",
     "DOKOOLA-HEALTH-CHECK/Better-Stack",
-    "DOKOOLA-HEALTH-CHECK/GITHUB-ACTIONS",
+    "DOKOOLA-HEALTH-CHECK/Github-Actions",
 ]
 
 class DokoolaCSRFMiddleware:
