@@ -5,7 +5,7 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
-from backend.src.settings.logger import DokoolaLogger
+from src.settings.logger import DokoolaLogger
 
 
 class EmailSender():

@@ -1,4 +1,3 @@
 venv/
 static/
-.logs/
 *.pyc
