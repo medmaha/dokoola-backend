@@ -7,9 +7,6 @@ from clients.models import Client
 from utilities.formatters import get_month_index, get_month_name
 from users.models import User
 
-from core.middleware.logger import DokoolaLogger
-
-
 class ClientDashboardAPIView(RetrieveAPIView):
     """
     This view is used for the client dashboard view

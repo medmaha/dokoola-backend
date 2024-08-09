@@ -1,5 +1,4 @@
-import json
-import os
+import os, json
 from django.http import HttpRequest, HttpResponse
 from datetime import  datetime
 
@@ -17,30 +16,18 @@ class DokoolaCSRFMiddleware:
 
 
     def check_if_samesite(self, request: HttpRequest):
-        # Check if the request is from the same domain
-        print(request.META.get("REMOTE_HOST"))
-
-        host = request.META.get("HTTP_HOST", "00")
-        
-        base_url = request.META.get("BASE_URL", "")
-        if host in base_url:
-            return True
-
-        allowed_host = request.META.get("ALLOWED_HOSTS")
-        if host in allowed_host:
-            return True
-        else:
-            return False
+        base_url = os.getenv("BASE_URL", "")
+        return True
 
  
     def __call__(self, request: HttpRequest):
         samesite = self.check_if_samesite(request)
 
         if samesite:
-            print("Same site: Request from same domain")
+            request.META[""]=3
             return self.get_response(request)
 
-        csrf_header = request.headers.get(os.environ.get("SERVICE_HTTP_HEADER", "_"))
+        csrf_header = request.headers.get(os.environ.get("SERVICE_HTTP_HEADER", "___"))
 
         if not csrf_header in DOKOOLA_ACCESS_SERVICES:
             response: HttpResponse = HttpResponse(

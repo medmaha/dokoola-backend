@@ -5,7 +5,6 @@ from django.db.models import Q, F, Sum, Avg, Count
 from rest_framework.generics import RetrieveAPIView, ListAPIView, GenericAPIView
 from rest_framework.response import Response
 
-from core.middleware.logger import DokoolaLogger
 from proposals.serializers import ProposalPendingListSerializer
 from jobs.models import Job
 from proposals.models import Proposal

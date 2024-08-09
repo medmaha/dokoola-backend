@@ -5,6 +5,8 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
+from backend.src.settings.logger import DokoolaLogger
+
 
 class EmailSender():
     def __init__(self, fail_silently=False):
@@ -19,7 +21,7 @@ class EmailSender():
             start_process(*args, **kwargs)
         except Exception as error:
             # TODO: handle error
-            print(error)
+            DokoolaLogger.error(error)
             pass
 
 

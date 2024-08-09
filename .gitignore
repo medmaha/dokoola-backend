@@ -1,7 +1,4 @@
 venv/
 static/
-dev-scripts/
-seed.json
-
-# ignore __pycache__
+.logs/
 *.pyc

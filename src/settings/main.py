@@ -11,15 +11,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
-from .api import *
-from .cors import *
-from .db import *
-from .email import *
-from .jwt import *
-from .unfold import *
-from .whitenoice import *
-from .logger import *
-
 ALLOWED_HOSTS = list(
     set(
         [
@@ -84,6 +75,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.contrib.sites.middleware.CurrentSiteMiddleware",
     "core.middleware.logger.DokoolaLoggerMiddleware",
     "core.middleware.csrf.DokoolaCSRFMiddleware"
 ]
@@ -146,3 +138,11 @@ STATIC_ROOT = BASE_DIR / "static"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+from .api import *
+from .cors import *
+from .db import *
+from .email import *
+from .jwt import *
+from .unfold import *
+from .whitenoice import *
+from .logger import *

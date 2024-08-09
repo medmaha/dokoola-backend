@@ -1,24 +1,13 @@
-import logging
-from datetime import  datetime
 import os
-
+from datetime import  datetime
+from src.settings.logger import DokoolaLogger
 from django.http import HttpRequest, HttpResponse
 
-class Logger:
-    def __init__(self):
-        logger = logging.getLogger(__file__)
-        handler = logging.StreamHandler()
-        handler.setFormatter(logging.Formatter("SERVER %(levelname)s:  %(message)s"))
-        logger.addHandler(handler)
-        logger.setLevel(logging.INFO)
-        self.log = logger
 
-DokoolaLogger = Logger().log
 
 class DokoolaLoggerMiddleware:
 
     def __init__(self, get_response):
-        self.logger = Logger()
         self.get_response = get_response
 
     def get_readable_from_user_agent(self, user_agent:str):
@@ -38,6 +27,7 @@ class DokoolaLoggerMiddleware:
                 else:
                     platform = _platform.capitalize()
                 break
+
         for _device in list_devices:
             if _device in agent:
                 device = _device.capitalize()
@@ -49,35 +39,45 @@ class DokoolaLoggerMiddleware:
 
         start_time = datetime.now()
         response: HttpResponse = self.get_response(request)
-
-        timestamp = self.get_timestamp(start_time)
-        status_code = response.status_code
         service_name = request.headers.get(os.environ.get('SERVICE_HTTP_HEADER', ""), "UNKNOWN-SERVICE")
-        req_user_agent = self.get_readable_from_user_agent(
+        user_agent = self.get_readable_from_user_agent(
             request.META.get('HTTP_USER_AGENT', '')
         )
 
-        message = (f"[@{start_time.date()} {str(start_time.time()).split(".")[0]} | {timestamp}] "
-                f"{status_code} - {request.method.upper()} - {request.path} - {service_name} - [{req_user_agent}]") # type: ignore
+        log_dict = {
+            "path": request.path,
+            "user_id":request.META.get("REMOTE_USER"),
+            "method": request.method,
+            "timestamp": self.get_timestamp(start_time),
+            "duration": self.get_duration(start_time),
+            "host":request.get_host(),
+            "ip_addr": request.META.get("REMOTE_ADDR"),
+            "status_code": response.status_code,
+            "status_message": response.reason_phrase,
+            "service_name": service_name,
+            "server_name": request.META.get("SERVER_NAME"),
+            "user_agent": user_agent
+        }
 
-        if status_code in [200, 204, 304]:
-            self.logger.log.info(message)
-        elif status_code in [401, 404]:
-            self.logger.log.warning(message)
+        if response.status_code in [200, 204, 304, 307]:
+            DokoolaLogger.info(log_dict, extra=log_dict)
+        elif response.status_code in [401, 404]:
+            DokoolaLogger.warn(log_dict, extra=log_dict)
         else:
-            self.logger.log.error(message)
-
+            DokoolaLogger.error(log_dict, extra=log_dict)
         return response
 
-    def get_timestamp(self, start_time: datetime):
+
+    def get_duration(self, start_time: datetime):
         end_time = datetime.now()
 
         minutes = end_time.minute - start_time.minute
         seconds = str(end_time.microsecond - start_time.microsecond / 1000)[:3]
 
         if minutes:
-            timestamp = f"{minutes}:{seconds}s"
+            return f"{minutes}:{seconds}s"
         else:
-            timestamp = f"{seconds}ms"
+            return f"{seconds}ms"
 
-        return timestamp
+    def get_timestamp(self, start_time: datetime):
+        return f"{start_time.date()} {str(start_time.time()).split(".")[0]}"

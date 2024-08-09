@@ -1,13 +1,10 @@
 from datetime import datetime
-from decimal import Decimal
 from django.db.models import Q, F, Sum, Avg, Count
 from rest_framework import serializers
 
 from contracts.models import Contract
-from proposals.models import Proposal
 from users.serializer import UserSerializer
 from freelancers.models import Freelancer, Portfolio
-from core.middleware.logger import DokoolaLogger
 
 
 class FreelancerMiniSerializer(serializers.ModelSerializer):
