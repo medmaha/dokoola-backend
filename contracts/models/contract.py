@@ -5,16 +5,17 @@ from utilities.generator import hex_generator
 
 
 class ContractProgressChoices(models.TextChoices):
-        NONE = "NONE"
-        ACTIVE = "ACTIVE"
-        CANCELLED = "CANCELLED"
-        COMPLETED = "COMPLETED"
+    NONE = "NONE"
+    ACTIVE = "ACTIVE"
+    CANCELLED = "CANCELLED"
+    COMPLETED = "COMPLETED"
 
 
 class ContractStatusChoices(models.TextChoices):
-        PENDING = "PENDING"
-        ACCEPTED = "ACCEPTED"
-        REJECTED = "REJECTED"
+    PENDING = "PENDING"
+    ACCEPTED = "ACCEPTED"
+    REJECTED = "REJECTED"
+
 
 class Contract(models.Model):
 
@@ -35,24 +36,20 @@ class Contract(models.Model):
     completed_at = models.DateTimeField(null=True, blank=True)
 
     status = models.CharField(
-        max_length=200, choices=ContractStatusChoices.choices, default=ContractStatusChoices.PENDING
+        max_length=200,
+        choices=ContractStatusChoices.choices,
+        default=ContractStatusChoices.PENDING,
     )
 
     progress = models.CharField(
-        max_length=200, choices=ContractProgressChoices.choices, default=ContractProgressChoices.NONE
+        max_length=200,
+        choices=ContractProgressChoices.choices,
+        default=ContractProgressChoices.NONE,
     )
 
     deleted = models.BooleanField(default=False, blank=True)
 
-    # Whether the client has acknowledged the contract sent to the freelancer
-    client_acknowledgement = models.CharField(
-        max_length=200, choices=ContractStatusChoices.choices, default="PENDING"
-    )
     # Whether the client has acknowledged the work done by the freelancer
-    client_project_acknowledgement = models.CharField(
-        max_length=200, choices=ContractStatusChoices.choices, default="PENDING"
-    )
-    # Whether the freelancer has acknowledged the contract sent by the client
     freelancer_acknowledgement = models.CharField(
         max_length=200, choices=ContractStatusChoices.choices, default="PENDING"
     )

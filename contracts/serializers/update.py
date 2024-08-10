@@ -1,46 +1,9 @@
 from rest_framework import serializers
-from .models import Contract, Proposal
+from contracts.models import Contract
+from proposals.models import Proposal
 
 
-class ContractListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Contract
-        fields = [
-            "id",
-            "created_at",
-            "start_date",
-            "end_date",
-            "duration",
-            "status",
-            "progress",
-            "payment_method",
-            "additional_terms",
-            "client_acknowledgement",
-            "freelancer_acknowledgement",
-        ]
-
-    def to_representation(self, instance: Contract):
-        data = super().to_representation(instance)
-        return {**data, **get_related_fields(instance.proposal)}
-
-
-class ContractCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Contract
-        fields = [
-            "proposal",
-            "freelancer",
-            "job",
-            "client",
-            "start_date",
-            "end_date",
-            "duration",
-            "payment_method",
-            "additional_terms",
-        ]
-
-
-class ContractCreateUpdateSerializer(serializers.ModelSerializer):
+class ContractUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contract
         fields = [
@@ -54,16 +17,6 @@ class ContractCreateUpdateSerializer(serializers.ModelSerializer):
     def to_representation(self, instance: Contract):
         data = super().to_representation(instance)
         return {**data, **get_related_fields(instance.proposal)}
-
-
-class ContractCreateDataSerializer(serializers.Serializer):
-
-    class Meta:
-        model = Proposal
-        fields = []
-
-    def to_representation(self, instance: Proposal):
-        return get_related_fields(instance)
 
 
 def get_related_fields(instance: Proposal):
