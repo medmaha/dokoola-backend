@@ -5,14 +5,14 @@ from rest_framework.generics import ListAPIView
 from datetime import datetime
 
 from freelancers.models import Freelancer
-from jobs.serializer import JobsSerializer
+from jobs.serializers import JobListSerializer
 
-from .models import Job
+from jobs.models import Job
 
 
 class JobsSearchAPIView(ListAPIView):
     permission_classes = []
-    serializer_class = JobsSerializer
+    serializer_class = JobListSerializer
 
     def get_queryset(self):
         search_params = self.request.query_params  # type: ignore
@@ -80,8 +80,6 @@ class JobsSearchAPIView(ListAPIView):
     def filter_by_location(self, country: str):
         country = country.lower()
 
-        
-
         qs = self.queryset.filter(location__icontains=country)
 
         if not qs.exists():
@@ -97,7 +95,9 @@ class JobsSearchAPIView(ListAPIView):
 
     # Filters queryset by category
     def filter_by_category(self, category: str):
-        category_filters = Q(category_obj__slug__icontains=category) | Q(category_obj__name__icontains=category)
+        category_filters = Q(category_obj__slug__icontains=category) | Q(
+            category_obj__name__icontains=category
+        )
         qs = self.queryset.filter(category_filters)
 
         if not qs.exists():
@@ -106,12 +106,16 @@ class JobsSearchAPIView(ListAPIView):
             third_4 = category[8:12]
             fourth_4 = category[12:16]
 
-            sub_query_filters = Q(category_obj__slug=first_4) |  Q(category_obj__name=first_4)
+            sub_query_filters = Q(category_obj__slug=first_4) | Q(
+                category_obj__name=first_4
+            )
 
             for i in [second_4, third_4, fourth_4]:
                 if not i:
                     continue
-                sub_query_filters |= Q(category_obj__slug__icontains=i) | Q(category_obj__name__icontains=i)
+                sub_query_filters |= Q(category_obj__slug__icontains=i) | Q(
+                    category_obj__name__icontains=i
+                )
             qs = self.queryset.filter(sub_query_filters)
         self.queryset = qs
 
@@ -174,9 +178,7 @@ class JobsSearchAPIView(ListAPIView):
                 filters &= Q(budget__lte=float(max_value))
 
         except Exception as e:
-            pass            
-            
-            
+            pass
 
         if filters:
             self.queryset = self.queryset.filter(filters)

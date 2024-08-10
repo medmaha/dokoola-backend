@@ -2,32 +2,13 @@ from rest_framework import serializers
 
 from users.serializer import User
 from clients.serializer import (
-    ClientSerializer,
     ClientDetailSerializer,
-    ClientUpdateDataSerializer,
 )
 from proposals.models import Proposal
 
-from .models import Job, Pricing, Activities
+from jobs.models import Job, Pricing
 
-
-class PricingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Pricing
-        fields = "__all__"
-
-
-class JobsCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Job
-        fields = [
-            "title",
-            "description",
-            "budget",
-            "activities_id",
-            "required_skills",
-            "location",
-        ]
+from .others import PricingSerializer, ActivitySerializer
 
 
 class JobMiniSerializer(serializers.ModelSerializer):
@@ -57,7 +38,7 @@ class JobMiniSerializer(serializers.ModelSerializer):
         }
 
 
-class JobsSerializer(serializers.ModelSerializer):
+class JobListSerializer(serializers.ModelSerializer):
     client = serializers.SerializerMethodField()
     has_proposed = serializers.SerializerMethodField()
 
@@ -139,30 +120,7 @@ class JobsSerializer(serializers.ModelSerializer):
         return data
 
 
-class JobsUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Job
-        fields = [
-            "title",
-            "budget",
-            "location",
-            "status",
-            "description",
-            "required_skills",
-        ]
-
-
-class JobsActivitySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Activities
-        exclude = [
-            "hired",
-            "proposals",
-            "invitations",
-        ]
-
-
-class JobsDetailSerializer(serializers.ModelSerializer):
+class JobRetrieveSerializer(serializers.ModelSerializer):
     client = ClientDetailSerializer()
     pricing = PricingSerializer()
     has_proposed = serializers.SerializerMethodField()

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from freelancers.serializers import FreelancerSerializer, FreelancerMiniSerializer
-from jobs.serializer import JobsSerializer, JobMiniSerializer
+from jobs.serializers import JobListSerializer, JobMiniSerializer
 
 from .models import Proposal, Attachment
 
@@ -42,7 +42,7 @@ class ProposalListSerializer(serializers.ModelSerializer):
 
 
 class ProposalDetailSerializer(serializers.ModelSerializer):
-    job = JobsSerializer()
+    job = JobListSerializer()
     freelancer = FreelancerSerializer()
     attachments = AttachmentSerializer(many=True)
 

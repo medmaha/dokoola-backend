@@ -1,23 +1,15 @@
 from django.db import models
 from core.models import Category
-from freelancers.models import Freelancer
 from utilities.generator import hex_generator
 from clients.models import Client
+from .pricing import Pricing
 
-
-class Pricing(models.Model):
-    fixed_price = models.BooleanField(default=True, blank=True)
-    negotiable_price = models.BooleanField(default=False, blank=True)
-    will_pay_more = models.BooleanField(default=False, blank=True)
-    addition = models.CharField(max_length=100)
-    payment_type = models.CharField(max_length=100, default="PROJECT")
-    deleted = models.BooleanField(default=False, blank=True)
 
 class JobStatusChoices(models.TextChoices):
-        CLOSED = "CLOSED"
-        PUBLISHED = "PUBLISHED"
-        SUSPENDED = "SUSPENDED"
-        IN_PROGRESS = "IN_PROGRESS"
+    CLOSED = "CLOSED"
+    PUBLISHED = "PUBLISHED"
+    SUSPENDED = "SUSPENDED"
+    IN_PROGRESS = "IN_PROGRESS"
 
 class Job(models.Model):
 
@@ -72,30 +64,3 @@ class Job(models.Model):
         if fixed_price:
             return "per hour / fixed price"
         return "per hour"
-
-
-class Invitation(models.Model):
-    interview_count = models.IntegerField(default=0)
-    deleted = models.BooleanField(default=False, blank=True)
-    client_last_visit = models.DateTimeField(null=True, blank=True)
-    freelancer = models.ForeignKey(Freelancer, on_delete=models.CASCADE)
-    proposals = models.ManyToManyField(
-        "proposals.Proposal", related_name="job_proposals"
-    )
-    proposal = models.ForeignKey(
-        "proposals.Proposal", on_delete=models.CASCADE, null=True
-    )
-    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="invitations")
-
-
-class Activities(models.Model):
-    deleted = models.BooleanField(default=False, blank=True)
-    hired_count = models.IntegerField(default=0)
-    invite_count = models.IntegerField(default=0)
-    proposal_count = models.IntegerField(default=0)
-    interview_count = models.IntegerField(default=0)
-    unanswered_invites = models.IntegerField(default=0)
-    hired = models.ManyToManyField(Freelancer, blank=True)
-    client_last_visit = models.DateTimeField(null=True, blank=True)
-    proposals = models.ManyToManyField("proposals.Proposal", related_name="proposals")
-    invitations = models.ManyToManyField(Invitation, related_name="activity")
