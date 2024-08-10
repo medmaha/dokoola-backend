@@ -45,6 +45,6 @@ class EmailService(EmailSender):
             html_message=html,
             recipient_list=[email],
             fail_silently=self._fail_silently,
-            from_email=settings.EMAIL_EMAIL_HOST_DOMAIN,
+            from_email=settings.EMAIL_HOST_DOMAIN,
         )
 
