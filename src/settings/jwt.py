@@ -5,7 +5,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(weeks=4),
-    "REFRESH_TOKEN_LIFETIME": timedelta(weeks=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(weeks=4),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,

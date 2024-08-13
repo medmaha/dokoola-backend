@@ -15,4 +15,4 @@ class ActivitySerializer(serializers.ModelSerializer):
 class PricingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pricing
-        fields = "__all__"
+        exclude = ["id"]

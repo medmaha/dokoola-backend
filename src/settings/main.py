@@ -14,9 +14,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 ALLOWED_HOSTS = list(
     set(
         [
-            host
-            if host != ""
-            else "localhost"
+            host if host != "" else "localhost"
             for host in os.environ.get("ALLOWED_HOSTS", "").split(",")
         ]
     )
@@ -28,8 +26,7 @@ AUTH_USER_MODEL = "users.User"
 APPEND_SLASH = True
 
 INSTALLED_APPS = [
-    "unfold", # Third party app
-
+    "unfold",  # Third party app
     # Django apps
     "django.contrib.admin",
     "django.contrib.auth",
@@ -37,29 +34,24 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     # Third party apps
     "corsheaders",
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
-
     # The core application services and utilities
     "core",
-
     # Users Account & Profiles apps
     "users",
     "staffs",
     "clients",
     "freelancers",
     "reviews",
-
     # Projects & Contracts apps
     "jobs",
     "proposals",
     "contracts",
     "projects",
-
     # Messaging & Notifications apps
     "messaging",
     "notifications",
@@ -77,7 +69,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.contrib.sites.middleware.CurrentSiteMiddleware",
     "core.middleware.logger.DokoolaLoggerMiddleware",
-    "core.middleware.csrf.DokoolaCSRFMiddleware"
+    "core.middleware.csrf.DokoolaCSRFMiddleware",
 ]
 
 

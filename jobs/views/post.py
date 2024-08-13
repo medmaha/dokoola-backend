@@ -1,8 +1,11 @@
+from django.db import transaction
+
 from rest_framework.generics import (
     CreateAPIView,
 )
 from rest_framework.response import Response
 from rest_framework.request import Request
+from utilities.generator import get_serializer_error_message
 from clients.models import Client
 from users.models import User
 
@@ -20,21 +23,18 @@ from .utils import get_category
 
 
 class JobCreateAPIView(CreateAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = JobRetrieveSerializer
 
-    def get_serializer(self, *args, **kwargs) -> JobCreateSerializer:
-        return super().get_serializer(*args, **kwargs)
+    serializer_class = JobCreateSerializer
 
     def create(self, request: Request, *args, **kwargs):
         user: User = request.user
 
-        client = Client.objects.filter(user=user).first()
-
-        if not client:
+        if not user.is_client:
             return Response(
                 {"message": "Freelancers can't create job openings"}, status=401
             )
+
+        profile, profile_name = user.profile
 
         data: dict = request.data.copy()  # type: ignore
 
@@ -50,42 +50,36 @@ class JobCreateAPIView(CreateAPIView):
 
         serializer = self.get_serializer(data=data)
 
-        if serializer.is_valid():
-            pricing = Pricing.objects.create(
-                **{
-                    **pricing_data,
-                    "fixed_price": bool(pricing_data.get("fixed_price")),
-                    "negotiable_price": bool(pricing_data.get("negotiable_price")),
-                    "will_pay_more": bool(pricing_data.get("will_pay_more")),
-                }
-            )
-            activities = Activities.objects.create()
+        with transaction.atomic():
 
-            # TODO: fix this
-            try:
-                del data["job_type"]  # because it's not in the model
-            except:
-                pass
+            if serializer.is_valid():
+                pricing = Pricing.objects.create(
+                    **{
+                        **pricing_data,
+                        "fixed_price": bool(pricing_data.get("fixed_price")),
+                        "negotiable_price": bool(pricing_data.get("negotiable_price")),
+                        "will_pay_more": bool(pricing_data.get("will_pay_more")),
+                    }
+                )
+                activities = Activities.objects.create()
 
-            job = Job.objects.create(
-                **data,
-                activities=activities,
-                pricing=pricing,
-                client=client,
-                category_obj=category,
-            )
-            serializer = JobRetrieveSerializer(instance=job)
-            return Response({"slug": job.slug}, status=201)
+                # TODO: fix this
+                try:
+                    del data["job_type"]  # because it's not in the model
+                except:
+                    pass
 
-        message = ""
+                job = Job.objects.create(
+                    **data,
+                    activities=activities,
+                    pricing=pricing,
+                    client=profile,
+                    category_obj=category,
+                )
+                serializer = JobRetrieveSerializer(instance=job)
+                return Response({"slug": job.slug}, status=201)
 
-        for error in serializer.errors.items():
-            field, text = error[0], error[1][0]
+            message = get_serializer_error_message(serializer.errors)
 
-            if re.search(rf"{field}", text, re.IGNORECASE):
-                message = text.capitalize()
-                break
-
-            message = field.capitalize() + ": " + text
-            break
-        return Response({"message": message}, status=400)
+            print("Error", message)
+            return Response({"message": message}, status=400)

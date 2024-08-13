@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 
-from users.token import GenerateToken
+from users.views.account.auth_token import GenerateToken
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError

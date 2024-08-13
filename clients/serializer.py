@@ -46,9 +46,9 @@ class ClientUpdateDataSerializer(serializers.ModelSerializer):
         return {
             # Client Info
             "bio": instance.bio,
-            "phone": instance.phone,
+            **instance.user.get_personal_info(),
             # Address Info
-            **instance.get_address(),
+            **instance.user.get_address(),
             # User Info
             "email": instance.user.email,
             "name": instance.user.name,
@@ -71,19 +71,14 @@ class ClientUpdateSerializer(serializers.ModelSerializer):
         model = Client
         fields = (
             "bio",
-            "phone",
-            "phone_code",
-            # Country Info
-            "country",
-            "country_code",
-            "state",
-            "district",
-            "city",
-            "zip_code",
-            # Company Info
             "website",
             "industry",
         )
+
+    def validate_bio(self, value):
+        if not value:
+            raise serializers.ValidationError("Your bio cannot be empty")
+        return value
 
 
 class ClientDetailSerializer(serializers.ModelSerializer):
@@ -93,16 +88,22 @@ class ClientDetailSerializer(serializers.ModelSerializer):
     * The return data will vary depending on the requesting user
     """
 
-    user = UserSerializer()
-
     class Meta:
         model = Client
-        fields = ("bio", "country", "address", "jobs_completed", "user")
+        fields = ("bio", "jobs_completed")
         read_only_fields = ["*"]
 
     def to_representation(self, instance: Client):
         representation = super().to_representation(instance)
         representation["date_joined"] = instance.user.date_joined
+        representation.update(
+            {
+                "avatar": instance.user.avatar,
+                "name": instance.user.name,
+                "username": instance.user.username,
+                **instance.user.get_personal_info(),
+            }
+        )
         try:
             user_data = representation.pop("user")
             representation = {
@@ -136,7 +137,7 @@ class ClientProfileDetailSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         user = request.user if request else None
         if user and user.pk == instance.user.pk:
-            return instance.get_address()
+            return instance.user.get_address()
         return instance.address
 
     def to_representation(self, instance: Client):

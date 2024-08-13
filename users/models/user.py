@@ -1,0 +1,96 @@
+from django.db import models
+from django.contrib.auth.models import AbstractUser
+from django.utils.translation import gettext_lazy as _
+
+from reviews.models import Review
+
+
+class User(AbstractUser):
+    "The base User model of this application"
+
+    email = models.EmailField(max_length=100, unique=True)
+    username = models.CharField(unique=True, max_length=32)
+    avatar = models.CharField(null=True, blank=True, max_length=1000)
+
+    first_name = models.CharField(default="", blank=True, max_length=100)
+    last_name = models.CharField(default="", blank=True, max_length=100)
+
+    gender = models.CharField(max_length=100, default="")
+
+    is_active = models.BooleanField(default=False)
+    is_client = models.BooleanField(default=False)
+    is_freelancer = models.BooleanField(default=False)
+
+    email_verified = models.BooleanField(default=False)
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username"]
+
+    reviews = models.ManyToManyField(Review, blank=True, related_name="reviews")
+
+    # Personal info
+    phone = models.CharField(max_length=50, default="", blank=True)
+    phone_code = models.CharField(max_length=10, default="", blank=True)
+    country = models.CharField(default="", max_length=100)
+    country_code = models.CharField(max_length=10, default="", blank=True)
+    state = models.CharField(max_length=50, default="", blank=True)
+    district = models.CharField(max_length=50, default="", blank=True)
+    city = models.CharField(default="", blank=True, max_length=100)
+    zip_code = models.CharField(max_length=20, default="00000", blank=True)
+
+    def __str__(self):
+        return self.username
+
+    @property
+    def name(self):
+        return self.get_full_name()
+
+    @property
+    def profile(self):
+        if self.is_staff:
+            return [self.staff_profile, "Staff"]  # type: ignore
+        if self.is_client:
+            return [self.client_profile, "Client"]  # type: ignore
+        if self.is_freelancer:
+            return [self.freelancer_profile, "Freelancer"]  # type: ignore
+        return [None, ""]
+
+    @property
+    def account_type(self):
+        if self.is_staff:
+            return "Staff"
+        if self.is_client:
+            return "Client"
+        if self.is_freelancer:
+            return "Freelancer"
+        return "User"
+
+    def get_address(self):
+        """Returns the client's address in a dictionary format"""
+        return {
+            "zip_code": self.zip_code,
+            "country": self.country,
+            "country_code": self.country_code,
+            "phone_code": self.phone_code,
+            "state": self.state,
+            "district": self.district,
+            "city": self.city,
+        }
+
+    def get_location(self):
+        return f"{self.country} | {self.city or self.state}"
+
+    def get_personal_info(self):
+        return {
+            "phone": self.phone,
+            "phone_code": self.phone_code,
+            "country": self.country,
+            "country_code": self.country_code,
+            "state": self.state,
+            "district": self.district,
+            "city": self.city,
+            "zip_code": self.zip_code,
+        }
+
+    def calculate_rating(self):
+        return self.reviews.aggregate(models.Avg("rating")).get("avg_rating", 0.0)

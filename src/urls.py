@@ -20,9 +20,10 @@ urlpatterns = [
     path("api/reviews/", include("reviews.urls")),
     path("api/proposals/", include("proposals.urls")),
     path("api/contracts/", include("contracts.urls")),
+    path("api/projects/", include("projects.urls")),
     path("api/freelancers/", include("freelancers.urls")),
     path("api/notifications/", include("notifications.urls")),
     path("api/messaging/", include("messaging.urls")),
-    path("api/account/", include("users.account.urls")),
+    path("api/account/", include("users.views.account.urls")),
     path("", include("core.urls")),
 ]

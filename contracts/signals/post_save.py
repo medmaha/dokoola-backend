@@ -1,5 +1,6 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from projects.models.project import Project
 from jobs.models import JobStatusChoices
 from notifications.models import Notification
 from contracts.models import Contract, ContractStatusChoices, ContractProgressChoices
@@ -7,42 +8,70 @@ from contracts.models import Contract, ContractStatusChoices, ContractProgressCh
 
 @receiver(post_save, sender=Contract)
 def on_accepted_contract(sender, instance: Contract, created, **kwargs):
+    """Fires when a contract is accepted.
+    Specifically, when the contract is acknowledged by the freelancer.
+    """
 
+    # Return if the contract is not accepted
     if not instance.status == ContractStatusChoices.ACCEPTED:
         return
 
+    # Return if the contract is already active
     if not instance.progress == ContractProgressChoices.NONE:
         return
 
+    # Update the contract progress
     instance.progress = ContractProgressChoices.ACTIVE
+    instance.save()
+
+    # Update the job status
     instance.job.status = JobStatusChoices.IN_PROGRESS
     instance.job.save()
-    instance.save()
 
     client = instance.client
     freelancer = instance.freelancer
 
-    # When an error occurred in the above transaction
-    if not instance.progress == ContractProgressChoices.ACTIVE:
-        return
+    project = Project()
+    project.contract = instance
+    project.duration = instance.duration or ""
+    project.save()
+
+    notifications = []
+
+    # Congrats the freelancer
+    notifications.append(
+        Notification(
+            hint_text="New Project 🎇",
+            content_text=f"Congratulations on your new project <strong>{instance.job.title}</strong> from <strong>{client.user.name}</strong>",
+            recipient=freelancer.user,
+            object_api_link=f"/projects/view/{project.pk}",
+        )
+        # TODO: Notify freelancer through email
+    )
 
     # Notify the freelancer
-    Notification.objects.create(
-        hint_text="Project Started",
-        content_text=f"Your contract <strong>{instance.job.title}</strong> from <strong>{client.user.name}</strong> is due an active",
-        recipient=freelancer.user,
-        object_api_link=f"/contracts/view/{instance.pk}",
+    notifications.append(
+        Notification(
+            hint_text="Project Timeline",
+            content_text=f"Your new project <strong>{instance.job.title}</strong> from <strong>{client.user.name}</strong> is due on <strong>{instance.start_date.__format__('%Y-%m-%d %H:%M:%S')}</strong>",
+            recipient=freelancer.user,
+            object_api_link=f"/projects/view/{project.pk}",
+        )
+        # TODO: Notify freelancer through email
     )
-    # TODO: Notify freelancer through email
 
     # Notify the client
-    Notification.objects.create(
-        hint_text="Project Started",
-        content_text=f"Your contract <strong>{instance.job.title}</strong> with <strong>{freelancer.user.name}</strong> has commenced",
-        recipient=client.user,
-        object_api_link=f"/contracts/view/{instance.pk}",
+    notifications.append(
+        Notification(
+            hint_text="Project Initiated",
+            content_text=f"You've created a new project <strong>{instance.job.title}</strong> with <strong>{freelancer.user.name}</strong>",
+            recipient=client.user,
+            object_api_link=f"/projects/view/{project.pk}",
+        )
+        # TODO: Notify client through email
     )
-    # TODO: Notify client through email
+
+    Notification.objects.bulk_create(notifications)
 
 
 @receiver(post_save, sender=Contract)

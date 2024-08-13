@@ -1,7 +1,6 @@
 from django.db import models
 from clients.models import Client
 from proposals.models import Proposal, Job, Freelancer
-from utilities.generator import hex_generator
 
 
 class ContractProgressChoices(models.TextChoices):
@@ -17,9 +16,35 @@ class ContractStatusChoices(models.TextChoices):
     REJECTED = "REJECTED"
 
 
-class Contract(models.Model):
+class NegotiationStatusChoices(models.TextChoices):
+    PENDING = "PENDING"
+    ACCEPTED = "ACCEPTED"
+    REJECTED = "REJECTED"
 
-    uid = models.CharField(default=hex_generator, editable=False, max_length=64)
+
+class Negotiation(models.Model):
+    """
+    Negotiation model represents the negotiation state of a contract.
+    It holds the terms of the negotiation and the status of the negotiation.
+    """
+
+    terms = models.TextField(max_length=1500, null=True, blank=True)
+    status = models.CharField(
+        max_length=200,
+        choices=NegotiationStatusChoices.choices,
+        default=NegotiationStatusChoices.PENDING,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class Contract(models.Model):
+    """
+    Contract model represents a contract between a client and a freelancer
+    for a specific job.
+    It holds the negotiation state, the terms of the contract, and the status of the contract.
+    """
+
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     proposal = models.ForeignKey(
@@ -48,6 +73,10 @@ class Contract(models.Model):
     )
 
     deleted = models.BooleanField(default=False, blank=True)
+
+    # negotiation = models.ManyToManyField(
+    #     Negotiation, related_name="contract", blank=True
+    # )
 
     # Whether the client has acknowledged the work done by the freelancer
     freelancer_acknowledgement = models.CharField(

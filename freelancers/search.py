@@ -55,13 +55,12 @@ class FreelancersSearchAPIView(ListAPIView):
 
         if location:
             if location.lower() != "all":
-                location = location.replace("%20", " ")
                 queryset = queryset.filter(
-                    Q(country__icontains=location)
-                    | Q(state__icontains=location)
-                    | Q(city__icontains=location)
-                    | Q(address__icontains=location)
-                    | Q(zip_code__icontains=location)
+                    Q(user__country__icontains=location)
+                    | Q(user__state__icontains=location)
+                    | Q(user__city__icontains=location)
+                    | Q(user__address__icontains=location)
+                    | Q(user__zip_code__icontains=location)
                 )
         return queryset.distinct()
 

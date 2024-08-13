@@ -50,16 +50,6 @@ class Freelancer(models.Model):
     skills = models.CharField(max_length=1000, default="", blank=True)
     education = models.ManyToManyField(Education, related_name="freelancer", blank=True)
 
-    # Personal info
-    phone = models.CharField(max_length=50, default="", blank=True)
-    phone_code = models.CharField(max_length=10, default="", blank=True)
-    country = models.CharField(default="", max_length=100)
-    country_code = models.CharField(max_length=10, default="", blank=True)
-    state = models.CharField(max_length=50, default="", blank=True)
-    district = models.CharField(max_length=50, default="", blank=True)
-    city = models.CharField(default="", blank=True, max_length=100)
-    zip_code = models.CharField(max_length=20, default="00000", blank=True)
-
     pricing = models.CharField(max_length=20, default="100", blank=True)
     reviews = models.ManyToManyField(
         Review, blank=True, related_name="freelancer_reviews"
@@ -76,37 +66,10 @@ class Freelancer(models.Model):
     @property
     def email(self):
         return self.user.email
-    
+
     @property
     def name(self):
         return self.user.name
 
     def __str__(self) -> str:
         return self.user.email
-
-    def get_address(self):
-        """Returns the client's address in a dictionary format"""
-        return {
-            "zip_code": self.zip_code,
-            "country": self.country,
-            "country_code": self.country_code,
-            "phone_code": self.phone_code,
-            "state": self.state,
-            "district": self.district,
-            "city": self.city,
-        }
-
-    def get_location(self):
-        return f"{self.country} | {self.city or self.state}"
-
-    @property
-    def location(self):
-        return f"{self.country} | {self.city or self.state}"
-
-    def calculate_rating(self):
-        return (
-            self.reviews.select_related().aggregate(rating=models.Avg("rating"))[
-                "rating"
-            ]
-            or 0.0
-        )

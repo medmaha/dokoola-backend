@@ -10,7 +10,6 @@ class ContractUpdateSerializer(serializers.ModelSerializer):
             "start_date",
             "end_date",
             "duration",
-            "payment_method",
             "additional_terms",
         ]
 
@@ -42,7 +41,7 @@ def get_related_fields(instance: Proposal):
         "name": instance.freelancer.user.get_full_name(),
         "username": instance.freelancer.user.username,
         "avatar": instance.freelancer.user.avatar,
-        "rating": instance.freelancer.calculate_rating(),
+        "rating": instance.freelancer.user.calculate_rating(),
     }
 
     data["client"] = {

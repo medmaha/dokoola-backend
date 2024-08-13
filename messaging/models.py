@@ -1,6 +1,4 @@
 from django.db import models
-from utilities.generator import hex_generator
-
 from users.models import User
 
 
@@ -9,9 +7,7 @@ def get_default() -> User:
 
 
 class Message(models.Model):
-    id = models.CharField(
-        primary_key=True, default=hex_generator, blank=True, max_length=64
-    )
+
     sender = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="messaging_sent"
     )
@@ -30,9 +26,6 @@ class Message(models.Model):
 
 
 class Thread(models.Model):
-    id = models.CharField(
-        primary_key=True, default=hex_generator, blank=True, max_length=64
-    )
     owner = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="thread_owner"
     )

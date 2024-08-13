@@ -1,102 +1,106 @@
-from django.db import transaction
-from django.db.models import Q
 from rest_framework.generics import UpdateAPIView
 from rest_framework.response import Response
+from contracts.models.contract import ContractStatusChoices
+from contracts.serializers.update import ContractUpdateSerializer
+from utilities.generator import get_serializer_error_message
 from notifications.models import Notification
 from contracts.models import Contract, ContractProgressChoices
-from contracts.serializers import (
-    ContractListSerializer,
-)
+
+
+class ContractUpdateAPIView(UpdateAPIView):
+    serializer_class = ContractUpdateSerializer
+
+    def update(self, request, contract_id: str, *args, **kwargs):
+
+        try:
+            contract = Contract.objects.get(
+                id=contract_id, status=ContractStatusChoices.PENDING
+            )
+        except Contract.DoesNotExist:
+            return Response({"message": "Contract does not exist"}, status=403)
+
+        serializer = self.get_serializer(contract, data=request.data)
+
+        if not serializer.is_valid():
+            error_message = get_serializer_error_message(serializer.errors)
+            return Response({"message": error_message}, status=400)
+
+        serializer.save()
+        return Response({"message": "Contract updated successfully"}, status=200)
 
 
 class ContractAcceptAPIView(UpdateAPIView):
-    serializer_class = ContractListSerializer
-
-    def perform_update(self, contract_id: str, new_status: str) -> str | Contract:
-        with transaction.atomic():
-            user = self.request.user
-            _, profile_name = user.profile  # type: ignore
-            try:
-                contract = Contract.objects.get(
-                    Q(freelancer__user=user) | Q(client__user=user), id=contract_id
-                )
-
-                # Check if user is a Client
-                if profile_name.lower() == "client":
-                    return f"Contract already acknowledged by you"
-
-                # Check if user is a Freelancer
-                if profile_name.lower() == "freelancer":
-                    if contract.freelancer_acknowledgement != "PENDING":
-                        # Return None of the freelancer has already acknowledges or rejects the contract
-                        return f"Contract already {contract.freelancer_acknowledgement.lower()} stage"
-
-                    # Update the freelancer acknowledgement of the contract
-                    contract.freelancer_acknowledgement = new_status
-                    contract.status = new_status  # Accepted | Rejected | Pending
-                    contract.save()
-
-                    if new_status == "ACCEPTED":
-                        # Create a notification for this action
-                        Notification.objects.create(
-                            hint_text="Contract Accepted",
-                            content_text=f"You've accepted a contract from <strong>{contract.client.user.name}</strong>",
-                            recipient=contract.freelancer.user,
-                            object_api_link=f"/contracts/view/{contract.pk}",
-                        )
-                        # TODO: Notify 2 through email
-
-                        Notification.objects.create(
-                            hint_text="Contract Accepted",
-                            content_text=f"<strong>{contract.freelancer.user.name}</strong> has accepted your contract for project <strong>{contract.job.title}</strong>",
-                            recipient=contract.client.user,
-                            sender=contract.freelancer.user,
-                            object_api_link=f"/contracts/view/{contract.pk}",
-                        )
-                    else:
-                        # Create a notification for this action
-                        Notification.objects.create(
-                            hint_text="Contract Rejected",
-                            content_text=f"You've rejected a contract from <strong>{contract.client.user.name}</strong>",
-                            recipient=contract.freelancer.user,
-                            object_api_link=f"/contracts/view/{contract.pk}",
-                        )
-                        # TODO: Notify 2 through email
-
-                        Notification.objects.create(
-                            hint_text="Contract Rejected",
-                            content_text=f"<strong>{contract.freelancer.user.name}</strong> has rejected your contract for project <strong>{contract.job.title}</strong>",
-                            recipient=contract.client.user,
-                            sender=contract.freelancer.user,
-                            object_api_link=f"/contracts/view/{contract.pk}",
-                        )
-                    # TODO: Notify 3 through email
-
-                contract.save()
-                return contract
-            except Contract.DoesNotExist:
-                return "Contact does not exist."
 
     def update(self, request, contract_id: str, *args, **kwargs):
-        new_status: str = request.data.get("status")
 
-        if not new_status:
+        try:
+            contract = Contract.objects.get(id=contract_id)
+        except Contract.DoesNotExist:
+            return Response({"message": "Contract does not exist"}, status=403)
+
+        accepted = request.data.get("accept", None)
+
+        print(request.data)
+
+        if accepted is None:
             return Response(
-                {"message": "Request body missing a status value"}, status=400
+                {"message": 'Request body missing a "accept" value'}, status=400
             )
 
-        new_status = new_status.upper()
+        if accepted in ["true", True]:
+            new_status = ContractStatusChoices.ACCEPTED
+        elif accepted in ["false", False]:
+            new_status = ContractStatusChoices.REJECTED
+        else:
+            return Response({"message": "Invalid accept value"}, status=400)
 
-        if not new_status in ["ACCEPTED", "REJECTED"]:
-            return Response({"message": "Invalid status value"}, status=400)
+        contract.status = new_status
+        notifications = []
 
-        updated_contract = self.perform_update(contract_id, new_status)
-        if isinstance(updated_contract, str):
-            return Response({"message": updated_contract}, status=4043)
-        serializer = self.get_serializer(
-            instance=updated_contract, context={"request": request}
-        )
-        return Response(serializer.data, status=200)
+        if contract.status == ContractStatusChoices.ACCEPTED:
+            notifications.append(
+                # Notify the freelancer
+                Notification(
+                    hint_text="Contract Accepted",
+                    content_text=f"You've accepted a contract from <strong>{contract.client.user.name}</strong>",
+                    recipient=contract.freelancer.user,
+                    object_api_link=f"/contracts/view/{contract.pk}",
+                ),
+            )
+            notifications.append(
+                # Notify the client
+                Notification(
+                    hint_text="Contract Accepted",
+                    content_text=f"<strong>{contract.freelancer.user.name}</strong> has accepted your contract for project <strong>{contract.job.title}</strong>",
+                    recipient=contract.client.user,
+                    sender=contract.freelancer.user,
+                    object_api_link=f"/contracts/view/{contract.pk}",
+                )
+            )
+        else:
+            notifications.append(
+                # Notify the freelancer
+                Notification(
+                    hint_text="Contract Rejected",
+                    content_text=f"You've rejected a contract from <strong>{contract.client.user.name}</strong>",
+                    recipient=contract.freelancer.user,
+                    object_api_link=f"/contracts/view/{contract.pk}",
+                ),
+            )
+            notifications.append(
+                # Notify the client
+                Notification(
+                    hint_text="Contract Rejected",
+                    content_text=f"<strong>{contract.freelancer.user.name}</strong> has rejected your contract for project <strong>{contract.job.title}</strong>",
+                    recipient=contract.client.user,
+                    sender=contract.freelancer.user,
+                    object_api_link=f"/contracts/view/{contract.pk}",
+                )
+            )
+        contract.freelancer_acknowledgement = new_status
+        contract.save()
+        Notification.objects.bulk_create(notifications)
+        return Response({"message": "Contract updated successfully"}, status=200)
 
 
 class ContractCompleteAPIView(UpdateAPIView):

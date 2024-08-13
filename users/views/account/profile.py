@@ -1,3 +1,5 @@
+""" A route controller for retrieving user profile. """
+
 from rest_framework.response import Response
 from rest_framework.generics import RetrieveAPIView
 
@@ -6,7 +8,7 @@ from clients.serializer import ClientProfileDetailSerializer
 from freelancers.serializers import FreelancerProfileDetailSerializer
 
 
-class UserProfile(RetrieveAPIView):
+class UserProfileAPIView(RetrieveAPIView):
     def get_queryset(self, username: str):
         try:
             user = User.objects.get(username=username)

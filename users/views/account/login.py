@@ -1,17 +1,13 @@
 from typing import Any
 from rest_framework.response import Response
-from django.contrib.auth import authenticate, login
 
-from users.token import GenerateToken
+from users.views.account.auth_token import GenerateToken
 from rest_framework_simplejwt.views import TokenObtainPairView
-from ..models import User
+from users.models import User
 
 
 class LoginView(TokenObtainPairView):
     """A view for getting access token and refreshing tokens"""
-
-    # authentication_classes = []
-    # permission_classes = []
 
     jwt_token_generator = GenerateToken()
 
@@ -19,7 +15,7 @@ class LoginView(TokenObtainPairView):
         email = request.data.get("email")
         password = request.data.get("password")
         user = User.objects.filter(email=email).first()
-        
+
         if user:
             auth = user.check_password(password)
             if auth:

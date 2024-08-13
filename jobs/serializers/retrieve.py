@@ -1,19 +1,19 @@
 from rest_framework import serializers
 
-from users.serializer import User
+from jobs.serializers.utils import check_has_proposed
+
 from clients.serializer import (
     ClientDetailSerializer,
 )
-from proposals.models import Proposal
 
 from jobs.models import Job, Pricing
 
-from .others import PricingSerializer, ActivitySerializer
+from .others import PricingSerializer
 
 
 class JobMiniSerializer(serializers.ModelSerializer):
+    pricing = serializers.SerializerMethodField()
     client = serializers.SerializerMethodField()
-    pricing = Pricing()
 
     class Meta:
         model = Job
@@ -23,8 +23,9 @@ class JobMiniSerializer(serializers.ModelSerializer):
             "title",
             "client",
             "budget",
-            "pricing",
             "status",
+            "pricing",
+            "published",
             "description",
             "created_at",
         ]
@@ -36,6 +37,9 @@ class JobMiniSerializer(serializers.ModelSerializer):
             "username": instance.client.user.username,
             "rating": instance.client.calculate_rating(),
         }
+
+    def get_pricing(self, instance: Job):
+        return PricingSerializer(instance.pricing).data
 
 
 class JobListSerializer(serializers.ModelSerializer):
@@ -52,7 +56,9 @@ class JobListSerializer(serializers.ModelSerializer):
             "category",
             "location",
             "duration",
+            "required_skills",
             "status",
+            "published",
             "has_proposed",
             "description",
             "payment_type",
@@ -60,47 +66,9 @@ class JobListSerializer(serializers.ModelSerializer):
             "created_at",
         ]
 
-        # Check if the user has proposed to the job
-
     # Check if the user has proposed to the job
     def get_has_proposed(self, instance: Job):
-        request = self.context.get("request")
-        user: User | None = request.user if request else None
-
-        # Check if the request user is authenticated
-        if user and user.is_authenticated:
-
-            # Retrieve the user profile information
-            [freelancer, profile_name] = user.profile
-
-            # Check if the user is a freelancer
-            if profile_name.lower() == "freelancer":
-
-                # Check if the user has proposed to the job
-                has_proposed = (
-                    Proposal.objects.select_related()
-                    .filter(job=instance, freelancer=freelancer)
-                    .exists()
-                )
-
-                # return a boolean value
-                return has_proposed
-
-        return False
-
-    # Update the category and required-skills data to a list of strings
-    def update_categories_and_skills(self, data):
-        try:
-            data.update(
-                {
-                    "category": data.get("category", "").split(","),
-                    "required_skills": data.get("required_skills", "").split(","),
-                }
-            )
-            return data
-        except KeyError:
-            pass
-        return data
+        return check_has_proposed(self.context, instance)
 
     def get_client(self, instance: Job):
         return {
@@ -108,20 +76,22 @@ class JobListSerializer(serializers.ModelSerializer):
             "avatar": instance.client.user.avatar,
             "username": instance.client.user.username,
             "rating": instance.client.calculate_rating(),
+            "bio": instance.client.bio[:100],
+            "location": instance.client.user.get_location(),
+            "country": instance.client.user.country,
         }
 
     def to_representation(self, instance: Job):
         representation = super().to_representation(instance)
-        data = self.update_categories_and_skills(representation)
         description = representation.get("description", "")
-        data.update({"description": description[:200]})
-        data["bits_count"] = instance.activities.proposal_count
+        representation.update({"description": description[:200]})
+        representation["bits_count"] = instance.activities.proposal_count
 
-        return data
+        return representation
 
 
 class JobRetrieveSerializer(serializers.ModelSerializer):
-    client = ClientDetailSerializer()
+    client = serializers.SerializerMethodField()
     pricing = PricingSerializer()
     has_proposed = serializers.SerializerMethodField()
 
@@ -140,52 +110,21 @@ class JobRetrieveSerializer(serializers.ModelSerializer):
             "activities",
             "has_proposed",
             "status",
+            "published",
             "description",
             "required_skills",
         ]
 
-    # Check if the user has proposed to the job
     def get_has_proposed(self, instance: Job):
-        request = self.context.get("request")
-        user: User | None = request.user if request else None
+        return check_has_proposed(self.context, instance)
 
-        # Check if the request user is authenticated
-        if user and user.is_authenticated:
-
-            # Retrieve the user profile information
-            [freelancer, profile_name] = user.profile
-
-            # Check if the user is a freelancer
-            if profile_name.lower() == "freelancer":
-
-                # Check if the user has proposed to the job
-                has_proposed = (
-                    Proposal.objects.select_related()
-                    .filter(job=instance, freelancer=freelancer)
-                    .exists()
-                )
-
-                # return a boolean value
-                return has_proposed
-
-        return False
-
-    # Update the category and required-skills data to a list of strings
-    def update_categories_and_skills(self, data):
-        try:
-            data.update(
-                {
-                    "category": data.get("category", "").split(","),
-                    "required_skills": data.get("required_skills", "").split(","),
-                }
-            )
-            return data
-        except KeyError:
-            pass
-        return data
-
-    def to_representation(self, instance: Job):
-        representation = super().to_representation(instance)
-        data = self.update_categories_and_skills(representation)
-
-        return data
+    def get_client(self, instance: Job):
+        return {
+            "name": instance.client.user.name,
+            "avatar": instance.client.user.avatar,
+            "username": instance.client.user.username,
+            "rating": instance.client.calculate_rating(),
+            "bio": instance.client.bio[:100],
+            "location": instance.client.user.get_location(),
+            "country": instance.client.user.country,
+        }

@@ -19,22 +19,21 @@ class FreelancerMiniSerializer(serializers.ModelSerializer):
             "username": instance.user.username,
             "avatar": instance.user.avatar,
             "name": instance.user.name,
-            "rating": instance.calculate_rating(),
+            "rating": instance.user.calculate_rating(),
         }
 
 
 class FreelancerSerializer(serializers.ModelSerializer):
     """Serializer for the user object"""
 
-    rating = serializers.SerializerMethodField()
     skills = serializers.SerializerMethodField()
 
     class Meta:
         model = Freelancer
-        fields = ("bio", "badge", "skills", "title", "pricing", "rating", "location")
+        fields = ("bio", "badge", "skills", "title", "pricing")
 
     def get_rating(self, instance: Freelancer):
-        return instance.calculate_rating()
+        return 0
 
     def get_skills(self, instance):
         skills = instance.skills.split(",")
@@ -43,11 +42,16 @@ class FreelancerSerializer(serializers.ModelSerializer):
             return skills
         return []
 
-    def to_representation(self, instance):
+    def to_representation(self, instance: Freelancer):
         data = super().to_representation(instance)
         user: User = UserSerializer(instance=instance.user).data  # type: ignore
 
-        return {**user, **data}
+        return {
+            **user,
+            **data,
+            "rating": instance.user.calculate_rating(),
+            "location": instance.user.get_location(),
+        }
 
 
 class FreelancerUpdateDataSerializer(serializers.ModelSerializer):
@@ -63,9 +67,10 @@ class FreelancerUpdateDataSerializer(serializers.ModelSerializer):
         return {
             # Client Info
             "bio": instance.bio,
-            "phone": instance.phone,
+            # User Info
+            **instance.user.get_personal_info(),
             # Address Info
-            **instance.get_address(),
+            **instance.user.get_address(),
             # User Info
             "email": instance.user.email,
             "name": instance.user.name,
@@ -91,14 +96,6 @@ class FreelancerUpdateSerializer(serializers.ModelSerializer):
         fields = (
             "title",
             "bio",
-            "phone",
-            "phone_code",
-            "country",
-            "country_code",
-            "state",
-            "district",
-            "city",
-            "zip_code",
             "pricing",
         )
 
@@ -110,11 +107,12 @@ class FreelancerMiniInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Freelancer
-        fields = ("id", "bits", "pricing", "location", "skills")
+        fields = ("id", "bits", "pricing", "skills")
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["pricing"] = float(data["pricing"])
+        data["location"] = instance.user.get_location()
         data["skills"] = data.get("skills", "").split(", ")
         return data
 
@@ -155,14 +153,14 @@ class FreelancerProfileDetailSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         user = request.user if request else None
         if user and user.pk == instance.user.pk:
-            return instance.get_address()
-        return instance.location
+            return instance.user.get_address()
+        return instance.user.get_location()
 
     def to_representation(self, instance: Freelancer):
         data = super().to_representation(instance)
         user: dict = UserSerializer(instance=instance.user).data  # type: ignore
         data.update(user)
-        data.update({"rating": instance.calculate_rating()})
+        data.update({"rating": instance.user.calculate_rating()})
         data.update({"address": self.get_address(instance)})
         data.update({"reviews": []})
         data.update({"education": []})
@@ -383,7 +381,7 @@ class FreelancerDashboardSerializer(serializers.ModelSerializer):
         super().to_representation(instance)
         data = {
             "username": instance.user.username,
-            "rating": instance.calculate_rating(),
+            "rating": instance.user.calculate_rating(),
             "total_earning": self.get_total_earning(instance),
             "client_reviews": self.get_client_reviews(instance),
             "completed_projects": self.get_completed_projects(instance),

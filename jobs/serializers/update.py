@@ -9,7 +9,7 @@ class JobUpdateSerializer(serializers.ModelSerializer):
             "title",
             "budget",
             "location",
-            "status",
+            "published",
             "description",
             "required_skills",
         ]

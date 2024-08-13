@@ -3,6 +3,7 @@ from rest_framework.generics import (
 )
 from django.db.models import Q
 from rest_framework.response import Response
+from jobs.models.job import JobStatusChoices
 from core.models import Category
 
 from jobs.models import Job
@@ -45,8 +46,17 @@ class JobUpdateAPIView(UpdateAPIView):
             instance=instance, data=data, partial=True, context={"request": request}
         )
 
+        print(data)
+
         if serializer.is_valid():
-            serializer.save(category_obj=category)
+            status = instance.status
+            if "published" in data:
+                if data["published"]:
+                    status = JobStatusChoices.PUBLISHED
+                else:
+                    status = JobStatusChoices.CLOSED
+
+            serializer.save(category_obj=category, status=status)
             return Response({"message": "Job updated successfully"}, status=200)
 
         return Response({"message": "Failed to update job"}, status=404)

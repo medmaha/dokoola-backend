@@ -1,12 +1,9 @@
-from datetime import datetime
 from django.db import transaction
 
-from django.db.models import Q, F, Sum, Avg, Count
 from rest_framework.generics import RetrieveAPIView, ListAPIView, GenericAPIView
 from rest_framework.response import Response
 
 from proposals.serializers import ProposalPendingListSerializer
-from jobs.models import Job
 from proposals.models import Proposal
 
 from .search import FreelancersSearchAPIView
@@ -18,12 +15,11 @@ from .serializers import (
     FreelancerMiniInfoSerializer,
     FreelancerUpdateSerializer,
     FreelancerUpdateDataSerializer,
-    FreelancerDashboardSerializer,
 )
 
-from .models import Freelancer, Portfolio
+from .dashboard import FreelancerDashboardSerializer
 
-# Create your views here.
+from .models import Freelancer, Portfolio
 
 
 class FreelancerListAPIView(ListAPIView):
@@ -58,7 +54,7 @@ class FreelancerUpdateAPIView(GenericAPIView):
             freelancer_serializer: FreelancerUpdateDataSerializer = self.get_serializer(
                 instance=freelancer, context={"request": request}
             )
-            
+
             return Response(freelancer_serializer.data, status=200)
         except Freelancer.DoesNotExist:
             return Response(
@@ -85,7 +81,7 @@ class FreelancerUpdateAPIView(GenericAPIView):
                 status=404,
             )
         except Exception as e:
-            
+
             return Response(
                 {"message": "Error: Something went wrong!"},
                 status=500,
@@ -160,7 +156,7 @@ class FreelancerPortfolioAPIView(GenericAPIView):
             return Response({"message": "This request is prohibited"}, status=403)
 
         except Exception as e:
-            
+
             return Response(
                 {"message": "Error: Something went wrong!"},
                 status=500,

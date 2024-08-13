@@ -13,6 +13,5 @@ class ContractCreateSerializer(serializers.ModelSerializer):
             "start_date",
             "end_date",
             "duration",
-            "payment_method",
             "additional_terms",
         ]

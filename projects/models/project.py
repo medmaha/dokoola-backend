@@ -4,23 +4,37 @@ from projects.models.milestone import Milestone, Acknowledgement
 
 
 class ProjectStatusChoices(models.TextChoices):
-    PENDING = "pending"
-    CLOSED = "closed"
-    COMPLETED = "completed"
-    CANCELLED = "cancelled"
-    TERMINATED = "terminated"
+    PENDING = "PENDING"
+    CLOSED = "CLOSED"
+    COMPLETED = "COMPLETED"
+    CANCELLED = "CANCELLED"
+    TERMINATED = "TERMINATED"
 
 
 class Project(models.Model):
-    deadline = models.DateTimeField()
+    duration = models.CharField(max_length=255)
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE)
+
+    deadline = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    milestones = models.ManyToManyField(Milestone, related_name="milestone_project")
-    acknowledgement = models.ForeignKey(Acknowledgement, on_delete=models.SET_NULL, related_name="ack_project", null=True)
+    milestones = models.ManyToManyField(
+        Milestone, related_name="milestone_project", blank=True
+    )
+    acknowledgement = models.ForeignKey(
+        Acknowledgement,
+        on_delete=models.SET_NULL,
+        related_name="project",
+        null=True,
+        blank=True,
+    )
 
-    status = models.CharField(max_length=20, choices=ProjectStatusChoices.choices, default=ProjectStatusChoices.PENDING)
+    status = models.CharField(
+        max_length=20,
+        choices=ProjectStatusChoices.choices,
+        default=ProjectStatusChoices.PENDING,
+    )
 
     @property
     def client(self):
@@ -29,7 +43,7 @@ class Project(models.Model):
     @property
     def freelancer(self):
         return self.contract.freelancer
-    
+
     @property
     def job(self):
         return self.contract.job

@@ -1,8 +1,5 @@
 from typing import Any
 from django.db import models
-from utilities.generator import hex_generator
-
-from users.models import User
 
 
 class ReviewManger(models.Manager):
@@ -15,10 +12,10 @@ class ReviewManger(models.Manager):
 
 
 class Review(models.Model):
-    id = models.CharField(
-        primary_key=True, default=hex_generator, editable=False, max_length=64
+
+    author = models.ForeignKey(
+        "users.User", related_name="user_reviews", on_delete=models.CASCADE
     )
-    author = models.ForeignKey(User, related_name="reviews", on_delete=models.CASCADE)
     rating = models.FloatField(default=5)
     text = models.TextField(default="")
     created_at = models.DateTimeField(auto_now_add=True)

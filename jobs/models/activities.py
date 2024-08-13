@@ -2,8 +2,9 @@ from django.db import models
 from freelancers.models import Freelancer
 from .invitation import Invitation
 
+
 class Activities(models.Model):
-    deleted = models.BooleanField(default=False, blank=True)
+    bits_count = models.IntegerField(default=0)
     hired_count = models.IntegerField(default=0)
     invite_count = models.IntegerField(default=0)
     proposal_count = models.IntegerField(default=0)
