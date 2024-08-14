@@ -21,9 +21,9 @@ class JobsListAPIView(ListAPIView):
     serializer_class = JobListSerializer
 
     def get_queryset(self):
-        user = self.request.user
+        user = self.request.user.pk
         queryset = Job.objects.filter(
-            Q(is_valid=True, status="PUBLISHED") | Q(client__user=user)
+            Q(is_valid=True, status="PUBLISHED") | Q(client__user__pk=user)
         ).order_by("-created_at")
         return queryset
 
