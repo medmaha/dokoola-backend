@@ -7,7 +7,7 @@ from django.db.models import Q
 from rest_framework.response import Response
 
 
-from jobs.models import Activities, Job
+from jobs.models import Activities, Job, JobStatusChoices
 from jobs.serializers import (
     JobRetrieveSerializer,
     ActivitySerializer,
@@ -21,9 +21,10 @@ class JobsListAPIView(ListAPIView):
     serializer_class = JobListSerializer
 
     def get_queryset(self):
-        user = self.request.user.pk
+        user_id = self.request.user.pk
         queryset = Job.objects.filter(
-            Q(is_valid=True, status="PUBLISHED") | Q(client__user__pk=user)
+            Q(is_valid=True, status=JobStatusChoices.PUBLISHED)
+            | Q(client__user__pk=user_id)
         ).order_by("-created_at")
         return queryset
 

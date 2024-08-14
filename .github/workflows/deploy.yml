@@ -5,6 +5,8 @@ on:
     workflows: ["Dokoola Backend Dockerizing CI/CD"]
     types:
       - completed
+    branches: ["main"]
+
 
 jobs:
   deploy:

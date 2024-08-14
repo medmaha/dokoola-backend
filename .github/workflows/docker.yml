@@ -5,6 +5,7 @@ on:
     workflows: ["Dokoola Backend Scaffolding CI/CD"]
     types:
       - completed
+    branches: ["main"]
 
 jobs:
   docker-image:
