@@ -23,6 +23,10 @@ class Milestone(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     is_final = models.BooleanField(default=False)
+    published = models.BooleanField(default=False)
+
+    due_date = models.DateTimeField(auto_now=False, null=True, blank=True)
+
     status = models.CharField(
         max_length=255,
         choices=MilestoneStatusChoices.choices,
@@ -32,3 +36,6 @@ class Milestone(models.Model):
     def get_project(self):
         project = self.project  # type: ignore
         return project
+
+    class Meta:
+        ordering = ["due_date"]

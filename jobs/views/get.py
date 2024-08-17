@@ -7,16 +7,18 @@ from django.db.models import Q
 from rest_framework.response import Response
 
 
+from users.models.user import User
 from jobs.models import Activities, Job, JobStatusChoices
 from jobs.serializers import (
     JobRetrieveSerializer,
     ActivitySerializer,
     JobListSerializer,
+    MyJobListSerializer,
 )
 from django.utils import timezone
 
 
-class JobsListAPIView(ListAPIView):
+class JobListAPIView(ListAPIView):
     permission_classes = []
     serializer_class = JobListSerializer
 
@@ -29,6 +31,29 @@ class JobsListAPIView(ListAPIView):
         return queryset
 
     def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(page, many=True, context={"request": request})
+        return self.get_paginated_response(serializer.data)
+
+
+class MyJobListAPIView(ListAPIView):
+    serializer_class = MyJobListSerializer
+
+    def get_queryset(self):
+        user_id = self.request.user.pk
+        queryset = Job.objects.filter(client__user__pk=user_id).order_by("-created_at")
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+
+        user: User = request.user
+
+        if not user.is_client:
+            return Response(
+                {"message": "Only clients can access this route"}, status=403
+            )
+
         queryset = self.get_queryset()
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True, context={"request": request})

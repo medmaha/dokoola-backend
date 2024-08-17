@@ -4,15 +4,6 @@ from .retrieve import (
     JobRetrieveSerializer,
     JobListSerializer,
     JobMiniSerializer,
+    MyJobListSerializer,
 )
 from .others import PricingSerializer, ActivitySerializer
-
-__all__ = [
-    "JobCreateSerializer",
-    "JobUpdateSerializer",
-    "JobRetrieveSerializer",
-    "JobListSerializer",
-    "JobMiniSerializer",
-    "PricingSerializer",
-    "ActivitySerializer",
-]

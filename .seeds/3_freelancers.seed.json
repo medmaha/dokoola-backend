@@ -1,0 +1,1 @@
+[{"model": "freelancers.freelancer", "pk": "d311b70290df49cb8fff", "fields": {"user": 3, "title": "Software Engineer", "bio": "perfect freelancer", "skills": "", "pricing": "5000", "jobs_completed": 0, "badge": "basic", "bits": 36, "education": [], "reviews": [2], "portfolio": []}}]

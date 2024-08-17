@@ -10,7 +10,7 @@ class VerifyOttAPIView(GenericAPIView):
     def post(self, request, *args, **kwargs):
         code = request.data.get("code")
         email = request.data.get("email")
-        print(email, code)
+        (email, code)
         verified = OTTProxy.validate_ott(email, code)
 
         if verified:

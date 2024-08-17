@@ -1,9 +1,32 @@
 import random
 from django.db.models.signals import post_save
+from django.utils.html import strip_tags
 from django.dispatch import receiver
-from .models import Notification
+
+from core.services.email.main import EmailService
 
 from proposals.models import Proposal
+
+from .models import Notification
+
+
+@receiver(post_save, sender=Notification)
+def send_email_notification(sender, instance: Notification, created, **kwargs):
+    if created:
+        subject = instance.hint_text
+        email = instance.recipient.email
+        text = strip_tags(instance.content_text or "")
+        html_template_name = "core/default_email.html"
+
+        html_template_context = {"content": text}
+
+        EmailService().send(
+            email,
+            subject,
+            text,
+            html_template_name=html_template_name,
+            html_template_context=html_template_context,
+        )
 
 
 @receiver(post_save, sender=Proposal)

@@ -4,14 +4,16 @@ from projects.models.milestone import Milestone, Acknowledgement
 
 
 class ProjectStatusChoices(models.TextChoices):
-    PENDING = "PENDING"
     CLOSED = "CLOSED"
+    PENDING = "PENDING"
+    ACCEPTED = "ACCEPTED"
     COMPLETED = "COMPLETED"
     CANCELLED = "CANCELLED"
     TERMINATED = "TERMINATED"
 
 
 class Project(models.Model):
+
     duration = models.CharField(max_length=255)
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE)
 
@@ -35,6 +37,16 @@ class Project(models.Model):
         choices=ProjectStatusChoices.choices,
         default=ProjectStatusChoices.PENDING,
     )
+
+    acceptance_comment = models.TextField(max_length=1000, null=True, blank=True)
+    completion_comment = models.TextField(max_length=1000, null=True, blank=True)
+    termination_comment = models.TextField(max_length=1000, null=True, blank=True)
+    cancellation_comment = models.TextField(max_length=1000, null=True, blank=True)
+
+    system_closed = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["-created_at"]
 
     @property
     def client(self):

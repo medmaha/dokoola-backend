@@ -25,8 +25,12 @@ def get_serializer_error_message(
         for key, value in error.items():
             if isinstance(value, list) or isinstance(value, tuple):
                 for val in value:
-                    return "{}: {}".format(key, val)
-            return "{}: {}".format(key, value)
+                    if key and key != "non_field_errors":
+                        return "{}: {}".format(key, val)
+                    return val
+            if key and key != "non_field_errors":
+                return "{}: {}".format(key, value)
+            return value
 
         if error.get("message"):
             return error["message"]

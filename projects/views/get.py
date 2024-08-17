@@ -1,5 +1,4 @@
 from django.db.models import Q
-from django.db import connection
 from rest_framework.response import Response
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 
@@ -46,6 +45,7 @@ class ProjectRetrieveAPIView(RetrieveAPIView):
                 id=project_id,
             )
             return project
+
         except:
             return None
 
@@ -59,5 +59,7 @@ class ProjectRetrieveAPIView(RetrieveAPIView):
 
         serializer = self.get_serializer(queryset, context={"request": request})
 
-        print(connection.queries)
+        # queryset.status = "PENDING"
+        # queryset.save()
+
         return Response(serializer.data, status=200)

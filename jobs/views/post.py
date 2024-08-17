@@ -81,5 +81,5 @@ class JobCreateAPIView(CreateAPIView):
 
             message = get_serializer_error_message(serializer.errors)
 
-            print("Error", message)
+            ("Error", message)
             return Response({"message": message}, status=400)

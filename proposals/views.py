@@ -123,7 +123,6 @@ class ProposalUpdateAPIView(GenericAPIView):
         proposal_id = request.data.get("proposal_id")
         self.serializer_class = ProposalEditSerializer
 
-
         if proposal_id:
             try:
                 proposal = Proposal.objects.get(id=proposal_id)
@@ -223,7 +222,7 @@ class ProposalCreateAPIView(CreateAPIView):
 
             error_message = get_serializer_error_message(serializer.errors)
 
-            print(error_message)
+            (error_message)
 
             return Response({"message": error_message}, status=400)
 

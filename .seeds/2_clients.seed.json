@@ -1,0 +1,1 @@
+[{"model": "clients.client", "pk": "1a7de8f792854bfea6cc", "fields": {"user": 2, "bio": "my bio", "rating": 0, "website": "", "industry": "", "jobs_active": 0, "jobs_created": 0, "jobs_completed": 0, "deleted": false, "reviews": [1]}}]

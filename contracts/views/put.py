@@ -40,7 +40,7 @@ class ContractAcceptAPIView(UpdateAPIView):
 
         accepted = request.data.get("accept", None)
 
-        print(request.data)
+        (request.data)
 
         if accepted is None:
             return Response(

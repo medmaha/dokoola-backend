@@ -18,7 +18,22 @@ def main():
             "forget to activate a virtual environment?"
         ) from exc
 
-    execute_from_command_line(sys.argv)
+    argv = sys.argv.copy()
+
+    # Implement this so i can run my management commands with custom arguments
+    # -------------------------------------------------------------------------
+    if "-l" in argv:
+        argv.remove("-l")
+    if "--loaddata" in argv:
+        argv.remove("--loaddata")
+
+    if "-d" in argv:
+        argv.remove("-d")
+    if "--dumpdata" in argv:
+        argv.remove("--dumpdata")
+    # -------------------------------------------------------------------------
+
+    execute_from_command_line(argv)
 
 
 if __name__ == "__main__":

@@ -38,7 +38,7 @@ class OTTProxy(OTT):
 
         ott.save()
 
-        print(ott.identifier, ott.code)
+        (ott.identifier, ott.code)
 
         return ott
 

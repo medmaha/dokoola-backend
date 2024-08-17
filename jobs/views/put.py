@@ -46,7 +46,7 @@ class JobUpdateAPIView(UpdateAPIView):
             instance=instance, data=data, partial=True, context={"request": request}
         )
 
-        print(data)
+        (data)
 
         if serializer.is_valid():
             status = instance.status

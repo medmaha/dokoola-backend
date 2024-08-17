@@ -1,7 +1,12 @@
+import json
 import os
 from datetime import  datetime
-from src.settings.logger import DokoolaLogger
 from django.http import HttpRequest, HttpResponse
+
+from django.db.models import QuerySet
+from  rest_framework.utils.serializer_helpers import ReturnDict
+
+from src.settings.logger import DokoolaLogger
 
 
 
@@ -9,6 +14,42 @@ class DokoolaLoggerMiddleware:
 
     def __init__(self, get_response):
         self.get_response = get_response
+
+    def get_response_message(self, response):
+        if hasattr(response, "data"):
+            data = response.data
+        elif hasattr(response, "content"):
+            data = response.content
+
+        content_type = response.get("content-type")
+        
+        try:
+            
+            if content_type == "application/json":
+                if isinstance(data, str):
+                    return json.loads(data).get("message", response.reason_phrase)
+
+                if isinstance(data, QuerySet):
+                    # message = data.get("message")
+                    # return message or response.reason_phrase
+                    return response.reason_phrase
+
+                if  isinstance(data, ReturnDict):
+                    message = data.get("message")
+                    return message or response.reason_phrase
+
+                if isinstance(data, dict):
+                    message = data.get("message")
+                    return message or response.reason_phrase
+
+            if content_type == "text/plain":
+                return str(data)[:45]
+                
+            return response.reason_phrase
+        
+        except Exception as e:
+            return "Something went wrong"
+        
 
     def get_readable_from_user_agent(self, user_agent:str):
         # Get the human friendly version for request user-agent
@@ -39,6 +80,7 @@ class DokoolaLoggerMiddleware:
 
         start_time = datetime.now()
         response: HttpResponse = self.get_response(request)
+        end_time = datetime.now()
         service_name = request.headers.get(os.environ.get('SERVICE_HTTP_HEADER', ""), "UNKNOWN-SERVICE")
         user_agent = self.get_readable_from_user_agent(
             request.META.get('HTTP_USER_AGENT', '')
@@ -46,16 +88,15 @@ class DokoolaLoggerMiddleware:
 
         log_dict = {
             "path": request.path,
-            "user_id":request.META.get("REMOTE_USER"),
             "method": request.method,
+            "duration": self.get_duration(end_time, start_time),
             "timestamp": self.get_timestamp(start_time),
-            "duration": self.get_duration(start_time),
-            "host":request.get_host(),
-            "ip_addr": request.META.get("REMOTE_ADDR"),
             "status_code": response.status_code,
-            "status_message": response.reason_phrase,
+            "status_message": self.get_response_message(response),
+            "user_id":request.user.pk,
+            "host":request.META.get("HTTP_HOST"),
+            "ip_addr": request.META.get("REMOTE_ADDR"),
             "service_name": service_name,
-            "server_name": request.META.get("SERVER_NAME"),
             "user_agent": user_agent
         }
 
@@ -68,8 +109,7 @@ class DokoolaLoggerMiddleware:
         return response
 
 
-    def get_duration(self, start_time: datetime):
-        end_time = datetime.now()
+    def get_duration(self, end_time: datetime, start_time: datetime):
 
         minutes = end_time.minute - start_time.minute
         seconds = str(end_time.microsecond - start_time.microsecond / 1000)[:3]

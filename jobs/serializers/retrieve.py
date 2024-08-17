@@ -85,8 +85,33 @@ class JobListSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         description = representation.get("description", "")
         representation.update({"description": description[:200]})
-        representation["bits_count"] = instance.activities.proposal_count
+        representation["proposal_count"] = instance.activities.proposal_count
 
+        return representation
+
+
+class MyJobListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Job
+        fields = [
+            "slug",
+            "title",
+            "client",
+            "budget",
+            "category",
+            "location",
+            "duration",
+            "required_skills",
+            "status",
+            "published",
+            "payment_type",
+            "updated_at",
+            "created_at",
+        ]
+
+    def to_representation(self, instance: Job):
+        representation = super().to_representation(instance)
+        representation["proposals_count"] = instance.activities.proposal_count
         return representation
 
 

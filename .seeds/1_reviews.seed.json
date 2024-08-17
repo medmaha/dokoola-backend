@@ -1,0 +1,1 @@
+[{"model": "reviews.review", "pk": 1, "fields": {"author": 3, "rating": 4.5, "text": "He is grate guy", "created_at": "2024-08-11T23:37:31.172Z"}}, {"model": "reviews.review", "pk": 2, "fields": {"author": 2, "rating": 4.5, "text": "He is a good freelancer, I would recommend him others.", "created_at": "2024-08-11T23:39:48.725Z"}}]
