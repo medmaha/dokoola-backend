@@ -1,10 +1,57 @@
 from datetime import datetime
 from django.db.models import Q, F, Sum, Avg, Count
+
+from rest_framework.response import Response
+from rest_framework.generics import GenericAPIView
 from rest_framework import serializers
 
 from jobs.models.job import JobStatusChoices
 from contracts.models import Contract
 from freelancers.models import Freelancer
+
+
+class FreelancerDashboardQuery(GenericAPIView):
+    permission_classes = []
+
+    def get_queryset(self, query: str):
+
+        freelancers = (
+            Freelancer.objects.select_related()
+            .filter(
+                Q(title__icontains=query)
+                | Q(bio__icontains=query)
+                | Q(skills__icontains=query)
+                | Q(user__last_name__icontains=query)
+                | Q(user__first_name__icontains=query)
+                | Q(user__last_name__icontains=query)
+            )
+            .annotate(
+                avatar=F("user__avatar"),
+                username=F("user__username"),
+                first_name=F("user__first_name"),
+                last_name=F("user__last_name"),
+            )
+            .order_by("-user__last_login")
+            .values("first_name", "last_name", "avatar", "username")
+        )
+
+        return freelancers
+
+    def get(self, request, *args, **kwargs):
+
+        query = request.query_params.get("q")
+
+        if not query:
+            return Response([], status=200)
+
+        queryset = self.get_queryset(query)
+
+        page = self.paginate_queryset(queryset)
+
+        if page is not None:
+            return self.get_paginated_response(page)
+
+        return Response(queryset, status=200)
 
 
 class FreelancerDashboardSerializer(serializers.ModelSerializer):

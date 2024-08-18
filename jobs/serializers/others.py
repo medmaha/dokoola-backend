@@ -5,11 +5,7 @@ from jobs.models import Pricing, Activities
 class ActivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Activities
-        exclude = [
-            "hired",
-            "proposals",
-            "invitations",
-        ]
+        exclude = ["hired"]
 
 
 class PricingSerializer(serializers.ModelSerializer):

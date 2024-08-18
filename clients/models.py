@@ -15,6 +15,8 @@ class Client(models.Model):
 
     # About
     bio = models.TextField(max_length=1500, default="")
+
+    # TODO: Delete these fields once we have a proper rating system
     rating = models.IntegerField(default=0, blank=True, null=False)
     reviews = models.ManyToManyField(Review, blank=True, related_name="client")
 

@@ -1,7 +1,6 @@
 from django.urls import path
 
-from . import views, search
-
+from . import views, search, dashboard
 
 # Url Pattern /api/freelancers/*/**
 
@@ -12,6 +11,11 @@ urlpatterns = [
         "dashboard/",
         views.FreelancerDashboardStatsView.as_view(),
         name="freelancer_dashboard",
+    ),
+    path(
+        "dashboard/query/",
+        dashboard.FreelancerDashboardQuery.as_view(),
+        name="freelancer_dashboard_query",
     ),
     path(
         "<username>/",
