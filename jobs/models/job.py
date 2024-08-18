@@ -15,9 +15,9 @@ class JobStatusChoices(models.TextChoices):
 
 class Job(models.Model):
 
-    slug = models.SlugField(max_length=200, blank=True, default="")
+    slug = models.SlugField(max_length=200, blank=True, default="", unique=True)
 
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200, db_index=True)
 
     description = models.TextField()
 

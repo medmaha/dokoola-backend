@@ -13,15 +13,23 @@ logging.config.dictConfig(
                 "class": "logtail.LogtailHandler",
                 "source_token": os.getenv("BETTER_STACK_SOURCE_TOKEN"),
             },
+            "console": {
+                "level": "DEBUG",
+                "class": "logging.StreamHandler",
+            },
         },
         "loggers": {
+            "django.db.backends": {
+                "handlers": ["console"],
+                "level": "DEBUG",
+                "propagate": False,
+            },
             "logtail": {
                 "handlers": [
                     "logtail",
                 ],
                 "level": "INFO",
             },
-            "django": {"handlers": [], "level": "INFO", "propagate": False},
         },
     }
 )

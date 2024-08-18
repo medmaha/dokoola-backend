@@ -1,14 +1,11 @@
 import os
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.http import HttpResponseRedirect, HttpRequest, HttpResponse, JsonResponse
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from django.http import HttpResponseRedirect, HttpRequest, JsonResponse
 
-from core.models import Category, Waitlist
+from core.models import Waitlist
 
 frontend_url = os.environ.get("FRONTEND_URL")
-
 
 global_context = {
     "waitlist_cookie": False,
@@ -29,13 +26,17 @@ def index(request: HttpRequest):
 def health(request: HttpRequest):
     try:
         Waitlist.objects.first()
-        return JsonResponse({"status": "OK", "message": "Backend Web-server up and running"})
+        return JsonResponse(
+            {"status": "OK", "message": "Backend Web-server up and running"}
+        )
     except Exception as e:
-        return JsonResponse({"status": "ERROR", "message": str(e)},  status=400)
-    
+        return JsonResponse({"status": "ERROR", "message": str(e)}, status=400)
+
 
 def status(request: HttpRequest):
-    return JsonResponse({"status": "OK", "message": "Backend Web-server up and running"})
+    return JsonResponse(
+        {"status": "OK", "message": "Backend Web-server up and running"}
+    )
 
 
 def waitlist(request: HttpRequest):
@@ -57,18 +58,3 @@ def waitlist(request: HttpRequest):
         return render(request, "core/index.html", global_context)
 
     return HttpResponseRedirect("/")
-
-
-from rest_framework import serializers
-class CategoriesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = ["slug", "name", "image_url", "description"]
-
-class CategoriesView(APIView):
-    permission_classes = []
-    def get(self, request):
-        categories = Category.objects.filter(disabled=False).values("slug", "name", "image_url", "description")
-        response =  Response(categories, status=200)
-        return response
-      
