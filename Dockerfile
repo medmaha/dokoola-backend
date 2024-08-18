@@ -8,7 +8,7 @@ COPY . .
 
 # global env across build images
 COPY .env.prod ./.env
-COPY dokoola.logs ./.logs/dokoola.log
+RUN touch .logs/dokoola.log
 
 RUN python /app/manage.py collectstatic --noinput
 
