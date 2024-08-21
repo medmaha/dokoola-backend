@@ -1,6 +1,7 @@
 import math
 import re
 from django.db.models import Q
+from rest_framework.response import Response
 from rest_framework.generics import ListAPIView
 from datetime import datetime
 
@@ -54,10 +55,14 @@ class JobsSearchAPIView(ListAPIView):
         return self.queryset
 
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-
+        try:
+            queryset = self.get_queryset()
+        except Exception as e:
+            print("---------------- Error: ", e)
+            return Response({"message": str(e)}, status=400)
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True, context={"request": request})
+
         return self.get_paginated_response(serializer.data)
 
     # Filters queryset by skills
@@ -72,7 +77,8 @@ class JobsSearchAPIView(ListAPIView):
             | Q(description__icontains=query)
             | Q(required_skills__icontains=query)
             | Q(location__icontains=query)
-            | Q(category__icontains=query)
+            | Q(category_obj__name__icontains=query)
+            | Q(category_obj__slug__icontains=query)
         )
         self.queryset = self.queryset.filter(query_filters)
 

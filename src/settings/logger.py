@@ -2,35 +2,16 @@ import os
 import logging, logging.config
 import after_response
 
+from logtail import LogtailHandler
+
 LOGGING_CONFIG = None
 
 logging.config.dictConfig(
     {
         "version": 1,
         "disable_existing_loggers": False,
-        "handlers": {
-            "logtail": {
-                "class": "logtail.LogtailHandler",
-                "source_token": os.getenv("BETTER_STACK_SOURCE_TOKEN"),
-            },
-            "console": {
-                "level": "DEBUG",
-                "class": "logging.StreamHandler",
-            },
-        },
-        "loggers": {
-            "django.db.backends": {
-                "handlers": ["console"],
-                "level": "DEBUG",
-                "propagate": False,
-            },
-            "logtail": {
-                "handlers": [
-                    "logtail",
-                ],
-                "level": "INFO",
-            },
-        },
+        "handlers": {},
+        "loggers": {},
     }
 )
 
@@ -38,21 +19,37 @@ logger = logging.getLogger(__file__)
 
 runtime_environment = os.environ.get("ENVIRONMENT", "development")
 
-if runtime_environment == "production":
+DEVELOPMENT_MODE = runtime_environment.lower() == "development"
+
+if DEVELOPMENT_MODE:
+
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel(logging.INFO)
     stream_formatter = logging.Formatter("%(levelname)s - %(message)s")
     stream_handler.setFormatter(stream_formatter)
     logger.addHandler(stream_handler)
 
-# File output logger
-file_handler = logging.FileHandler(".logs/dokoola.log")
-file_handler.setLevel(logging.INFO)
-file_formatter = logging.Formatter("%(levelname)s - %(message)s")
-file_handler.setFormatter(file_formatter)
-logger.addHandler(file_handler)
+if not DEVELOPMENT_MODE:
 
-logger.setLevel(logging.INFO)
+    logtail_handler = LogtailHandler(
+        source_token=os.getenv("BETTER_STACK_SOURCE_TOKEN")
+    )
+    logtail_handler.setLevel(logging.INFO)
+    logger.addHandler(logtail_handler)
+
+
+if DEVELOPMENT_MODE:
+
+    if not os.path.exists(".logs"):
+        os.makedirs(".logs")
+
+    file_handler = logging.FileHandler(".logs/dokoola.log")
+    file_handler.setLevel(logging.INFO)
+    file_formatter = logging.Formatter("%(levelname)s - %(message)s")
+    file_handler.setFormatter(file_formatter)
+    logger.addHandler(file_handler)
+
+logger.setLevel(logging.DEBUG)
 
 
 @after_response.enable
@@ -64,7 +61,7 @@ def execute_log(log_attr, message, extras):
                 message, extra=extras
             )
     except:
-        ("Logging Failed!")
+        print("Logging Failed!")
 
 
 class DokoolaLogger:
