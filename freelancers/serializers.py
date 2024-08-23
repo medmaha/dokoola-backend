@@ -149,19 +149,13 @@ class FreelancerProfileDetailSerializer(serializers.ModelSerializer):
             "jobs_completed",
         ]
 
-    def get_address(self, instance: Freelancer):
-        request = self.context.get("request")
-        user = request.user if request else None
-        if user and user.pk == instance.user.pk:
-            return instance.user.get_address()
-        return instance.user.get_location()
 
     def to_representation(self, instance: Freelancer):
         data = super().to_representation(instance)
         user: dict = UserSerializer(instance=instance.user).data  # type: ignore
         data.update(user)
         data.update({"rating": instance.user.calculate_rating()})
-        data.update({"address": self.get_address(instance)})
+        data.update({"address": instance.user.get_address()})
         data.update({"reviews": []})
         data.update({"education": []})
         return data
