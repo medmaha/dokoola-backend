@@ -2,11 +2,7 @@ from rest_framework import serializers
 
 from jobs.serializers.utils import check_has_proposed
 
-from clients.serializer import (
-    ClientDetailSerializer,
-)
-
-from jobs.models import Job, Pricing
+from jobs.models import Job
 
 from .others import PricingSerializer
 
@@ -59,6 +55,7 @@ class JobListSerializer(serializers.ModelSerializer):
             "required_skills",
             "status",
             "published",
+            "type",
             "has_proposed",
             "description",
             "payment_type",
@@ -103,6 +100,7 @@ class MyJobListSerializer(serializers.ModelSerializer):
             "duration",
             "required_skills",
             "status",
+            "type",
             "published",
             "payment_type",
             "updated_at",
@@ -135,6 +133,7 @@ class JobRetrieveSerializer(serializers.ModelSerializer):
             "activities",
             "has_proposed",
             "status",
+            "type",
             "published",
             "description",
             "required_skills",

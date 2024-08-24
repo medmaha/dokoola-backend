@@ -26,21 +26,10 @@ class FreelancerMiniSerializer(serializers.ModelSerializer):
 class FreelancerSerializer(serializers.ModelSerializer):
     """Serializer for the user object"""
 
-    skills = serializers.SerializerMethodField()
 
     class Meta:
         model = Freelancer
         fields = ("bio", "badge", "skills", "title", "pricing")
-
-    def get_rating(self, instance: Freelancer):
-        return 0
-
-    def get_skills(self, instance):
-        skills = instance.skills.split(",")
-
-        if len(skills) and skills[0]:
-            return skills
-        return []
 
     def to_representation(self, instance: Freelancer):
         data = super().to_representation(instance)

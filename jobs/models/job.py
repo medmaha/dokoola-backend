@@ -13,6 +13,13 @@ class JobStatusChoices(models.TextChoices):
     COMPLETED = "COMPLETED"
 
 
+class JobTypeChoices(models.TextChoices):
+    FULL_TIME = "FULL-TIME"
+    PART_TIME = "PART-TIME"
+    FREELANCE = "FREELANCE"
+    CONTRACT = "CONTRACT"
+
+
 class Job(models.Model):
 
     slug = models.SlugField(max_length=200, blank=True, default="", unique=True)
@@ -21,7 +28,7 @@ class Job(models.Model):
 
     description = models.TextField()
 
-    location = models.CharField(max_length=200)
+    location = models.CharField(max_length=200, db_index=True)
 
     published = models.BooleanField(default=False, blank=True)
 
@@ -46,6 +53,13 @@ class Job(models.Model):
     required_skills = models.CharField(max_length=1000, blank=True, default="")
 
     category_obj = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
+
+    type = models.CharField(
+        max_length=200,
+        choices=JobTypeChoices.choices,
+        default=JobTypeChoices.FREELANCE,
+        db_index=True,
+    )
 
     client = models.ForeignKey(Client, related_name="jobs", on_delete=models.DO_NOTHING)
 
