@@ -1,5 +1,5 @@
 from rest_framework.response import Response
-from rest_framework.generics import ListAPIView, RetrieveAPIView, GenericAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView, UpdateAPIView
 
 from .serializer import NotificationSerializer
 from .models import Notification
@@ -28,23 +28,43 @@ class NotificationListAPIView(ListAPIView):
         return response
 
 
-class NotificationSeenAPIView(GenericAPIView):
+class NotificationSeenAPIView(UpdateAPIView):
 
-    def post(self, request, *args, **kwargs):
+    def update(self, request, *args, **kwargs):
         user = request.user
-        notifications = request.data.get("data")
+        notification_ids = request.data
+
         Notification.objects.select_related().filter(
-            recipient=user, id__in=notifications
+            recipient=user, id__in=notification_ids
         ).update(is_seen=True)
+
+        print("IDS:", notification_ids)
+
         return Response({}, status=200)
 
 
-class NotificationCheckAPIView(RetrieveAPIView):
+class NotificationReadAPIView(UpdateAPIView):
+
+    def update(self, request, *args, **kwargs):
+        user = request.user
+        notification_ids = request.data
+
+        Notification.objects.select_related().filter(
+            recipient=user, id__in=notification_ids
+        ).update(is_read=False)
+
+        return Response({}, status=200)
+
+
+class NotificationCheckAPIView(ListAPIView):
+    serializer_class = NotificationSerializer
+
     def get_queryset(self):
         user = self.request.user
-        queryset = Notification.objects.filter(recipient=user, is_seen=False)
-        return queryset.exists()
+        queryset = Notification.objects.filter(recipient=user, is_seen=False)[:3]
+        return queryset
 
-    def retrieve(self, request, *args, **kwargs):
-        queryset_exists = self.get_queryset()
-        return Response({"new": queryset_exists})
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

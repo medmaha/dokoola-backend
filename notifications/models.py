@@ -17,6 +17,7 @@ class Notification(models.Model):
     object_api_link = models.CharField(max_length=1000, null=True, blank=True)
 
     is_seen = models.BooleanField(default=False)
+    is_read = models.BooleanField(default=False)
     archived = models.BooleanField(default=False)
     deleted = models.BooleanField(default=False)
 

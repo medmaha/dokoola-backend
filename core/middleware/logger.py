@@ -80,6 +80,10 @@ class DokoolaLoggerMiddleware:
 
         start_time = datetime.now()
         response: HttpResponse = self.get_response(request)
+
+        if hasattr(response, "ignore_logs") and request.ignore_logs : # type: ignore
+            return response
+        
         end_time = datetime.now()
         service_name = request.headers.get(os.environ.get('SERVICE_HTTP_HEADER', ""), "UNKNOWN-SERVICE")
         user_agent = self.get_readable_from_user_agent(
@@ -89,6 +93,7 @@ class DokoolaLoggerMiddleware:
         log_dict = {
             "path": request.path,
             "method": request.method,
+            "absolute_path":request.build_absolute_uri(),
             "duration": self.get_duration(end_time, start_time),
             "timestamp": self.get_timestamp(start_time),
             "status_code": response.status_code,

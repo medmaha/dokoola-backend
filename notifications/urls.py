@@ -5,9 +5,18 @@ from . import views
 urlpatterns = [
     path("", views.NotificationListAPIView.as_view(), name="notification_list"),
     path(
-        "mark_as_seen/",
+        "seen/",
         views.NotificationSeenAPIView.as_view(),
         name="notification_mark_seen",
     ),
-    path("check/", views.NotificationCheckAPIView.as_view(), name="notification_check"),
+    path(
+        "reed/",
+        views.NotificationReadAPIView.as_view(),
+        name="notification_mark_read",
+    ),
+    path(
+        "check/",
+        views.NotificationCheckAPIView.as_view(),
+        name="notification_check_new",
+    ),
 ]

@@ -5,7 +5,17 @@ from users.serializer import UserSerializer
 
 
 class NotificationSerializer(serializers.ModelSerializer):
-    sender = UserSerializer()
+    sender = serializers.SerializerMethodField()
+
+    def get_sender(self, instance: Notification):
+        if instance.sender:
+            return {
+                "name": instance.sender.name,
+                "username": instance.sender.username,
+                "avatar": instance.sender.avatar,
+            }
+        else:
+            return None
 
     class Meta:
         model = Notification
@@ -14,6 +24,7 @@ class NotificationSerializer(serializers.ModelSerializer):
             "sender",
             "is_seen",
             "hint_text",
+            "archived",
             "created_at",
             "content_text",
             "object_api_link",

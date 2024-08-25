@@ -29,7 +29,7 @@ class FreelancerListAPIView(ListAPIView):
     serializer_class = FreelancerSerializer
 
     def get_queryset(self):
-        return FreelancersSearchAPIView.make_query(self.request.query_params)  # type: ignore
+        return FreelancersSearchAPIView.make_query(self.request.query_params).order_by("badge")  # type: ignore
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()

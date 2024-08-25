@@ -23,7 +23,7 @@ class ClientListView(ListAPIView):
     serializer_class = ClientSerializer
 
     def get_queryset(self):
-        queryset = Client.objects.all()
+        queryset = Client.objects.all().order_by("-jobs_created", "-jobs_completed")
         return queryset
 
     def list(self, request, *args, **kwargs):
@@ -109,7 +109,7 @@ class ClientUpdateView(GenericAPIView):
                 status=404,
             )
         except Exception as e:
-            
+
             return Response(
                 {"message": "Error: Something went wrong!"},
                 status=500,
@@ -147,9 +147,8 @@ class ClientJobDetailView(RetrieveAPIView):
             )
             return Response(client_serializer.data, status=200)
         except Exception as e:
-            
+
             return Response(
                 {"message": "The provided query, doesn't match our database"},
                 status=404,
             )
-

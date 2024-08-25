@@ -62,7 +62,7 @@ class FreelancersSearchAPIView(ListAPIView):
                     | Q(user__address__icontains=location)
                     | Q(user__zip_code__icontains=location)
                 )
-        return queryset.distinct()
+        return queryset.order_by("badge").distinct()
 
     def get_queryset(self):
         return FreelancersSearchAPIView.make_query(self.request.query_params)  # type: ignore

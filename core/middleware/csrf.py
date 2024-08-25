@@ -1,6 +1,6 @@
 import os, json
 from django.http import HttpRequest, HttpResponse
-from datetime import  datetime
+from datetime import datetime
 
 
 DOKOOLA_ACCESS_SERVICES = [
@@ -9,22 +9,39 @@ DOKOOLA_ACCESS_SERVICES = [
     "DOKOOLA-HEALTH-CHECK/Github-Actions",
 ]
 
+
 class DokoolaCSRFMiddleware:
 
     def __init__(self, get_response):
         self.get_response = get_response
 
-
     def check_if_samesite(self, request: HttpRequest):
         base_url = os.getenv("BASE_URL", "")
-        return True
+        request_url = request.build_absolute_uri()
 
- 
+        if "deployment-check=true" in request_url:
+            return True
+
+        # check if request is coming from a browser and not programmatically
+        if "HTTP_USER_AGENT" in request.META:
+            user_agent = request.META["HTTP_USER_AGENT"]
+            if (
+                "Chrome" in user_agent
+                or "Firefox" in user_agent
+                or "Safari" in user_agent
+                or "Mozilla" in user_agent
+            ):
+                if base_url in request_url:
+                    return True
+
+        return False
+
     def __call__(self, request: HttpRequest):
-        samesite = self.check_if_samesite(request)
 
+        samesite = self.check_if_samesite(request)
         if samesite:
-            request.META[""]=3
+            request.META[""] = 3
+            request.ignore_logs = True  # type: ignore
             return self.get_response(request)
 
         csrf_header = request.headers.get(os.environ.get("SERVICE_HTTP_HEADER", "___"))
@@ -33,7 +50,7 @@ class DokoolaCSRFMiddleware:
             response: HttpResponse = HttpResponse(
                 json.dumps({"message": "Dokoola csrf header not found or not allowed"}),
                 status=403,
-                headers={"Content-Type": "application/json"}
+                headers={"Content-Type": "application/json"},
             )
 
         else:
