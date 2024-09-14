@@ -24,7 +24,6 @@ from .models import Freelancer, Portfolio
 
 class FreelancerListAPIView(ListAPIView):
     permission_classes = []
-    authentication_classes = []
 
     serializer_class = FreelancerSerializer
 
@@ -89,6 +88,7 @@ class FreelancerUpdateAPIView(GenericAPIView):
 
 
 class FreelanceMiniInfoView(RetrieveAPIView):
+    permission_classes = []
     serializer_class = FreelancerMiniInfoSerializer
 
     def retrieve(self, request, username, **kwargs):

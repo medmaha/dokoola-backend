@@ -3,6 +3,7 @@ from core.models import Category
 from clients.models import Client
 from utilities.generator import hex_generator
 from .pricing import Pricing
+from .activities import Activities
 
 
 class JobStatusChoices(models.TextChoices):
@@ -45,7 +46,7 @@ class Job(models.Model):
     )
 
     activities = models.ForeignKey(
-        "Activities", on_delete=models.CASCADE, related_name="job"
+        Activities, on_delete=models.CASCADE, related_name="job"
     )
 
     duration = models.CharField(max_length=1000, blank=True, null=True)

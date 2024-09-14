@@ -207,8 +207,7 @@ class ProposalCreateAPIView(CreateAPIView):
             if serializer.is_valid():
                 proposal: Proposal = serializer.save(job=job, freelancer=freelancer)
                 activity: Activities = job.activities
-                activity.proposals.add(proposal)
-                activity.bits_count = activity.bits_count + 1
+                activity.proposal_count = activity.proposal_count + 1
                 activity.save()
                 freelancer.bits = freelancer.bits - proposal.bits_amount
                 freelancer.save()

@@ -24,16 +24,23 @@ class JobListAPIView(ListAPIView):
 
     def get_queryset(self):
         user_id = self.request.user.pk
-        queryset = Job.objects.filter(
-            Q(is_valid=True, status=JobStatusChoices.PUBLISHED)
-            | Q(client__user__pk=user_id)
-        ).order_by("-created_at")
+        if user_id:
+            queryset = Job.objects.filter(
+                # Q(is_valid=True, status=JobStatusChoices.PUBLISHED)
+                Q(is_valid=True)
+                | Q(client__user__pk=user_id)
+            ).order_by("-created_at")
+            return queryset
+        else:
+            queryset = Job.objects.filter(Q(is_valid=True)).order_by("-created_at")
+
         return queryset
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True, context={"request": request})
+        print(serializer.data[0])
         return self.get_paginated_response(serializer.data)
 
 

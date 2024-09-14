@@ -109,7 +109,9 @@ class MyJobListSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance: Job):
         representation = super().to_representation(instance)
-        representation["proposals_count"] = instance.activities.proposal_count
+        representation["proposals_count"] = (
+            instance.activities.bits_count or instance.activities.proposal_count
+        )
         return representation
 
 
