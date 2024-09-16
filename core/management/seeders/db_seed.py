@@ -45,13 +45,12 @@ def dump_data_from_db():
             capture_output=True,
         )
 
-        json_data = command_output.stdout.decode("utf-8")
         dump_path = f"{os.path.join(SEEDERS_PATH, file)}.seed.json"
 
-        with open(dump_path, "w") as f:
-            f.write(json_data)
+        with open(dump_path, "wb") as f:
+            f.write(command_output.stdout)
             print(
-                f"✅ Dumped {app.capitalize()} data from ./.seeds/{file}.seed.json to DATABASE"
+                f"✅ Dumped {app.capitalize()} data to ./.seeds/{file}.seed.json from DATABASE"
             )
 
 
@@ -71,7 +70,12 @@ def load_data_from_db():
     for obj in execution_order:
         file, app = obj
         file_path = f"{os.path.join(SEEDERS_PATH, file)}.seed.json"
-        argv = ["python", "manage.py", "loaddata", file_path]
+        argv = [
+            "python",
+            "manage.py",
+            "loaddata",
+            file_path,
+        ]
 
         subprocess.run(
             argv,
@@ -91,6 +95,9 @@ def database_seeding():
 
     if "--loaddata" in argv_str or "-l" in argv_str:
         return load_data_from_db()
+
+    sys.stdout.write("Please provide either --dumpdata or --loaddata as an argument")
+    sys.stdout.write("Usage python manage.py seed  <-d | --dumpdata | -l | --loaddata>")
 
 
 __all__ = ["database_seeding"]

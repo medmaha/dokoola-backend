@@ -76,8 +76,15 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             "city",
         )
 
-    def validate_gender(self, value: str):
-        if not value:
-            raise serializers.ValidationError("Gender cannot be blank")
-        value = value.upper()
-        return value
+    def validate(self, attrs):
+        for field, value in attrs.items():
+
+            if hasattr(self.instance, field):
+                setattr(
+                    self.instance,
+                    field,
+                    value if value else getattr(self.instance, field),
+                )
+            attrs[field] = getattr(self.instance, field) or value
+
+        return super().validate(attrs)

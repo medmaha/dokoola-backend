@@ -5,6 +5,21 @@ from users.models import User
 from reviews.models import Review
 
 
+class Certificate(models.Model):
+    name = models.CharField(max_length=200, blank=True)
+    organization = models.TextField()
+    url = models.URLField()
+    date_issued = models.DateField()
+    file_url = models.URLField(blank=True, null=True)
+    published = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Portfolio(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField()
@@ -19,12 +34,15 @@ class Portfolio(models.Model):
 
 
 class Education(models.Model):
-    course = models.CharField(max_length=200)
+    degree = models.CharField(max_length=200)
     institution = models.CharField(max_length=200)
-    description = models.TextField()
+    location = models.CharField(max_length=200)
+
     start_date = models.DateField()
     end_date = models.DateField()
-    present = models.BooleanField(default=False)
+
+    published = models.BooleanField(default=False)
+    achievements = models.TextField(max_length=500)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -48,14 +66,17 @@ class Freelancer(models.Model):
     bio = models.TextField(max_length=1500, default="", blank=True)
 
     skills = models.CharField(max_length=1000, default="", blank=True)
-    education = models.ManyToManyField(Education, related_name="freelancer", blank=True)
 
     pricing = models.CharField(max_length=20, default="100", blank=True)
     reviews = models.ManyToManyField(
         Review, blank=True, related_name="freelancer_reviews"
     )
 
+    education = models.ManyToManyField(Education, related_name="freelancer", blank=True)
     portfolio = models.ManyToManyField(Portfolio, related_name="freelancer", blank=True)
+    certificates = models.ManyToManyField(
+        Certificate, related_name="freelancer", blank=True
+    )
 
     jobs_completed = models.IntegerField(default=0)
     badge = models.CharField(max_length=200, default="basic")

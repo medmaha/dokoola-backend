@@ -75,6 +75,17 @@ class ClientUpdateSerializer(serializers.ModelSerializer):
             "industry",
         )
 
+    def update(self, instance, validated_data):
+        # Loop through each field and set the current instance value if a value is not passed in
+        for field, value in validated_data.items():
+            setattr(
+                instance,
+                field,
+                value if value is not None else getattr(instance, field),
+            )
+        instance.save()
+        return instance
+
     def validate_bio(self, value):
         if not value:
             raise serializers.ValidationError("Your bio cannot be empty")

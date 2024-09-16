@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from contracts.models import Contract
 from users.serializer import UserSerializer
-from freelancers.models import Freelancer, Portfolio
+from freelancers.models import Freelancer, Portfolio, Certificate, Education
 
 
 class FreelancerMiniSerializer(serializers.ModelSerializer):
@@ -25,7 +25,6 @@ class FreelancerMiniSerializer(serializers.ModelSerializer):
 
 class FreelancerSerializer(serializers.ModelSerializer):
     """Serializer for the user object"""
-
 
     class Meta:
         model = Freelancer
@@ -69,24 +68,34 @@ class FreelancerUpdateDataSerializer(serializers.ModelSerializer):
             "first_name": instance.user.first_name,
             "last_name": instance.user.last_name,
             "pricing": instance.pricing,
-            "skills": instance.skills.split(",") if instance.skills else [],
+            "skills": instance.skills,
             "date_joined": instance.user.date_joined,
         }
 
 
-class FreelancerUpdateSerializer(serializers.ModelSerializer):
+class FreelancerUpdateSerializer(serializers.Serializer):
     """
     This serializer is used for the freelancer update view
     Exposes the freelancer's updatable fields
     """
-
     class Meta:
-        model = Freelancer
         fields = (
             "title",
             "bio",
+            "skills",
             "pricing",
         )
+
+    def update(self, instance, validated_data):
+        # Loop through each field and set the current instance value if a value is not passed in
+        for field, value in validated_data.items():
+            setattr(
+                instance,
+                field,
+                value if value is not None else getattr(instance, field),
+            )
+        instance.save()
+        return instance
 
 
 class FreelancerMiniInfoSerializer(serializers.ModelSerializer):
@@ -138,15 +147,12 @@ class FreelancerProfileDetailSerializer(serializers.ModelSerializer):
             "jobs_completed",
         ]
 
-
     def to_representation(self, instance: Freelancer):
         data = super().to_representation(instance)
         user: dict = UserSerializer(instance=instance.user).data  # type: ignore
         data.update(user)
         data.update({"rating": instance.user.calculate_rating()})
         data.update({"address": instance.user.get_address()})
-        data.update({"reviews": []})
-        data.update({"education": []})
         return data
 
 
@@ -163,6 +169,41 @@ class FreelancerPortfolioSerializer(serializers.ModelSerializer):
             "description": self.initial_data.get("description"),
         }
         return super().is_valid(raise_exception=raise_exception)
+
+
+# ===================== Certificate Serializers ===================== #
+class FreelancerCertificateSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(required=False, read_only=True)
+    created_at = serializers.DateTimeField(required=False, read_only=True)
+    updated_at = serializers.DateTimeField(required=False, read_only=True)
+    name = serializers.CharField(required=False)
+    organization = serializers.CharField(required=False)
+    url = serializers.URLField(required=False)
+    published = serializers.BooleanField(required=False)
+    date_issued = serializers.DateField(required=False)
+
+    class Meta:
+        model = Certificate
+        fields = "__all__"
+
+
+# ===================== Education Serializers ====================== #
+class FreelancerEducationSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(required=False, read_only=True)
+    created_at = serializers.DateTimeField(required=False, read_only=True)
+    updated_at = serializers.DateTimeField(required=False, read_only=True)
+    degree = serializers.CharField(required=False)
+    institution = serializers.CharField(required=False)
+    location = serializers.CharField(required=False)
+    achievements = serializers.CharField(required=False, max_length=500)
+    end_date = serializers.DateField(required=False)
+    published = serializers.BooleanField(required=False)
+
+    start_date = serializers.DateField(required=False)
+
+    class Meta:
+        model = Education
+        fields = "__all__"
 
 
 class FreelancerPortfolioCreateSerializer(serializers.ModelSerializer):

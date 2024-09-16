@@ -22,14 +22,11 @@ class UserProfileUpdateAPIView(UpdateAPIView):
 
         data = request.data.copy()
 
-        if "avatar" in data and not len(data.get("avatar", "")):
-            del data["avatar"]
-
         with transaction.atomic():
             if profile:
                 username = data.get("username")
                 username_exists = (
-                    User.objects.select_related("id", "username")
+                    User.objects.select_related()
                     .select_for_update()
                     .filter(username=username)
                     .exclude(id=user.pk)
@@ -46,7 +43,7 @@ class UserProfileUpdateAPIView(UpdateAPIView):
                 if user_serializer.is_valid():
                     user_serializer.save()
                 else:
-                    error_message = user_serializer.errors
+                    error_message = get_serializer_error_message(user_serializer.errors)
                     return Response(dict(message=error_message), status=400)
 
                 if isinstance(profile, Freelancer):
@@ -68,7 +65,7 @@ class UserProfileUpdateAPIView(UpdateAPIView):
                     return Response(tokens, status=200)
 
                 error_message = get_serializer_error_message(profile_serializer.errors)
-                (error_message)
+                print(error_message)
                 return Response(dict(message=str(error_message)), status=400)
 
         return Response({"message": "Request is forbidden/unauthorize"}, status=403)

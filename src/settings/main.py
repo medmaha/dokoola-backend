@@ -58,6 +58,11 @@ INSTALLED_APPS = [
     "notifications",
 ]
 
+if DEBUG:
+    pass
+    # INSTALLED_APPS.append("django_dump_load_utf8")
+    # INSTALLED_APPS.append("debug_toolbar")
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
