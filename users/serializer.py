@@ -76,15 +76,12 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             "city",
         )
 
-    def validate(self, attrs):
-        for field, value in attrs.items():
-
-            if hasattr(self.instance, field):
-                setattr(
-                    self.instance,
-                    field,
-                    value if value else getattr(self.instance, field),
-                )
-            attrs[field] = getattr(self.instance, field) or value
-
-        return super().validate(attrs)
+    @classmethod
+    def merge_serialize(cls, instance, validated_data):
+        data = dict
+        for field in cls.Meta.fields:
+            if field in validated_data:
+                data[field] = validated_data[field]
+            else:
+                data[field] = getattr(instance, field)
+        return cls(instance=instance, data=data)

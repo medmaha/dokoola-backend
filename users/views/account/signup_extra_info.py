@@ -38,7 +38,7 @@ class UserProfileUpdateAPIView(UpdateAPIView):
                         {"message": "Sorry! this username already exist"}, status=400
                     )
                 data["is_valid"] = True
-                user_serializer = UserUpdateSerializer(instance=request.user, data=data)
+                user_serializer = UserUpdateSerializer.merge_serialize(user, data)
 
                 if user_serializer.is_valid():
                     user_serializer.save()

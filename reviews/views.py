@@ -44,7 +44,7 @@ class ReviewsGenericAPIView(GenericAPIView):
             review = serializer.save(author=request.user)
             profile.reviews.add(review)
             return Response(serializer.data, status=200)
-        
+
         return Response({"message": str(serializer.errors)}, status=400)
 
     def put(self, request, *args, **kwargs):
@@ -83,5 +83,5 @@ class ReviewsGenericAPIView(GenericAPIView):
             return Response({"message": "Review not found"}, status=404)
 
         except Exception as e:
-            
+
             return Response({"message": "Review not found"}, status=404)
