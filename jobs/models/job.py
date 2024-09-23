@@ -39,7 +39,7 @@ class Job(models.Model):
 
     is_valid = models.BooleanField(default=True, blank=True)
 
-    budget = models.DecimalField(max_digits=10, decimal_places=2)
+    budget = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
 
     pricing = models.ForeignKey(
         Pricing, on_delete=models.CASCADE, related_name="job_pricing"
