@@ -33,8 +33,7 @@ class FreelancersSearchAPIView(ListAPIView):
                     | Q(user__username__icontains=query)
                     | Q(title__icontains=query)
                     | Q(bio__icontains=query)
-                    | Q(education__course__icontains=query)
-                    | Q(education__description__icontains=query)
+                    | Q(skills__icontains=query)
                 )
 
         if category:
@@ -44,8 +43,6 @@ class FreelancersSearchAPIView(ListAPIView):
                     Q(skills__icontains=category)
                     | Q(title__icontains=category)
                     | Q(bio__icontains=category)
-                    | Q(education__course__icontains=category)
-                    | Q(education__description__icontains=category)
                 )
 
         if badge:
