@@ -51,8 +51,6 @@ class ClientDashboardAPIView(RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         try:
             dashboard_data = self.get_queryset(request.user, request.query_params)
-
-            print(dashboard_data)
             return Response(dashboard_data, status=200)
         except Exception as e:
             return Response(

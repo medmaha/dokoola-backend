@@ -61,7 +61,7 @@ def execute_log(log_attr, message, extras):
                 message, extra=extras
             )
     except:
-        print("Logging Failed!")
+        pass
 
 
 class DokoolaLogger:

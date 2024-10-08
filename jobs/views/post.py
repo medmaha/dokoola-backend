@@ -89,8 +89,4 @@ class JobCreateAPIView(CreateAPIView):
                 return Response({"message": message}, status=400)
 
         except Exception as e:
-            print("-----------------------------")
-            print(e)
-            print("-----------------------------")
-
             return Response({"message": str(e)}, status=400)

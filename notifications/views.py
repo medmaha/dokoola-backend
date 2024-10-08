@@ -38,8 +38,6 @@ class NotificationSeenAPIView(UpdateAPIView):
             recipient=user, id__in=notification_ids
         ).update(is_seen=True)
 
-        print("IDS:", notification_ids)
-
         return Response({}, status=200)
 
 

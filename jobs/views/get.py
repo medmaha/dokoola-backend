@@ -40,7 +40,6 @@ class JobListAPIView(ListAPIView):
         queryset = self.get_queryset()
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True, context={"request": request})
-        print(serializer.data[0])
         return self.get_paginated_response(serializer.data)
 
 

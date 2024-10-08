@@ -62,7 +62,6 @@ class JobsSearchAPIView(ListAPIView):
         try:
             queryset = self.get_queryset()
         except Exception as e:
-            print("---------------- Error: ", e)
             return Response({"message": str(e)}, status=400)
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True, context={"request": request})

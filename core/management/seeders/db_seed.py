@@ -32,7 +32,6 @@ def dump_data_from_db():
     )
 
     if answer.lower() != "y":
-        print("Aborting...")
         sys.exit()
 
     for obj in execution_order:
@@ -64,7 +63,6 @@ def load_data_from_db():
     )
 
     if answer.lower() != "y":
-        print("Aborting...")
         sys.exit()
 
     for obj in execution_order:

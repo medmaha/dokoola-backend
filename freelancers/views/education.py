@@ -82,9 +82,6 @@ class FreelancerEducationAPIView(GenericAPIView):
                 return Response({"message": error_message}, status=400)
 
         except Exception as e:
-            print("-------------------")
-            print(e)
-            print("-------------------")
             return Response(
                 {"message": "Error: Something went wrong!"},
                 status=500,

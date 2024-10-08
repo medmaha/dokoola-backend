@@ -43,9 +43,6 @@ class FreelancerCertificateAPIView(GenericAPIView):
             return Response({"message": "This request is prohibited"}, status=403)
 
         except Exception as e:
-            print("-------------------")
-            print(e)
-            print("-------------------")
             return Response(
                 {"message": "Error: Something went wrong!"},
                 status=500,

@@ -65,7 +65,6 @@ class UserProfileUpdateAPIView(UpdateAPIView):
                     return Response(tokens, status=200)
 
                 error_message = get_serializer_error_message(profile_serializer.errors)
-                print(error_message)
                 return Response(dict(message=str(error_message)), status=400)
 
         return Response({"message": "Request is forbidden/unauthorize"}, status=403)
