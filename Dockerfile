@@ -1,19 +1,26 @@
-FROM python
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
 WORKDIR /app
+
+# Install dependencies
 COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
 
-# global env across build images
+RUN pip install --no-cache-dir -r requirements.txt \
+    # Create log directory and log file
+    && mkdir -p .logs \
+    && touch .logs/dokoola.log
+
+# Copy environment-specific files
 COPY .env.prod ./.env
-RUN touch .logs/dokoola.log
 
-RUN python /app/manage.py collectstatic --noinput
+# Copy the rest of the app
+COPY . .
 
 ENV PORT=8000
 
 EXPOSE ${PORT}
 
-CMD gunicorn src.wsgi:application --bind 0.0.0.0:${PORT} 
+CMD gunicorn src.wsgi:application --bind 0.0.0.0:${PORT}

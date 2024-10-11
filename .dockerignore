@@ -1,10 +1,14 @@
 .venv/
 .idea/
 .vscode/
+.logs/
+.env
 
+.git/
 .seeds/
 .github/
 
+venv/
 migrations/
 */migrations/
 __pycache__/
