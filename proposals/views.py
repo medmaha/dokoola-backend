@@ -11,7 +11,7 @@ from rest_framework.request import Request
 from jobs.models.activities import Activities
 from src.settings.logger import DokoolaLogger
 from utilities.generator import get_serializer_error_message
-from freelancers.models import Freelancer
+from talents.models import Talent  # Updated import
 from jobs.models import Job
 from .models import Proposal, Attachment, ProposalStatusChoices
 
@@ -37,15 +37,15 @@ class ProposalListApiView(ListAPIView):
             if user:
                 [profile, profile_name] = user.profile
 
-                # Check if the user is a client or a freelancer
+                # Check if the user is a client or a talent
                 if profile_name.lower() == "client":
                     # Gets all proposals for jobs that the client has posted
                     queryset = Proposal.objects.filter(job__client=profile).order_by(
                         "-updated_at"
                     )
-                # Gets all proposals for jobs that the freelancer has applied to
-                elif profile_name.lower() == "freelancer":
-                    queryset = Proposal.objects.filter(freelancer=profile).order_by(
+                # Gets all proposals for jobs that the talent has applied to
+                elif profile_name.lower() == "talent":
+                    queryset = Proposal.objects.filter(talent=profile).order_by(
                         "-updated_at"
                     )
                 else:
@@ -73,7 +73,7 @@ class ProposalDetailsApiView(RetrieveAPIView):
             # and if the proposal is for the current user
             # or from the current user
             proposal = Proposal.objects.get(
-                Q(job__client__user=user) | Q(freelancer__user=user),
+                Q(job__client__user=user) | Q(talent__user=user),
                 pk=proposal_id,
             )
         except Proposal.DoesNotExist:
@@ -104,12 +104,14 @@ class ProposalUpdateAPIView(GenericAPIView):
 
         [profile, profile_name] = user.profile
 
-        if profile_name.lower() != "freelancer":
+        if profile_name.lower() != "talent":
             return Response({"message": "Bad request attempted"}, status=400)
 
         try:
             proposal = Proposal.objects.get(
-                freelancer=profile, id=proposal_id, status=ProposalStatusChoices.PENDING
+                talent=profile,
+                id=proposal_id,
+                status=ProposalStatusChoices.PENDING,
             )
             serializer = self.get_serializer(proposal, context={"request": request})
             return Response(serializer.data, status=200)
@@ -158,12 +160,12 @@ class ProposalCreateAPIView(CreateAPIView):
     # Fires when a POST request is made
     def create(self, request: Request, *args, **kwargs):
         user: User = request.user
-        freelancer, profile_type = user.profile
+        talent, profile_type = user.profile
 
-        # Make sure the user is a freelancer
-        if profile_type.lower() != "freelancer":
+        # Make sure the user is a talent
+        if profile_type.lower() != "talent":
             return Response(
-                {"message": "Forbidden! Only freelancers can apply for jobs"},
+                {"message": "Forbidden! Only talents can apply for jobs"},
                 status=403,
             )
 
@@ -177,7 +179,7 @@ class ProposalCreateAPIView(CreateAPIView):
 
                 # Check if the user has already applied for this job
                 existing_proposal = Proposal.objects.filter(
-                    job=job, freelancer=freelancer
+                    job=job, talent=talent
                 ).exists()
 
                 # If the user has already applied for this job, return an error
@@ -205,12 +207,12 @@ class ProposalCreateAPIView(CreateAPIView):
             serializer = self.get_serializer(data=data, context={"request": request})
 
             if serializer.is_valid():
-                proposal: Proposal = serializer.save(job=job, freelancer=freelancer)
+                proposal: Proposal = serializer.save(job=job, talent=talent)
                 activity: Activities = job.activities
                 activity.proposal_count = activity.proposal_count + 1
                 activity.save()
-                freelancer.bits = freelancer.bits - proposal.bits_amount
-                freelancer.save()
+                talent.bits = talent.bits - proposal.bits_amount
+                talent.save()
                 return Response(
                     {
                         "proposal_id": proposal.pk,
@@ -232,9 +234,9 @@ class ProposalCreateAPIView(CreateAPIView):
 class ProposalCheckAPIView(RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         user = request.user
-        freelancer = Freelancer.objects.filter(user=user).first()
+        talent = Talent.objects.filter(user=user).first()
 
-        if not freelancer:
+        if not talent:
             return Response(
                 {"message": "You don't have permission for this request"}, status=403
             )
@@ -245,7 +247,7 @@ class ProposalCheckAPIView(RetrieveAPIView):
         if not job:
             return Response({"message": "Request rejected"}, status=400)
 
-        proposal = Proposal.objects.filter(job=job, freelancer=freelancer).exists()
+        proposal = Proposal.objects.filter(job=job, talent=talent).exists()
 
         return Response({"proposed": proposal}, status=200)
 
@@ -256,16 +258,16 @@ class ProposalPendingListView(ListAPIView):
     def get_queryset(self, username: str):
         try:
             user = User.objects.get(username=username)
-            freelancer = Freelancer.objects.select_related().get(user_id=user.pk)
+            talent = Talent.objects.select_related().get(user_id=user.pk)
         except User.DoesNotExist:
             return None
-        except Freelancer.DoesNotExist:
+        except Talent.DoesNotExist:
             return None
         except Exception as e:
             return None
         proposals = Proposal.objects.filter(
             job__is_valid=True,
-            freelancer=freelancer,
+            talent=talent,
             status=ProposalStatusChoices.PENDING,
         )
         return proposals

@@ -14,7 +14,7 @@ class ProjectListAPIView(ListAPIView):
     def get_queryset(self, user: User):
         try:
             projects = Project.objects.filter(
-                Q(contract__client__user=user) | Q(contract__freelancer__user=user)
+                Q(contract__client__user=user) | Q(contract__talent__user=user)
             )
             return projects
         except:
@@ -41,7 +41,7 @@ class ProjectRetrieveAPIView(RetrieveAPIView):
     def get_queryset(self, user: User, project_id: str):
         try:
             project = Project.objects.get(
-                Q(contract__client__user=user) | Q(contract__freelancer__user=user),
+                Q(contract__client__user=user) | Q(contract__talent__user=user),
                 id=project_id,
             )
             return project

@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 
 from staffs.models import Staff
 from clients.models import Client
-from freelancers.models import Freelancer
+from talents.models import Talent
 from users.models import User
 
 from .auth_token import GenerateToken
@@ -54,8 +54,8 @@ class SignupAPIView(APIView):
                     Staff.objects.get_or_create(user=user)
                 if user.is_client:
                     Client.objects.get_or_create(user=user)
-                if user.is_freelancer:
-                    Freelancer.objects.get_or_create(user=user)
+                if user.is_talent:
+                    Talent.objects.get_or_create(user=user)
 
                 # TODO: send a welcome email to the user
                 return Response(tokens, status=201)

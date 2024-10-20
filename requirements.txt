@@ -7,6 +7,9 @@ django-unfold==0.34.0
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.3.1
 
+# Django Dev Packages
+django-silk==5.2.0
+
 # Environment variable reader
 python-dotenv==1.0.1
 

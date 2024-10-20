@@ -13,7 +13,7 @@ class ContractListAPIView(ListAPIView):
     def get_queryset(self):
         user = self.request.user
         queryset = Contract.objects.filter(
-            Q(freelancer__user=user) | Q(client__user=user)
+            Q(talent__user=user) | Q(client__user=user)
         ).order_by("-created_at")
         return queryset
 
@@ -30,7 +30,7 @@ class ContractRetrieveAPIView(RetrieveAPIView):
         user = self.request.user
         try:
             queryset = Contract.objects.get(
-                Q(freelancer__user=user) | Q(client__user=user), id=contract_id
+                Q(talent__user=user) | Q(client__user=user), id=contract_id
             )
             return queryset
         except:

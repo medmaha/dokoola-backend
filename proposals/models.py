@@ -1,6 +1,6 @@
 from django.db import models
 from jobs.models import Job
-from freelancers.models import Freelancer
+from talents.models import Talent  # Updated import
 
 
 class ProposalStatusChoices(models.TextChoices):
@@ -13,8 +13,8 @@ class Proposal(models.Model):
 
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="proposals")
 
-    freelancer = models.ForeignKey(
-        Freelancer, on_delete=models.CASCADE, related_name="proposals"
+    talent = models.ForeignKey(  # Renamed from talent to talent
+        Talent, on_delete=models.CASCADE, related_name="proposals"
     )
 
     duration = models.CharField(max_length=100, null=True, blank=True)

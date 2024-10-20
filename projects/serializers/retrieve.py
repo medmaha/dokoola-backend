@@ -24,12 +24,12 @@ class ProjectListSerializer(serializers.ModelSerializer):
             "rating": instance.contract.client.user.calculate_rating(),
         }
 
-    def get_freelancer(self, instance: Project):
+    def get_talent(self, instance: Project):
         return {
-            "name": instance.contract.freelancer.user.name,
-            "avatar": instance.contract.freelancer.user.avatar,
-            "username": instance.contract.freelancer.user.username,
-            "rating": instance.contract.freelancer.user.calculate_rating(),
+            "name": instance.contract.talent.user.name,
+            "avatar": instance.contract.talent.user.avatar,
+            "username": instance.contract.talent.user.username,
+            "rating": instance.contract.talent.user.calculate_rating(),
         }
 
     def to_representation(self, instance: Project):
@@ -41,7 +41,7 @@ class ProjectListSerializer(serializers.ModelSerializer):
 
         data["job"] = self.get_job(instance)
         data["client"] = self.get_client(instance)
-        data["freelancer"] = self.get_freelancer(instance)
+        data["talent"] = self.get_talent(instance)
         return data
 
 
@@ -64,12 +64,12 @@ class ProjectRetrieveSerializer(serializers.ModelSerializer):
             "rating": instance.contract.client.user.calculate_rating(),
         }
 
-    def get_freelancer(self, instance: Project):
+    def get_talent(self, instance: Project):
         return {
-            "name": instance.contract.freelancer.user.name,
-            "avatar": instance.contract.freelancer.user.avatar,
-            "username": instance.contract.freelancer.user.username,
-            "rating": instance.contract.freelancer.user.calculate_rating(),
+            "name": instance.contract.talent.user.name,
+            "avatar": instance.contract.talent.user.avatar,
+            "username": instance.contract.talent.user.username,
+            "rating": instance.contract.talent.user.calculate_rating(),
         }
 
     def to_representation(self, instance: Project):
@@ -81,5 +81,5 @@ class ProjectRetrieveSerializer(serializers.ModelSerializer):
 
         data["job"] = self.get_job(instance)
         data["client"] = self.get_client(instance)
-        data["freelancer"] = self.get_freelancer(instance)
+        data["talent"] = self.get_talent(instance)
         return data

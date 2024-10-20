@@ -1,1 +1,68 @@
-[{"model": "contracts.contract", "pk": 1, "fields": {"job": 1, "client": "1a7de8f792854bfea6cc", "proposal": 1, "freelancer": "d311b70290df49cb8fff", "start_date": "2024-08-11", "end_date": null, "duration": "2 weeks", "payment_method": null, "additional_terms": "N/A", "completed_at": null, "status": "ACCEPTED", "progress": "ACTIVE", "deleted": false, "freelancer_acknowledgement": "ACCEPTED", "created_at": "2024-08-11T14:47:05.835Z", "updated_at": "2024-08-11T16:08:40.143Z"}}, {"model": "contracts.contract", "pk": 2, "fields": {"job": 2, "client": "1a7de8f792854bfea6cc", "proposal": 2, "freelancer": "d311b70290df49cb8fff", "start_date": "2024-08-14", "end_date": null, "duration": "2-3 months", "payment_method": null, "additional_terms": "", "completed_at": null, "status": "ACCEPTED", "progress": "ACTIVE", "deleted": false, "freelancer_acknowledgement": "ACCEPTED", "created_at": "2024-08-14T20:42:31.672Z", "updated_at": "2024-08-14T20:45:31.958Z"}}, {"model": "contracts.contract", "pk": 3, "fields": {"job": 5, "client": "dd782d919eff47c38a26", "proposal": 4, "freelancer": "46a467c341214747815b", "start_date": "2024-09-16", "end_date": null, "duration": "2-3 months", "payment_method": null, "additional_terms": "", "completed_at": null, "status": "ACCEPTED", "progress": "ACTIVE", "deleted": false, "freelancer_acknowledgement": "ACCEPTED", "created_at": "2024-09-14T10:50:52.553Z", "updated_at": "2024-09-14T10:59:21.325Z"}}]
+[
+  {
+    "model": "contracts.contract",
+    "pk": 1,
+    "fields": {
+      "job": 1,
+      "client": "1a7de8f792854bfea6cc",
+      "proposal": 1,
+      "professional": "d311b70290df49cb8fff",
+      "start_date": "2024-08-11",
+      "end_date": null,
+      "duration": "2 weeks",
+      "payment_method": null,
+      "additional_terms": "N/A",
+      "completed_at": null,
+      "status": "ACCEPTED",
+      "progress": "ACTIVE",
+      "deleted": false,
+      "professional_acknowledgement": "ACCEPTED",
+      "created_at": "2024-08-11T14:47:05.835Z",
+      "updated_at": "2024-08-11T16:08:40.143Z"
+    }
+  },
+  {
+    "model": "contracts.contract",
+    "pk": 2,
+    "fields": {
+      "job": 2,
+      "client": "1a7de8f792854bfea6cc",
+      "proposal": 2,
+      "professional": "d311b70290df49cb8fff",
+      "start_date": "2024-08-14",
+      "end_date": null,
+      "duration": "2-3 months",
+      "payment_method": null,
+      "additional_terms": "",
+      "completed_at": null,
+      "status": "ACCEPTED",
+      "progress": "ACTIVE",
+      "deleted": false,
+      "professional_acknowledgement": "ACCEPTED",
+      "created_at": "2024-08-14T20:42:31.672Z",
+      "updated_at": "2024-08-14T20:45:31.958Z"
+    }
+  },
+  {
+    "model": "contracts.contract",
+    "pk": 3,
+    "fields": {
+      "job": 5,
+      "client": "dd782d919eff47c38a26",
+      "proposal": 4,
+      "professional": "46a467c341214747815b",
+      "start_date": "2024-09-16",
+      "end_date": null,
+      "duration": "2-3 months",
+      "payment_method": null,
+      "additional_terms": "",
+      "completed_at": null,
+      "status": "ACCEPTED",
+      "progress": "ACTIVE",
+      "deleted": false,
+      "professional_acknowledgement": "ACCEPTED",
+      "created_at": "2024-09-14T10:50:52.553Z",
+      "updated_at": "2024-09-14T10:59:21.325Z"
+    }
+  }
+]

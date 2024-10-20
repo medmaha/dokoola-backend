@@ -59,11 +59,11 @@ class ContractAcceptAPIView(UpdateAPIView):
 
         if contract.status == ContractStatusChoices.ACCEPTED:
             notifications.append(
-                # Notify the freelancer
+                # Notify the talent
                 Notification(
                     hint_text="Contract Accepted",
                     content_text=f"You've accepted a contract from <strong>{contract.client.user.name}</strong>",
-                    recipient=contract.freelancer.user,
+                    recipient=contract.talent.user,
                     object_api_link=f"/contracts/view/{contract.pk}",
                 ),
             )
@@ -71,19 +71,19 @@ class ContractAcceptAPIView(UpdateAPIView):
                 # Notify the client
                 Notification(
                     hint_text="Contract Accepted",
-                    content_text=f"<strong>{contract.freelancer.user.name}</strong> has accepted your contract for project <strong>{contract.job.title}</strong>",
+                    content_text=f"<strong>{contract.talent.user.name}</strong> has accepted your contract for project <strong>{contract.job.title}</strong>",
                     recipient=contract.client.user,
-                    sender=contract.freelancer.user,
+                    sender=contract.talent.user,
                     object_api_link=f"/contracts/view/{contract.pk}",
                 )
             )
         else:
             notifications.append(
-                # Notify the freelancer
+                # Notify the talent
                 Notification(
                     hint_text="Contract Rejected",
                     content_text=f"You've rejected a contract from <strong>{contract.client.user.name}</strong>",
-                    recipient=contract.freelancer.user,
+                    recipient=contract.talent.user,
                     object_api_link=f"/contracts/view/{contract.pk}",
                 ),
             )
@@ -91,13 +91,13 @@ class ContractAcceptAPIView(UpdateAPIView):
                 # Notify the client
                 Notification(
                     hint_text="Contract Rejected",
-                    content_text=f"<strong>{contract.freelancer.user.name}</strong> has rejected your contract for project <strong>{contract.job.title}</strong>",
+                    content_text=f"<strong>{contract.talent.user.name}</strong> has rejected your contract for project <strong>{contract.job.title}</strong>",
                     recipient=contract.client.user,
-                    sender=contract.freelancer.user,
+                    sender=contract.talent.user,
                     object_api_link=f"/contracts/view/{contract.pk}",
                 )
             )
-        contract.freelancer_acknowledgement = new_status
+        contract.talent_acknowledgement = new_status
         contract.save()
         Notification.objects.bulk_create(notifications)
         return Response({"message": "Contract updated successfully"}, status=200)
@@ -115,9 +115,9 @@ class ContractCompleteAPIView(UpdateAPIView):
         if profile_name.lower() == "client":
             return Response({"message": "Forbidden"}, status=403)
 
-        if profile_name.lower() == "freelancer":
+        if profile_name.lower() == "talent":
             try:
-                contract = Contract.objects.get(id=contract_id, freelancer__user=user)
+                contract = Contract.objects.get(id=contract_id, talent__user=user)
                 contract.progress = ContractProgressChoices.COMPLETED
                 contract.save()
 

@@ -3,7 +3,7 @@ from .put import JobUpdateAPIView
 from .search import JobsSearchAPIView
 from .get import (
     JobListAPIView,
-    JobDetailAPIView,
+    JobRetrieveAPIView,
     JobActivitiesAPIView,
     MyJobListAPIView,
 )

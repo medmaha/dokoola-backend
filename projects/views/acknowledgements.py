@@ -127,7 +127,7 @@ class AcknowledgementRetrieveAPIView(RetrieveAPIView):
         try:
             project = Project.objects.get(
                 Q(id=project_id, contract__client__user=user)
-                | Q(id=project_id, contract__freelancer__user=user),
+                | Q(id=project_id, contract__talent__user=user),
             )
         except:
             return Response({"message": "Project does not exist"}, status=400)

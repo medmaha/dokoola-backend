@@ -1,6 +1,6 @@
 import os
 
-DB_ENGINE = os.environ.get("DB_ENGINE")
+DB_ENGINE = os.environ.get("DB_ENGINE", None)
 
 credentials = {
     "ENGINE": "django.db.backends.sqlite3",
@@ -24,6 +24,7 @@ if DB_ENGINE:
         "ENGINE": DB_ENGINE,
         "PASSWORD": DB_PASSWORD,
     }
+
 
 DATABASES = {"default": credentials}
 

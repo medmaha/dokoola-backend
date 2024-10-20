@@ -36,12 +36,12 @@ def get_related_fields(instance: Proposal):
         "status": instance.status,
         "duration": instance.duration,
     }
-    data["freelancer"] = {
-        "id": instance.freelancer.pk,
-        "name": instance.freelancer.user.get_full_name(),
-        "username": instance.freelancer.user.username,
-        "avatar": instance.freelancer.user.avatar,
-        "rating": instance.freelancer.user.calculate_rating(),
+    data["talent"] = {
+        "id": instance.talent.pk,
+        "name": instance.talent.user.get_full_name(),
+        "username": instance.talent.user.username,
+        "avatar": instance.talent.user.avatar,
+        "rating": instance.talent.user.calculate_rating(),
     }
 
     data["client"] = {
@@ -49,7 +49,7 @@ def get_related_fields(instance: Proposal):
         "name": instance.job.client.user.get_full_name(),
         "username": instance.job.client.user.username,
         "avatar": instance.job.client.user.avatar,
-        "rating": instance.job.client.calculate_rating(),
+        "rating": instance.job.client.average_rating(),
     }
 
     return data

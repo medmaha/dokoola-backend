@@ -1,9 +1,8 @@
+import uuid
 from django.db import models
 from core.models import Category
 from clients.models import Client
-from utilities.generator import hex_generator
-from .pricing import Pricing
-from .activities import Activities
+from django.core.serializers.json import DjangoJSONEncoder
 
 
 class JobStatusChoices(models.TextChoices):
@@ -15,80 +14,71 @@ class JobStatusChoices(models.TextChoices):
 
 
 class JobTypeChoices(models.TextChoices):
-    FULL_TIME = "FULL-TIME"
-    PART_TIME = "PART-TIME"
-    FREELANCE = "FREELANCE"
-    CONTRACT = "CONTRACT"
+    FULL_TIME = "full-time"
+    PART_TIME = "part-time"
+    FREELANCE = "freelance"
+    CONTRACT = "contract"
+    INTERNSHIP = "internship"
+    OTHER = "other"
 
 
 class Job(models.Model):
-
-    slug = models.SlugField(max_length=200, blank=True, default="", unique=True)
-
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=200, db_index=True)
-
     description = models.TextField()
 
-    location = models.CharField(max_length=200, db_index=True)
+    pricing = models.JSONField(encoder=DjangoJSONEncoder, blank=True, null=True)
+    benefits = models.JSONField(encoder=DjangoJSONEncoder, blank=True, null=True)
+    required_skills = models.JSONField(encoder=DjangoJSONEncoder, blank=True, null=True)
 
-    published = models.BooleanField(default=False, blank=True)
+    country = models.JSONField(encoder=DjangoJSONEncoder)
+    address = models.CharField(max_length=200, blank=True, null=True)
 
-    status = models.CharField(
-        max_length=200, choices=JobStatusChoices.choices, default="CLOSED"
-    )
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
 
-    is_valid = models.BooleanField(default=True, blank=True)
-
-    budget = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
-
-    pricing = models.ForeignKey(
-        Pricing, on_delete=models.CASCADE, related_name="job_pricing"
-    )
-
-    activities = models.ForeignKey(
-        Activities, on_delete=models.CASCADE, related_name="job"
-    )
-
-    duration = models.CharField(max_length=1000, blank=True, null=True)
-
-    required_skills = models.CharField(max_length=1000, blank=True, default="")
-
-    category_obj = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
-
-    type = models.CharField(
-        max_length=200,
+    job_type = models.CharField(
+        max_length=20,
         choices=JobTypeChoices.choices,
         default=JobTypeChoices.FREELANCE,
         db_index=True,
     )
 
-    client = models.ForeignKey(Client, related_name="jobs", on_delete=models.DO_NOTHING)
+    published = models.BooleanField(default=False, blank=True)
+    status = models.CharField(
+        max_length=200, choices=JobStatusChoices.choices, default="CLOSED"
+    )
 
+    is_valid = models.BooleanField(default=True, blank=True)
+    is_third_party = models.BooleanField(default=False, blank=True)
+    third_party_address = models.URLField(blank=True, null=True)
+
+    views_count = models.IntegerField(default=0)
+    proposal_count = models.IntegerField(default=0)
+    invitation_count = models.IntegerField(default=0)
+    client_last_visit = models.DateTimeField(blank=True, null=True)
+
+    job_type_other = models.CharField(blank=True, null=True, max_length=200)
+    experience_level_other = models.CharField(blank=True, null=True, max_length=200)
+
+    estimated_duration = models.DateTimeField(blank=True, null=True)
+    application_deadline = models.DateTimeField(blank=True, null=True)
+    experience_level = models.CharField(blank=True, null=True, max_length=200)
+
+    client = models.ForeignKey(
+        Client, related_name="jobs", on_delete=models.SET_NULL, null=True
+    )
+
+    bits_amount = models.IntegerField(default=16)
     updated_at = models.DateTimeField(auto_now=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title[:50]
 
-    @property
-    def category(self):
-        return self.category_obj.name if self.category_obj else None
-
-    @property
-    def payment_type(self):
-        payment_type = self.pricing.payment_type.lower()
-        fixed_price = self.pricing.fixed_price
-        if payment_type.lower() == "project":
-            if fixed_price:
-                return "per project / fixed price"
-            return "per project"
-        if fixed_price:
-            return "per hour / fixed price"
-        return "per hour"
+    class Meta:
+        ordering = ["is_valid", "-created_at", "published"]
 
     def save(self, *args, **kwargs):
-        if self._state.adding:
-            self.slug = hex_generator(16)
-
+        if self.third_party_address:
+            self.is_third_party = True
         return super().save(*args, **kwargs)

@@ -18,15 +18,15 @@ logging.config.dictConfig(
 logger = logging.getLogger(__file__)
 
 runtime_environment = os.environ.get("ENVIRONMENT", "development")
+console_log_allowed = bool(int(os.environ.get("CONSOLE_LOG", "0")))
+
+APP_ID = os.environ.get("APP_ID", "DEFAULT")
 
 DEVELOPMENT_MODE = runtime_environment.lower() == "development"
 
-if DEVELOPMENT_MODE:
-
+if DEVELOPMENT_MODE and console_log_allowed:
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel(logging.INFO)
-    stream_formatter = logging.Formatter("%(levelname)s - %(message)s")
-    stream_handler.setFormatter(stream_formatter)
     logger.addHandler(stream_handler)
 
 if not DEVELOPMENT_MODE:
@@ -45,8 +45,6 @@ if DEVELOPMENT_MODE:
 
     file_handler = logging.FileHandler(".logs/dokoola.log")
     file_handler.setLevel(logging.INFO)
-    file_formatter = logging.Formatter("%(levelname)s - %(message)s")
-    file_handler.setFormatter(file_formatter)
     logger.addHandler(file_handler)
 
 logger.setLevel(logging.DEBUG)
@@ -57,6 +55,19 @@ def execute_log(log_attr, message, extras):
     try:
         logger.__getattribute__(log_attr)(message, extra=extras)
         if extras:
+            extras["LEVEL"] = log_attr
+            extras["APP_ID"] = APP_ID
+            extras["ENVIRONMENT"] = runtime_environment
+
+            try:
+                message["LEVEL"] = log_attr
+                message["APP_ID"] = APP_ID
+                message["ENVIRONMENT"] = runtime_environment
+            except:
+                pass
+
+            if isinstance(extras, dict):
+                extras = extras
             logging.getLogger("logtail").__getattribute__(log_attr)(
                 message, extra=extras
             )

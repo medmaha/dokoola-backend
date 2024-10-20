@@ -5,8 +5,8 @@ from rest_framework.generics import UpdateAPIView
 from utilities.generator import get_serializer_error_message
 from clients.models import Client
 from clients.serializer import ClientUpdateSerializer
-from freelancers.models import Freelancer
-from freelancers.serializers import FreelancerUpdateSerializer
+from talents.models import Talent
+from talents.serializers import TalentUpdateSerializer
 from users.models import User
 
 from .auth_token import GenerateToken
@@ -46,14 +46,14 @@ class UserProfileUpdateAPIView(UpdateAPIView):
                     error_message = get_serializer_error_message(user_serializer.errors)
                     return Response(dict(message=error_message), status=400)
 
-                if isinstance(profile, Freelancer):
-                    profile_serializer = FreelancerUpdateSerializer(
-                        instance=profile, data=data
+                if isinstance(profile, Talent):
+                    profile_serializer = TalentUpdateSerializer.merge_serialize(
+                        profile, data
                     )
 
                 if isinstance(profile, Client):
-                    profile_serializer = ClientUpdateSerializer(
-                        instance=profile, data=data
+                    profile_serializer = ClientUpdateSerializer.merge_serialize(
+                        profile, data
                     )
 
                 if profile_serializer.is_valid():

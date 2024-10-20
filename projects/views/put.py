@@ -15,7 +15,7 @@ class ProjectStatusUpdateAPIView(UpdateAPIView):
 
         user = request.user
 
-        if not user.is_freelancer and not user.is_client:
+        if not user.is_talent and not user.is_client:
             return Response(
                 {
                     "message": "forbidden! You don't have permission to perform this action"
@@ -30,7 +30,7 @@ class ProjectStatusUpdateAPIView(UpdateAPIView):
                 )
                 | Q(
                     id=project_id,
-                    contract__freelancer__user=user,
+                    contract__talent__user=user,
                 ),
             )
         except:

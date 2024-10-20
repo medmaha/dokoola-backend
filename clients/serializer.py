@@ -1,35 +1,205 @@
-from django.db.models import Sum
+import json
 from rest_framework import serializers
 from jobs.models import Job
-from users.models import User
 from users.serializer import UserSerializer
 
-from .models import Client, Review
+from .models import Client, Review, Company
 
 
-class ClientSerializer(serializers.ModelSerializer):
+class UpdateSerializer(serializers.ModelSerializer):
+
+    @classmethod
+    def merge_serialize(cls, instance, validated_data):
+        data = dict()
+
+        _meta = cls.Meta  # type: ignore
+
+        for field in _meta.fields:
+            if field in validated_data:
+                data[field] = validated_data[field]
+            else:
+                data[field] = getattr(instance, field)
+
+        return cls(instance=instance, data=data)
+
+
+# -------------------------- Company ------------------------------ #
+
+
+class CompanyCreateSerializer(serializers.ModelSerializer):
+    """
+    A serializer for the company list api view
+    Use to get the list of companies without much extra information
+    """
+
+    class Meta:
+        model = Company
+        fields = [
+            "name",
+            "website",
+            "logo_url",
+            "industry",
+            "description",
+            "date_established",
+        ]
+
+
+class CompanyListSerializer(serializers.ModelSerializer):
+    """
+    A serializer for the company list api view
+    Use to get the list of companies without much extra information
+    """
+
+    class Meta:
+        model = Company
+        fields = ["slug", "name", "industry", "logo_url"]
+
+
+class CompanyUpdateSerializer(UpdateSerializer, serializers.ModelSerializer):
+    """
+    A serializer for the company update view
+    Expose the company's updatable fields
+    """
+
+    class Meta:
+        model = Company
+        fields = [
+            "name",
+            "website",
+            "logo_url",
+            "industry",
+            "description",
+            "date_established",
+        ]
+
+
+class CompanyDetailSerializer(serializers.ModelSerializer):
+    """
+    A serializer for the company detail api view \n
+    Securely serialize all the necessary information of this company
+    """
+
+    class Meta:
+        model = Client
+        fields = "__all__"
+
+
+# -------------------------- Client ------------------------------ #
+
+
+class ClientCreateSerializer(serializers.ModelSerializer):
     """
     A serializer for the client list api view
     Use to get the list of clients without much extra information
     """
 
-    user = UserSerializer()
+    class Meta:
+        model = Client
+        fields = ["address", "country", "about"]
+
+
+class ClientListSerializer(serializers.ModelSerializer):
+    """
+    A serializer for the client list api view
+    Use to get the list of clients without much extra information
+    """
 
     class Meta:
         model = Client
-        fields = ("id", "bio", "jobs_completed", "user")
+        fields = [
+            "id",
+            "country",
+            "address",
+        ]
 
     def to_representation(self, instance: Client):
-        # TODO: return all necessary fields
-        representation = super().to_representation(instance)
-        representation["date_joined"] = instance.user.date_joined
+        data = super().to_representation(instance)
 
+        data["full_name"] = instance.name
+
+        data["company"] = None
+        if instance.company:
+            data["company"] = {
+                "slug": instance.company.slug,
+                "name": instance.company.name,
+            }
+
+        data["avatar"] = instance.user.avatar
+        data["avg_rating"] = instance.average_rating()
+
+        return data
+
+
+class ClientUpdateSerializer(UpdateSerializer, serializers.ModelSerializer):
+    """
+    This serializer is used for the client update view
+    Expose the client's updatable fields
+    """
+
+    class Meta:
+        model = Client
+        fields = [
+            "country",
+            "address",
+            "about",
+        ]
+
+    def validate_country(self, value):
+        print("---------------------------------")
+        print("Validating country....")
+        print("---------------------------------")
         try:
-            user_data = representation.pop("user")
-            representation = {**user_data, **representation}
-        except KeyError:
-            pass
-        return representation
+            _value = json.loads(value)
+        except ValueError:
+            raise serializers.ValidationError("Invalid Country")
+        return _value
+
+
+class ClientRetrieveSerializer(serializers.ModelSerializer):
+    """
+    A serializer for the client detail api view \n
+    Securely serialize all the necessary information of this client
+    * The return data will vary depending on the requesting user
+    """
+
+    class Meta:
+        model = Client
+        fields = [
+            "id",
+            "country",
+            "address",
+            "about",
+        ]
+
+    def to_representation(self, instance: Client):
+        data = super().to_representation(instance)
+
+        data["full_name"] = instance.name
+
+        data["company"] = None
+        if instance.company:
+            data["company"] = {
+                "id": instance.company.pk,
+                "slug": instance.company.slug,
+                "name": instance.company.name,
+                "website": instance.company.website,
+                "logo_url": instance.company.logo_url,
+                "industry": instance.company.industry,
+                "description": instance.company.description,
+                "date_established": instance.company.date_established,
+            }
+
+        data["email"] = instance.user.email
+        data["avatar"] = instance.user.avatar
+        data["username"] = instance.user.username
+        data["first_name"] = instance.user.first_name
+        data["last_name"] = instance.user.last_name
+        data["last_name"] = instance.user.last_name
+        data["phone"] = instance.user.phone
+        data["gender"] = instance.user.gender
+        data["avg_rating"] = instance.average_rating()
+
+        return data
 
 
 class ClientUpdateDataSerializer(serializers.ModelSerializer):
@@ -40,131 +210,13 @@ class ClientUpdateDataSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Client
-        fields = []
-
-    def to_representation(self, instance: Client):
-        return {
-            # Client Info
-            "bio": instance.bio,
-            **instance.user.get_personal_info(),
-            # Address Info
-            **instance.user.get_address(),
-            # User Info
-            "email": instance.user.email,
-            "name": instance.user.name,
-            "avatar": instance.user.avatar,
-            "gender": instance.user.gender,
-            "username": instance.user.username,
-            "first_name": instance.user.first_name,
-            "last_name": instance.user.last_name,
-            "date_joined": instance.user.date_joined,
-        }
-
-
-class ClientUpdateSerializer(serializers.ModelSerializer):
-    """
-    This serializer is used for the client update view
-    Expose the client's updatable fields
-    """
-
-    class Meta:
-        model = Client
-        fields = (
-            "bio",
-            "website",
-            "industry",
-        )
-
-    def update(self, instance, validated_data):
-        # Loop through each field and set the current instance value if a value is not passed in
-        for field, value in validated_data.items():
-            setattr(
-                instance,
-                field,
-                value if value is not None else getattr(instance, field),
-            )
-        instance.save()
-        return instance
-
-    def validate_bio(self, value):
-        if not value:
-            raise serializers.ValidationError("Your bio cannot be empty")
-        return value
-
-
-class ClientDetailSerializer(serializers.ModelSerializer):
-    """
-    A serializer for the client detail api view \n
-    Securely serialize all the necessary information of this client
-    * The return data will vary depending on the requesting user
-    """
-
-    class Meta:
-        model = Client
-        fields = ("bio", "jobs_completed")
-        read_only_fields = ["*"]
-
-    def to_representation(self, instance: Client):
-        representation = super().to_representation(instance)
-        representation["date_joined"] = instance.user.date_joined
-        representation.update(
-            {
-                "avatar": instance.user.avatar,
-                "name": instance.user.name,
-                "username": instance.user.username,
-                **instance.user.get_personal_info(),
-            }
-        )
-        try:
-            user_data = representation.pop("user")
-            representation = {
-                **user_data,
-                **representation,
-            }
-        except KeyError:
-            pass
-        return representation
-
-
-class ClientProfileDetailSerializer(serializers.ModelSerializer):
-    """
-    A serializer for the client detail api view \n
-    Securely serialize all the necessary information of this client
-    * The return data will vary depending on the requesting user
-    """
-
-    class Meta:
-        model = Client
-        fields = [
-            "bio",
-            "website",
-            "industry",
-            "jobs_active",
-            "jobs_created",
-            "jobs_completed",
-        ]
-
-    def get_address(self, instance: Client):
-        request = self.context.get("request")
-        user = request.user if request else None
-        if user and user.pk == instance.user.pk:
-            return instance.user.get_address()
-        return instance.address
-
-    def to_representation(self, instance: Client):
-        data = super().to_representation(instance)
-        user: dict = UserSerializer(instance=instance.user).data  # type: ignore
-        data.update(user)
-        data.update({"rating": instance.calculate_rating()})
-        data.update({"address": self.get_address(instance)})
-        data.update({"reviews": []})
-        return data
+        fields = "__all__"
 
 
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = ("id", "rating", "content")
+        fields = "__all__"
 
     def to_representation(self, instance: Review):
         data = super().to_representation(instance)
@@ -187,39 +239,15 @@ class ClientJobDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Client
-        fields = (
-            "bio",
-            "rating",
-            "reviews",
-            "country",
-            "address",
-            "jobs_active",
-            "jobs_created",
-            "jobs_completed",
-        )
+        fields = "__all__"
 
-    # Gets the client's basic user information and returns it
-    def user_info(self, user: User):
-        return {
-            "avatar": user.avatar,
-            "name": user.name,
-            "username": user.username,
-        }
 
-    # Calculate how much this client has been spent on jobs
-    def calculate_spent(self, instance: Client):
-        # get the all jobs created by this client
-        completed_jobs = Job.objects.select_related().filter(
-            client=instance, completed=True
-        )
-        return completed_jobs.aggregate(Sum("budget"))["budget__sum"] or 0
+class ClientJobPostingSerializer(serializers.ModelSerializer):
+    """
+    This serializer is used for the job detail view
+    * The return data will vary depending on the requesting user
+    """
 
-    def to_representation(self, instance: Client):
-
-        representation = super().to_representation(instance)
-        representation["rating"] = instance.calculate_rating()
-        representation["date_joined"] = instance.user.date_joined
-        representation["total_spent"] = self.calculate_spent(instance)
-        representation.update(self.user_info(instance.user))
-
-        return representation
+    class Meta:
+        model = Job
+        fields = "__all__"

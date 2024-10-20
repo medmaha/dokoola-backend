@@ -3,7 +3,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 
-load_dotenv()
+# load_dotenv()
 
 DEBUG = bool(int(os.environ.get("DEBUG", 0)))
 
@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     "users",
     "staffs",
     "clients",
-    "freelancers",
+    "talents",
     "reviews",
     # Projects & Contracts apps
     "jobs",
@@ -58,10 +58,6 @@ INSTALLED_APPS = [
     "notifications",
 ]
 
-if DEBUG:
-    pass
-    # INSTALLED_APPS.append("django_dump_load_utf8")
-    # INSTALLED_APPS.append("debug_toolbar")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -75,8 +71,11 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.contrib.sites.middleware.CurrentSiteMiddleware",
     "core.middleware.logger.DokoolaLoggerMiddleware",
-    "core.middleware.csrf.DokoolaCSRFMiddleware",
+    # "core.middleware.csrf.DokoolaCSRFMiddleware",
 ]
+if DEBUG:
+    INSTALLED_APPS.append("silk")
+    MIDDLEWARE.append("silk.middleware.SilkyMiddleware")
 
 
 ROOT_URLCONF = "src.urls"

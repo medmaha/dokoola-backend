@@ -1,6 +1,6 @@
 from django.db import models
 from clients.models import Client
-from proposals.models import Proposal, Job, Freelancer
+from proposals.models import Proposal, Job, Talent
 
 
 class ContractProgressChoices(models.TextChoices):
@@ -40,7 +40,7 @@ class Negotiation(models.Model):
 
 class Contract(models.Model):
     """
-    Contract model represents a contract between a client and a freelancer
+    Contract model represents a contract between a client and a talent
     for a specific job.
     It holds the negotiation state, the terms of the contract, and the status of the contract.
     """
@@ -50,7 +50,7 @@ class Contract(models.Model):
     proposal = models.ForeignKey(
         Proposal, on_delete=models.CASCADE, related_name="contract"
     )
-    freelancer = models.ForeignKey(Freelancer, on_delete=models.CASCADE)
+    talent = models.ForeignKey(Talent, on_delete=models.CASCADE)
 
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
@@ -78,8 +78,8 @@ class Contract(models.Model):
     #     Negotiation, related_name="contract", blank=True
     # )
 
-    # Whether the client has acknowledged the work done by the freelancer
-    freelancer_acknowledgement = models.CharField(
+    # Whether the client has acknowledged the work done by the talent
+    talent_acknowledgement = models.CharField(
         max_length=200, choices=ContractStatusChoices.choices, default="PENDING"
     )
 

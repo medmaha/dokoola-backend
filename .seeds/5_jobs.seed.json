@@ -1,1 +1,231 @@
-[{"model": "jobs.pricing", "pk": 1, "fields": {"fixed_price": true, "negotiable_price": false, "will_pay_more": true, "addition": "20%", "payment_type": "PROJECT"}}, {"model": "jobs.pricing", "pk": 2, "fields": {"fixed_price": true, "negotiable_price": false, "will_pay_more": true, "addition": "20%", "payment_type": "PROJECT"}}, {"model": "jobs.pricing", "pk": 5, "fields": {"fixed_price": true, "negotiable_price": false, "will_pay_more": true, "addition": "50%", "payment_type": "PROJECT"}}, {"model": "jobs.pricing", "pk": 6, "fields": {"fixed_price": true, "negotiable_price": false, "will_pay_more": true, "addition": "25%", "payment_type": "PROJECT"}}, {"model": "jobs.activities", "pk": 1, "fields": {"bits_count": 1, "hired_count": 1, "invite_count": 0, "proposal_count": 1, "interview_count": 0, "unanswered_invites": 0, "client_last_visit": "2024-08-21T22:07:38.000Z", "hired": ["d311b70290df49cb8fff"]}}, {"model": "jobs.activities", "pk": 2, "fields": {"bits_count": 1, "hired_count": 1, "invite_count": 0, "proposal_count": 1, "interview_count": 0, "unanswered_invites": 0, "client_last_visit": "2024-08-21T20:31:48.477Z", "hired": ["d311b70290df49cb8fff"]}}, {"model": "jobs.activities", "pk": 3, "fields": {"bits_count": 1, "hired_count": 0, "invite_count": 0, "proposal_count": 0, "interview_count": 0, "unanswered_invites": 0, "client_last_visit": "2024-08-15T00:31:50.053Z", "hired": []}}, {"model": "jobs.activities", "pk": 5, "fields": {"bits_count": 0, "hired_count": 0, "invite_count": 0, "proposal_count": 0, "interview_count": 0, "unanswered_invites": 0, "client_last_visit": "2024-09-14T02:39:38.824Z", "hired": []}}, {"model": "jobs.activities", "pk": 6, "fields": {"bits_count": 0, "hired_count": 0, "invite_count": 0, "proposal_count": 0, "interview_count": 0, "unanswered_invites": 0, "client_last_visit": "2024-09-14T02:52:45.317Z", "hired": ["46a467c341214747815b"]}}, {"model": "jobs.job", "pk": 1, "fields": {"slug": "3ae8d6da5c0e466d", "title": "Procurement Management System", "description": "We are seeking a skilled and passionate Procurement Management System to join our team on a freelance basis. The ideal candidate will have a strong background in web development, with a portfolio that demonstrates experience in creating user-friendly, visually appealing, and functional websites for non-profit organizations.\r\n\r\nResponsibilities:\r\n- Collaborate with our team to understand the needs and goals of our charity.\r\n- Design and develop a responsive, accessible, and secure website.\r\n- Implement features such as donation forms, event calendars, and volunteer sign-up sheets.\r\n- Optimize the website for search engines to increase visibility.\r\n- Provide maintenance and updates to the website as needed.", "location": "The Gambia", "published": false, "status": "IN_PROGRESS", "is_valid": true, "budget": "36000.00", "pricing": 1, "activities": 1, "duration": "1 month", "required_skills": "HTML, CSS, Javascript, Backend, Database", "category_obj": 1, "type": "FREELANCE", "client": "1a7de8f792854bfea6cc", "updated_at": "2024-08-11T16:08:40.296Z", "created_at": "2024-08-11T02:35:28.245Z"}}, {"model": "jobs.job", "pk": 2, "fields": {"slug": "0fbdd3ec752243e9", "title": "Figma-Aligned Static React.js Card Component", "description": "I'm seeking a skilled React.js developer to create a static card component, aligned with a specific Figma design. The card will primarily serve the purpose of displaying information.\n\nKey Requirements:\n- Proficiency in React.js\n- Experience in translating Figma designs into functional components\n- Ability to create a responsive, static component\n\nThe ideal freelancer will be able to deliver a high-quality, Figma-aligned React.js card component that meets these specifications.", "location": "The Gambia", "published": false, "status": "IN_PROGRESS", "is_valid": true, "budget": "16500.00", "pricing": 2, "activities": 2, "duration": "2-3 months", "required_skills": "JavaScript, CSS, HTML5, AngularJS", "category_obj": 3, "type": "FREELANCE", "client": "1a7de8f792854bfea6cc", "updated_at": "2024-08-14T20:45:32.090Z", "created_at": "2024-08-14T19:47:26.368Z"}}, {"model": "jobs.job", "pk": 3, "fields": {"slug": "3ad8d65a5c0e466d", "title": "System Admin", "description": "We are seeking a skilled and passionate Procurement Management System to join our team on a freelance basis. The ideal candidate will have a strong background in web development, with a portfolio that demonstrates experience in creating user-friendly, visually appealing, and functional websites for non-profit organizations.\r\n\r\nResponsibilities:\r\n- Collaborate with our team to understand the needs and goals of our charity.\r\n- Design and develop a responsive, accessible, and secure website.\r\n- Implement features such as donation forms, event calendars, and volunteer sign-up sheets.\r\n- Optimize the website for search engines to increase visibility.\r\n- Provide maintenance and updates to the website as needed.", "location": "The Gambia", "published": false, "status": "IN_PROGRESS", "is_valid": true, "budget": "36000.00", "pricing": 1, "activities": 3, "duration": "1 month", "required_skills": "HTML, CSS, Javascript, Backend, Database", "category_obj": 4, "type": "FREELANCE", "client": "1a7de8f792854bfea6cc", "updated_at": "2024-08-11T16:08:40.296Z", "created_at": "2024-08-11T02:35:28.245Z"}}, {"model": "jobs.job", "pk": 4, "fields": {"slug": "69e43061115f48c6", "title": "Full-Stack Developer for E-Commerce Platform", "description": "We’re looking for an experienced full-stack developer to help build an e-commerce platform from the ground up. The project involves creating a user-friendly front-end and integrating it with a secure, scalable back-end system. You will also implement payment gateways and ensure mobile responsiveness.", "location": "The Gambia", "published": true, "status": "PUBLISHED", "is_valid": true, "budget": "1500.00", "pricing": 5, "activities": 5, "duration": "2-3 months", "required_skills": "Full-Stack Development, React.js, Node.js, MongoDB, Payment Gateway Integration", "category_obj": 1, "type": "FREELANCE", "client": "dd782d919eff47c38a26", "updated_at": "2024-09-14T02:40:03.692Z", "created_at": "2024-09-14T02:39:38.362Z"}}, {"model": "jobs.job", "pk": 5, "fields": {"slug": "e7ae4e84103e4d31", "title": "Graphic Designer for Branding and Logo Creation", "description": "We need a creative graphic designer to develop a brand identity for our new startup. The project includes logo design, color schemes, typography selection, and overall branding guidelines. The goal is to create a modern, professional look that stands out in the tech industry.", "location": "The Gambia", "published": false, "status": "IN_PROGRESS", "is_valid": true, "budget": "1100.00", "pricing": 6, "activities": 6, "duration": "2-3 months", "required_skills": "Graphic Design, Branding, Adobe Illustrator, Adobe Photoshop", "category_obj": 2, "type": "FREELANCE", "client": "dd782d919eff47c38a26", "updated_at": "2024-09-14T10:59:21.325Z", "created_at": "2024-09-14T02:46:44.995Z"}}]
+[
+  {
+    "model": "jobs.pricing",
+    "pk": 1,
+    "fields": {
+      "fixed_price": true,
+      "negotiable_price": false,
+      "will_pay_more": true,
+      "addition": "20%",
+      "payment_type": "PROJECT"
+    }
+  },
+  {
+    "model": "jobs.pricing",
+    "pk": 2,
+    "fields": {
+      "fixed_price": true,
+      "negotiable_price": false,
+      "will_pay_more": true,
+      "addition": "20%",
+      "payment_type": "PROJECT"
+    }
+  },
+  {
+    "model": "jobs.pricing",
+    "pk": 5,
+    "fields": {
+      "fixed_price": true,
+      "negotiable_price": false,
+      "will_pay_more": true,
+      "addition": "50%",
+      "payment_type": "PROJECT"
+    }
+  },
+  {
+    "model": "jobs.pricing",
+    "pk": 6,
+    "fields": {
+      "fixed_price": true,
+      "negotiable_price": false,
+      "will_pay_more": true,
+      "addition": "25%",
+      "payment_type": "PROJECT"
+    }
+  },
+  {
+    "model": "jobs.activities",
+    "pk": 1,
+    "fields": {
+      "bits_count": 1,
+      "hired_count": 1,
+      "invite_count": 0,
+      "proposal_count": 1,
+      "interview_count": 0,
+      "unanswered_invites": 0,
+      "client_last_visit": "2024-08-21T22:07:38.000Z",
+      "hired": ["d311b70290df49cb8fff"]
+    }
+  },
+  {
+    "model": "jobs.activities",
+    "pk": 2,
+    "fields": {
+      "bits_count": 1,
+      "hired_count": 1,
+      "invite_count": 0,
+      "proposal_count": 1,
+      "interview_count": 0,
+      "unanswered_invites": 0,
+      "client_last_visit": "2024-08-21T20:31:48.477Z",
+      "hired": ["d311b70290df49cb8fff"]
+    }
+  },
+  {
+    "model": "jobs.activities",
+    "pk": 3,
+    "fields": {
+      "bits_count": 1,
+      "hired_count": 0,
+      "invite_count": 0,
+      "proposal_count": 0,
+      "interview_count": 0,
+      "unanswered_invites": 0,
+      "client_last_visit": "2024-08-15T00:31:50.053Z",
+      "hired": []
+    }
+  },
+  {
+    "model": "jobs.activities",
+    "pk": 5,
+    "fields": {
+      "bits_count": 0,
+      "hired_count": 0,
+      "invite_count": 0,
+      "proposal_count": 0,
+      "interview_count": 0,
+      "unanswered_invites": 0,
+      "client_last_visit": "2024-09-14T02:39:38.824Z",
+      "hired": []
+    }
+  },
+  {
+    "model": "jobs.activities",
+    "pk": 6,
+    "fields": {
+      "bits_count": 0,
+      "hired_count": 0,
+      "invite_count": 0,
+      "proposal_count": 0,
+      "interview_count": 0,
+      "unanswered_invites": 0,
+      "client_last_visit": "2024-09-14T02:52:45.317Z",
+      "hired": ["46a467c341214747815b"]
+    }
+  },
+  {
+    "model": "jobs.job",
+    "pk": 1,
+    "fields": {
+      "slug": "3ae8d6da5c0e466d",
+      "title": "Procurement Management System",
+      "description": "We are seeking a skilled and passionate Procurement Management System to join our team on a freelance basis. The ideal candidate will have a strong background in web development, with a portfolio that demonstrates experience in creating user-friendly, visually appealing, and functional websites for non-profit organizations.\r\n\r\nResponsibilities:\r\n- Collaborate with our team to understand the needs and goals of our charity.\r\n- Design and develop a responsive, accessible, and secure website.\r\n- Implement features such as donation forms, event calendars, and volunteer sign-up sheets.\r\n- Optimize the website for search engines to increase visibility.\r\n- Provide maintenance and updates to the website as needed.",
+      "location": "The Gambia",
+      "published": false,
+      "status": "IN_PROGRESS",
+      "is_valid": true,
+      "budget": "36000.00",
+      "pricing": 1,
+      "activities": 1,
+      "duration": "1 month",
+      "required_skills": "HTML, CSS, Javascript, Backend, Database",
+      "category_obj": 1,
+      "type": "FREELANCE",
+      "client": "1a7de8f792854bfea6cc",
+      "updated_at": "2024-08-11T16:08:40.296Z",
+      "created_at": "2024-08-11T02:35:28.245Z"
+    }
+  },
+  {
+    "model": "jobs.job",
+    "pk": 2,
+    "fields": {
+      "slug": "0fbdd3ec752243e9",
+      "title": "Figma-Aligned Static React.js Card Component",
+      "description": "I'm seeking a skilled React.js developer to create a static card component, aligned with a specific Figma design. The card will primarily serve the purpose of displaying information.\n\nKey Requirements:\n- Proficiency in React.js\n- Experience in translating Figma designs into functional components\n- Ability to create a responsive, static component\n\nThe ideal professional will be able to deliver a high-quality, Figma-aligned React.js card component that meets these specifications.",
+      "location": "The Gambia",
+      "published": false,
+      "status": "IN_PROGRESS",
+      "is_valid": true,
+      "budget": "16500.00",
+      "pricing": 2,
+      "activities": 2,
+      "duration": "2-3 months",
+      "required_skills": "JavaScript, CSS, HTML5, AngularJS",
+      "category_obj": 3,
+      "type": "FREELANCE",
+      "client": "1a7de8f792854bfea6cc",
+      "updated_at": "2024-08-14T20:45:32.090Z",
+      "created_at": "2024-08-14T19:47:26.368Z"
+    }
+  },
+  {
+    "model": "jobs.job",
+    "pk": 3,
+    "fields": {
+      "slug": "3ad8d65a5c0e466d",
+      "title": "System Admin",
+      "description": "We are seeking a skilled and passionate Procurement Management System to join our team on a freelance basis. The ideal candidate will have a strong background in web development, with a portfolio that demonstrates experience in creating user-friendly, visually appealing, and functional websites for non-profit organizations.\r\n\r\nResponsibilities:\r\n- Collaborate with our team to understand the needs and goals of our charity.\r\n- Design and develop a responsive, accessible, and secure website.\r\n- Implement features such as donation forms, event calendars, and volunteer sign-up sheets.\r\n- Optimize the website for search engines to increase visibility.\r\n- Provide maintenance and updates to the website as needed.",
+      "location": "The Gambia",
+      "published": false,
+      "status": "IN_PROGRESS",
+      "is_valid": true,
+      "budget": "36000.00",
+      "pricing": 1,
+      "activities": 3,
+      "duration": "1 month",
+      "required_skills": "HTML, CSS, Javascript, Backend, Database",
+      "category_obj": 4,
+      "type": "FREELANCE",
+      "client": "1a7de8f792854bfea6cc",
+      "updated_at": "2024-08-11T16:08:40.296Z",
+      "created_at": "2024-08-11T02:35:28.245Z"
+    }
+  },
+  {
+    "model": "jobs.job",
+    "pk": 4,
+    "fields": {
+      "slug": "69e43061115f48c6",
+      "title": "Full-Stack Developer for E-Commerce Platform",
+      "description": "Weï¿½re looking for an experienced full-stack developer to help build an e-commerce platform from the ground up. The project involves creating a user-friendly front-end and integrating it with a secure, scalable back-end system. You will also implement payment gateways and ensure mobile responsiveness.",
+      "location": "The Gambia",
+      "published": true,
+      "status": "PUBLISHED",
+      "is_valid": true,
+      "budget": "1500.00",
+      "pricing": 5,
+      "activities": 5,
+      "duration": "2-3 months",
+      "required_skills": "Full-Stack Development, React.js, Node.js, MongoDB, Payment Gateway Integration",
+      "category_obj": 1,
+      "type": "FREELANCE",
+      "client": "dd782d919eff47c38a26",
+      "updated_at": "2024-09-14T02:40:03.692Z",
+      "created_at": "2024-09-14T02:39:38.362Z"
+    }
+  },
+  {
+    "model": "jobs.job",
+    "pk": 5,
+    "fields": {
+      "slug": "e7ae4e84103e4d31",
+      "title": "Graphic Designer for Branding and Logo Creation",
+      "description": "We need a creative graphic designer to develop a brand identity for our new startup. The project includes logo design, color schemes, typography selection, and overall branding guidelines. The goal is to create a modern, professional look that stands out in the tech industry.",
+      "location": "The Gambia",
+      "published": false,
+      "status": "IN_PROGRESS",
+      "is_valid": true,
+      "budget": "1100.00",
+      "pricing": 6,
+      "activities": 6,
+      "duration": "2-3 months",
+      "required_skills": "Graphic Design, Branding, Adobe Illustrator, Adobe Photoshop",
+      "category_obj": 2,
+      "type": "FREELANCE",
+      "client": "dd782d919eff47c38a26",
+      "updated_at": "2024-09-14T10:59:21.325Z",
+      "created_at": "2024-09-14T02:46:44.995Z"
+    }
+  }
+]

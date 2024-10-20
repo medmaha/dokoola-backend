@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.generics import ListAPIView
 from datetime import datetime
 
-from freelancers.models import Freelancer
+from talents.models import Talent
 from jobs.serializers import JobListSerializer
 
 from jobs.models import Job
@@ -132,20 +132,20 @@ class JobsSearchAPIView(ListAPIView):
     def get_relevance(self):
 
         profile, profile_name = self.request.user.profile  # type: ignore
-        freelancer: Freelancer | None = None
+        talent: Talent | None = None
 
-        if profile_name.lower() == "freelancer":
-            freelancer = profile
+        if profile_name.lower() == "talent":
+            talent = profile
 
-        if freelancer:
-            skills = freelancer.skills.split(",")
+        if talent:
+            skills = talent.skills.split(",")
             filters = (
                 Q(bits_count__gt=0)
                 | Q(created_at__year=datetime.now().year)
                 | Q(required_skills__in=skills)
-                | Q(required_skills__iendswith=freelancer.skills)
-                | Q(required_skills__istartswith=freelancer.skills)
-                | Q(required_skills__icontains=freelancer.skills)
+                | Q(required_skills__iendswith=talent.skills)
+                | Q(required_skills__istartswith=talent.skills)
+                | Q(required_skills__icontains=talent.skills)
             )
 
             qs = self.queryset.filter(filters)

@@ -3,7 +3,7 @@ from django.db.models import Q, F
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from clients.models import Client  # client_profile
-from freelancers.models import Freelancer  # freelancers_profile
+from talents.models import Talent  # talents_profile
 
 from .models import User
 
@@ -11,11 +11,11 @@ from .models import User
 class UserProfileAPIQueryView(GenericAPIView):
     permission_classes = []
 
-    def get_freelancer_queries(self, query: str):
+    def get_talent_queries(self, query: str):
         return (
-            Q(freelancer_profile__title__icontains=query)
-            | Q(freelancer_profile__bio__icontains=query)
-            | Q(freelancer_profile__skills__icontains=query)
+            Q(talent_profile__title__icontains=query)
+            | Q(talent_profile__bio__icontains=query)
+            | Q(talent_profile__skills__icontains=query)
         )
 
     def get_client_queries(self, query: str):
@@ -29,12 +29,12 @@ class UserProfileAPIQueryView(GenericAPIView):
     def get_queryset(self, query: str, model: str):
 
         queries = self.get_user_queries(query)
-        if model.lower() in "freelancers":
-            queries = queries | self.get_freelancer_queries(query)
+        if model.lower() in "talents":
+            queries = queries | self.get_talent_queries(query)
         elif model.lower() in "clients":
             queries = queries | self.get_client_queries(query)
 
-        freelancers = (
+        talents = (
             User.objects.select_related()
             .filter(queries)
             .exclude(Q(is_superuser=True) | Q(is_staff=True) | Q(is_active=False))
@@ -42,7 +42,7 @@ class UserProfileAPIQueryView(GenericAPIView):
             .values("first_name", "last_name", "avatar", "username")
         )
 
-        return freelancers
+        return talents
 
     def get(self, request, *args, **kwargs):
 

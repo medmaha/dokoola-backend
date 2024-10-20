@@ -7,7 +7,7 @@ class ContractCreateSerializer(serializers.ModelSerializer):
         model = Contract
         fields = [
             "proposal",
-            "freelancer",
+            "talent",
             "job",
             "client",
             "start_date",

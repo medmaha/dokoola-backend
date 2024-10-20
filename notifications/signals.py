@@ -33,16 +33,16 @@ def send_email_notification(sender, instance: Notification, created, **kwargs):
 def notification_proposals(sender, instance: Proposal, created, **kwargs):
     """
     Listen to database dispatching event for the Proposal model
-    - Check to see if a new job proposal (freelancer proposed to a job) is created
+    - Check to see if a new job proposal (talent proposed to a job) is created
     - Then create a new notification for the job creator
     """
 
-    def create_hint_text(freelancer):
+    def create_hint_text(talent):
         hints = [
             "You've received a new application",
             "A new proposal from your job posting",
-            f"An Application from {freelancer.name}",
-            f"{freelancer.name} has proposed for your job",
+            f"An Application from {talent.name}",
+            f"{talent.name} has proposed for your job",
         ]
 
         hint = random.choice(hints)
@@ -51,12 +51,12 @@ def notification_proposals(sender, instance: Proposal, created, **kwargs):
 
     if created:
         client = instance.job.client.user
-        freelancer = instance.freelancer.user
+        talent = instance.talent.user
 
         notification = Notification()
-        notification.sender = freelancer
+        notification.sender = talent
         notification.recipient = client
-        notification.hint_text = create_hint_text(freelancer)
+        notification.hint_text = create_hint_text(talent)
         notification.content_text = f"{instance.cover_letter[:125]}" + (
             "..." if len(instance.cover_letter) > 125 else ""
         )

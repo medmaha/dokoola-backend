@@ -8,12 +8,12 @@ def check_has_proposed(context: dict, instance: Job):
     request = context.get("request")
     user: User | None = request.user if request else None
 
-    if user and user.is_authenticated and user.is_freelancer:
+    if user and user.is_authenticated and user.is_talent:
 
         # Check if the user has proposed to the job
         has_proposed = (
             Proposal.objects.select_related()
-            .filter(job=instance, freelancer__user=user)
+            .filter(job=instance, talent__user=user)
             .exists()
         )
 

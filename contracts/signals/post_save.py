@@ -9,7 +9,7 @@ from contracts.models import Contract, ContractStatusChoices, ContractProgressCh
 @receiver(post_save, sender=Contract)
 def on_accepted_contract(sender, instance: Contract, created, **kwargs):
     """Fires when a contract is accepted.
-    Specifically, when the contract is acknowledged by the freelancer.
+    Specifically, when the contract is acknowledged by the talent.
     """
 
     # Return if the contract is not accepted
@@ -29,7 +29,7 @@ def on_accepted_contract(sender, instance: Contract, created, **kwargs):
     instance.job.save()
 
     client = instance.client
-    freelancer = instance.freelancer
+    talent = instance.talent
 
     project = Project()
     project.contract = instance
@@ -38,33 +38,33 @@ def on_accepted_contract(sender, instance: Contract, created, **kwargs):
 
     notifications = []
 
-    # Congrats the freelancer
+    # Congrats the talent
     notifications.append(
         Notification(
             hint_text="New Project 🎇",
             content_text=f"Congratulations on your new project <strong>{instance.job.title}</strong> from <strong>{client.user.name}</strong>",
-            recipient=freelancer.user,
+            recipient=talent.user,
             object_api_link=f"/projects/view/{project.pk}",
         )
-        # TODO: Notify freelancer through email
+        # TODO: Notify talent through email
     )
 
-    # Notify the freelancer
+    # Notify the talent
     notifications.append(
         Notification(
             hint_text="Project Timeline",
             content_text=f"Your new project <strong>{instance.job.title}</strong> from <strong>{client.user.name}</strong> is due on <strong>{instance.start_date.__format__('%Y-%m-%d %H:%M:%S')}</strong>",
-            recipient=freelancer.user,
+            recipient=talent.user,
             object_api_link=f"/projects/view/{project.pk}",
         )
-        # TODO: Notify freelancer through email
+        # TODO: Notify talent through email
     )
 
     # Notify the client
     notifications.append(
         Notification(
             hint_text="Project Initiated",
-            content_text=f"You've created a new project <strong>{instance.job.title}</strong> with <strong>{freelancer.user.name}</strong>",
+            content_text=f"You've created a new project <strong>{instance.job.title}</strong> with <strong>{talent.user.name}</strong>",
             recipient=client.user,
             object_api_link=f"/projects/view/{project.pk}",
         )
@@ -81,31 +81,31 @@ def on_completed_contract(sender, instance: Contract, created, **kwargs):
         return
 
     client = instance.client
-    freelancer = instance.freelancer
+    talent = instance.talent
 
-    # Notify the freelancer
+    # Notify the talent
     Notification.objects.create(
         hint_text="Project Completed",
         content_text=f"You've marked the contract {instance.pk}: {instance.job.title} as <strong>{instance.progress}</strong>! Dokoola congrats you for this 🎇",
-        recipient=freelancer.user,
+        recipient=talent.user,
         object_api_link=f"/contracts/view/{instance.pk}",
     )
-    # TODO: Notify freelancer through email
-    # Notify the freelancer
+    # TODO: Notify talent through email
+    # Notify the talent
     Notification.objects.create(
         hint_text="Project Awaiting Review",
         content_text=f"We'll prompt <strong>{instance.client.user.name}</strong> to review and validate your work",
-        recipient=freelancer.user,
+        recipient=talent.user,
         object_api_link=f"/contracts/view/{instance.pk}",
     )
-    # TODO: Notify freelancer through email
+    # TODO: Notify talent through email
 
     # Notify the client
     Notification.objects.create(
         hint_text="Project Completed",
-        content_text=f"Your contract {instance.pk}: {instance.job.title} was marked completed by <strong>{freelancer.user.name}</strong> please review and acknowledge the status",
+        content_text=f"Your contract {instance.pk}: {instance.job.title} was marked completed by <strong>{talent.user.name}</strong> please review and acknowledge the status",
         recipient=client.user,
-        sender=freelancer.user,
+        sender=talent.user,
         object_api_link=f"/contracts/view/{instance.pk}",
     )
     # TODO: Notify client through email

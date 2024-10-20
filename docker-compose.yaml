@@ -1,0 +1,75 @@
+version: "3.9"
+
+services:
+  # ------------------------------------- Nginx (Nginx Server) -------------------------------------
+  nginx:
+    container_name: nginx-load-balancer
+
+    networks:
+      - dokoola-network
+
+    image: intrasoft0/dokoola:backend-nginx-001
+
+    build:
+      context: ./nginx
+      dockerfile: ./nginx/Dockerfile
+
+    ports:
+      - "8080:8080"
+
+    depends_on:
+      - backend_3
+      - websocket_3
+
+    environment:
+      - NGINX_PORT=80
+      - NGINX_SSL_PORT=443
+      - NGINX_HOST=localhost
+      - BACKEND_PORT=8000
+      - WEBSOCKET_PORT=5500
+
+    command: nginx -g 'daemon off;'
+
+  # ------------------------------------- Backend (Django) -------------------------------------
+  backend_1:
+    container_name: backend_server_1
+    networks:
+      - dokoola-network
+
+    image: intrasoft0/dokoola:backend-001
+
+    environment:
+      - APP_ID=1
+
+    command: gunicorn src.wsgi:application --bind 0.0.0.0:8000
+
+  backend_2:
+    container_name: backend_server_2
+    networks:
+      - dokoola-network
+
+    image: intrasoft0/dokoola:backend-001
+
+    environment:
+      - APP_ID=2
+
+    command: gunicorn src.wsgi:application --bind 0.0.0.0:8000
+
+  backend_3:
+    container_name: backend_server_3
+
+    networks:
+      - dokoola-network
+
+    image: intrasoft0/dokoola:backend-001
+
+    environment:
+      - APP_ID=3
+
+    command: gunicorn src.wsgi:application --bind 0.0.0.0:8000
+
+# Dokoola Services Networks
+
+networks:
+  dokoola-network:
+    driver: bridge

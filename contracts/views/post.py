@@ -80,7 +80,7 @@ class ContractCreateAPIView(GenericAPIView):
                         "proposal": proposal.pk,
                         "job": proposal.job.pk,
                         "client": profile.pk,
-                        "freelancer": proposal.freelancer.pk,
+                        "talent": proposal.talent.pk,
                         "duration": proposal.duration,
                         "start_date": start_date,
                         "additional_terms": additional_terms,
@@ -91,23 +91,21 @@ class ContractCreateAPIView(GenericAPIView):
 
                     notifications = []
 
-                    freelancer_notification = Notification()
-                    notifications.append(freelancer_notification)
-                    freelancer_notification.recipient = proposal.freelancer.user
-                    freelancer_messages = [
+                    talent_notification = Notification()
+                    notifications.append(talent_notification)
+                    talent_notification.recipient = proposal.talent.user
+                    talent_messages = [
                         "New Contract",
                         "You've got a new contract.",
                         "A new contract has been created for you.",
                         "You have a new contract for a project you've proposed to",
                     ]
-                    freelancer_notification.hint_text = random.choice(
-                        freelancer_messages
-                    )
-                    freelancer_notification.content_text = (
-                        "You've received a contract for <strong>%s</strong> project, from freelancer <strong>%s</strong>. Please check it out."
+                    talent_notification.hint_text = random.choice(talent_messages)
+                    talent_notification.content_text = (
+                        "You've received a contract for <strong>%s</strong> project, from talent <strong>%s</strong>. Please check it out."
                         % (proposal.job.title, proposal.job.client.user.name)
                     )
-                    freelancer_notification.object_api_link = (
+                    talent_notification.object_api_link = (
                         "/contracts/view/%s" % contract.pk
                     )
                     # ----------------------------------------------------------------------------
@@ -125,7 +123,7 @@ class ContractCreateAPIView(GenericAPIView):
                     client_notification.hint_text = random.choice(client_messages)
                     client_notification.content_text = (
                         "You've created a contract for <strong>%s</strong> project, with <strong>%s</strong>. Please check it out."
-                        % (proposal.job.title, proposal.freelancer.user.name)
+                        % (proposal.job.title, proposal.talent.user.name)
                     )
                     client_notification.object_api_link = (
                         "/contracts/view/%s" % contract.pk
@@ -148,7 +146,7 @@ class ContractCreateAPIView(GenericAPIView):
 
                     # update job activities
                     job_activity = proposal.job.activities
-                    job_activity.hired.add(proposal.freelancer)
+                    job_activity.hired.add(proposal.talent)
 
                     # Save notifications
                     Notification.objects.bulk_create(notifications)

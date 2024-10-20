@@ -6,7 +6,7 @@ from django.urls import path, re_path, include
 
 from django.http import JsonResponse
 from django.http import JsonResponse, HttpResponse
-
+from django.conf import settings
 
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "")
 
@@ -21,9 +21,12 @@ urlpatterns = [
     path("api/proposals/", include("proposals.urls")),
     path("api/contracts/", include("contracts.urls")),
     path("api/projects/", include("projects.urls")),
-    path("api/freelancers/", include("freelancers.urls")),
+    path("api/talents/", include("talents.urls")),
     path("api/notifications/", include("notifications.urls")),
     path("api/messaging/", include("messaging.urls")),
     path("api/account/", include("users.views.account.urls")),
     path("", include("core.urls")),
 ]
+
+if settings.DEBUG:
+    urlpatterns.insert(0, path("silk/", include("silk.urls", namespace="silk")))

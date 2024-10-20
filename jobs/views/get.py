@@ -13,9 +13,11 @@ from jobs.serializers import (
     JobRetrieveSerializer,
     ActivitySerializer,
     JobListSerializer,
-    MyJobListSerializer,
+    JobListSerializer,
 )
 from django.utils import timezone
+
+import after_response
 
 
 class JobListAPIView(ListAPIView):
@@ -44,7 +46,7 @@ class JobListAPIView(ListAPIView):
 
 
 class MyJobListAPIView(ListAPIView):
-    serializer_class = MyJobListSerializer
+    serializer_class = JobListSerializer
 
     def get_queryset(self):
         user_id = self.request.user.pk
@@ -66,23 +68,18 @@ class MyJobListAPIView(ListAPIView):
         return self.get_paginated_response(serializer.data)
 
 
-class JobDetailAPIView(RetrieveAPIView):
+class JobRetrieveAPIView(RetrieveAPIView):
     permission_classes = []
     serializer_class = JobRetrieveSerializer
 
-    def update_last_client_visit(self, activity: Activities) -> None:
-        activity.client_last_visit = timezone.now()
-        activity.save()
-
-    def get_queryset(self):
-        slug = self.kwargs["slug"]
+    def get_queryset(self, job_id: str):
         try:
-            return Job.objects.get(slug=slug)
+            return Job.objects.get(pk=job_id)
         except:
             return None
 
-    def retrieve(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
+    def retrieve(self, request, job_id, *args, **kwargs):
+        queryset = self.get_queryset(job_id)
         if queryset:
             serializer = self.get_serializer(instance=queryset)
 

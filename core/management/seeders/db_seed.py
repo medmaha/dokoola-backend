@@ -10,7 +10,7 @@ execution_order = [
     ("0_users", "users"),
     ("1_reviews", "reviews"),
     ("2_clients", "clients"),
-    ("3_freelancers", "freelancers"),
+    ("3_talents", "talents"),
     ("4_core", "core"),
     ("5_jobs", "jobs"),
     ("6_proposals", "proposals"),

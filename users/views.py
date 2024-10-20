@@ -71,7 +71,7 @@ class UserDashboardAPIView(RetrieveAPIView):
         data = {}
         status = 200
 
-        if profile_name == "Freelancer":
+        if profile_name == "Talent":
             data["projects_count"] = 1
             status = 200
 

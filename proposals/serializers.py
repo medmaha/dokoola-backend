@@ -1,7 +1,11 @@
 from rest_framework import serializers
 
-from freelancers.serializers import FreelancerSerializer, FreelancerMiniSerializer
-from jobs.serializers import JobListSerializer, JobMiniSerializer
+from talents.serializers import (
+    TalentSerializer,
+    TalentMiniSerializer,
+)
+
+from jobs.serializers import JobListSerializer, JobListSerializer
 
 from .models import Proposal, Attachment
 
@@ -37,14 +41,14 @@ class ProposalListSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
 
-        data.update({"freelancer": get_freelancer(instance), "job": get_job(instance)})
+        data.update({"talent": get_talent(instance), "job": get_job(instance)})
 
         return data
 
 
 class ProposalDetailSerializer(serializers.ModelSerializer):
     job = JobListSerializer()
-    freelancer = FreelancerSerializer()
+    talent = TalentSerializer()
     attachments = AttachmentSerializer(many=True)
 
     class Meta:
@@ -54,7 +58,7 @@ class ProposalDetailSerializer(serializers.ModelSerializer):
             "job",
             "budget",
             "service_fee",
-            "freelancer",
+            "talent",
             "bits_amount",
             "attachments",
             "cover_letter",
@@ -67,7 +71,7 @@ class ProposalDetailSerializer(serializers.ModelSerializer):
 
 
 class ProposalUpdateSerializer(serializers.ModelSerializer):
-    job = JobMiniSerializer()
+    job = JobListSerializer()
     attachments = AttachmentSerializer(many=True)
 
     class Meta:
@@ -110,7 +114,7 @@ class ProposalCreateSerializer(serializers.ModelSerializer):
 
 class ProposalPendingListSerializer(serializers.ModelSerializer):
     """
-    This is a serializer for the list of pending proposals for the request user (freelancer)
+    This is a serializer for the list of pending proposals for the request user (talent)
     """
 
     class Meta:
@@ -119,7 +123,7 @@ class ProposalPendingListSerializer(serializers.ModelSerializer):
             "id",
             "budget",
             "service_fee",
-            "freelancer",
+            "talent",
             "duration",
             "created_at",
         ]
@@ -128,7 +132,7 @@ class ProposalPendingListSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
 
         data.update({"job": get_job(instance)})
-        data.update({"freelancer": get_freelancer(instance)})
+        data.update({"talent": get_talent(instance)})
         data["cover_letter"] = instance.cover_letter[:150]
 
         return data
@@ -148,10 +152,18 @@ def get_job(instance: Proposal):
     }
 
 
-def get_freelancer(instance: Proposal):
+def get_talent(instance: Proposal):
     return {
-        "name": instance.freelancer.user.name,
-        "username": instance.freelancer.user.username,
-        "avatar": instance.freelancer.user.avatar,
-        "rating": instance.freelancer.user.calculate_rating(),
+        "username": instance.talent.user.username,
+        "avatar": instance.talent.user.avatar,
+        "rating": instance.talent.user.calculate_rating(),
+    }
+
+
+def get_talent(instance: Proposal):
+    return {
+        "name": instance.talent.user.name,
+        "username": instance.talent.user.username,
+        "avatar": instance.talent.user.avatar,
+        "rating": instance.talent.user.calculate_rating(),
     }

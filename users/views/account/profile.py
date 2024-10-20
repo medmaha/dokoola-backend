@@ -4,35 +4,33 @@ from rest_framework.response import Response
 from rest_framework.generics import RetrieveAPIView
 
 from users.models import User
-from clients.serializer import ClientProfileDetailSerializer
-from freelancers.serializers import FreelancerProfileDetailSerializer
+from clients.serializer import ClientRetrieveSerializer
+from talents.serializers import TalentProfileDetailSerializer
 
 
 class UserProfileAPIView(RetrieveAPIView):
-    def get_queryset(self, username: str):
+
+    def retrieve(self, request, username, *args, **kwargs):
+
         try:
             user = User.objects.get(username=username)
             profile, profile_name = user.profile
         except:
-            return None
-        if profile_name.lower() == "freelancer":
-            self.serializer_class = FreelancerProfileDetailSerializer
-
-        if profile_name.lower() == "client":
-            self.serializer_class = ClientProfileDetailSerializer
-
-        if not self.serializer_class:
-            return None
-        return profile
-
-    def retrieve(self, request, username, *args, **kwargs):
-        queryset = self.get_queryset(username)
-        if not queryset:
             return Response(
                 {"message": "The userID provided, doesn't match our database"},
                 status=404,
             )
-        serializer = self.get_serializer(
-            instance=queryset, context={"request": request}
-        )
-        return Response(serializer.data, status=200)
+
+        if profile_name.lower() == "talent":
+            self.serializer_class = TalentProfileDetailSerializer
+
+        if profile_name.lower() == "client":
+            self.serializer_class = ClientRetrieveSerializer
+
+        serializer = self.get_serializer(instance=profile, context={"request": request})
+
+        data = serializer.data
+        data["is_client"] = profile.user.is_client
+        data["is_talent"] = profile.user.is_talent
+
+        return Response(data, status=200)

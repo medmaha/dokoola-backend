@@ -13,8 +13,8 @@ class AuthUserSerializer(serializers.ModelSerializer):
             data.update({"is_staff": True})
         if instance.is_client:
             data.update({"is_client": True})
-        if instance.is_freelancer:
-            data.update({"is_freelancer": True})
+        if instance.is_talent:
+            data.update({"is_talent": True})
 
         return data
 
@@ -53,7 +53,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
             "last_name",
             "is_active",
             "is_client",
-            "is_freelancer",
+            "is_talent",
         )
 
 
@@ -67,21 +67,16 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             "username",
             "gender",
             "phone",
-            "country",
-            "phone_code",
-            "country_code",
-            "state",
-            "district",
             "zip_code",
-            "city",
+            "email",
         )
 
     @classmethod
-    def merge_serialize(cls, instance, validated_data):
-        data = dict
+    def merge_serialize(cls, instance, validated_data, **kwargs):
+        data = dict()
         for field in cls.Meta.fields:
             if field in validated_data:
                 data[field] = validated_data[field]
             else:
                 data[field] = getattr(instance, field)
-        return cls(instance=instance, data=data)
+        return cls(instance=instance, data=data, **kwargs)

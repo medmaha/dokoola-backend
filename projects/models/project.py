@@ -53,8 +53,8 @@ class Project(models.Model):
         return self.contract.client
 
     @property
-    def freelancer(self):
-        return self.contract.freelancer
+    def talent(self):
+        return self.contract.talent
 
     @property
     def job(self):

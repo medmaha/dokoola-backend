@@ -19,7 +19,7 @@ class User(AbstractUser):
 
     is_active = models.BooleanField(default=False)
     is_client = models.BooleanField(default=False)
-    is_freelancer = models.BooleanField(default=False)
+    is_talent = models.BooleanField(default=False)
 
     email_verified = models.BooleanField(default=False)
 
@@ -31,7 +31,12 @@ class User(AbstractUser):
     # Personal info
     phone = models.CharField(max_length=50, default="", blank=True)
     phone_code = models.CharField(max_length=10, default="", blank=True)
-    country = models.CharField(default="", max_length=100)
+    country = models.CharField(
+        default="",
+        blank=True,
+        max_length=100,
+        null=True,
+    )
     country_code = models.CharField(max_length=10, default="", blank=True)
     state = models.CharField(max_length=50, default="", blank=True, null=True)
     district = models.CharField(max_length=50, default="", blank=True, null=True)
@@ -51,8 +56,8 @@ class User(AbstractUser):
             return (self.staff_profile, "Staff")  # type: ignore
         if self.is_client:
             return (self.client_profile, "Client")  # type: ignore
-        if self.is_freelancer:
-            return (self.freelancer_profile, "Freelancer")  # type: ignore
+        if self.is_talent:
+            return (self.talent_profile, "Talent")  # type: ignore
         return (None, "")
 
     @property
@@ -61,8 +66,8 @@ class User(AbstractUser):
             return "Staff"
         if self.is_client:
             return "Client"
-        if self.is_freelancer:
-            return "Freelancer"
+        if self.is_talent:
+            return "Talent"
         return "User"
 
     def get_address(self):
@@ -78,7 +83,10 @@ class User(AbstractUser):
         }
 
     def get_location(self):
-        return f"{self.country} | {self.city or self.state}"
+        sub = self.city or self.state
+        if sub:
+            return f"{self.country} | {sub}"
+        return self.country
 
     def get_personal_info(self):
         return {

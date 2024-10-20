@@ -42,7 +42,7 @@ class ClientDashboardAPIView(RetrieveAPIView):
         data["total_spending"] = query.total_spending()
         data["total_projects"] = query.get_total_projects()
         data["project_spending"] = query.get_project_spending()
-        data["freelancer_reviews"] = query.get_freelancer_reviews()
+        data["talent_reviews"] = query.get_talent_reviews()
         data["recent_projects"] = query.get_recent_projects()
         data["avg_rating"] = query.get_average_rating()
 
@@ -290,7 +290,7 @@ class ClientDashboardQuery:
             pass
 
     def get_recent_projects(self):
-        from freelancers.models import Freelancer
+        from talents.models import Talent
 
         projects = self.__jobs.values(
             "slug",
@@ -305,20 +305,20 @@ class ClientDashboardQuery:
         try:
             for i, project in enumerate(projects[:5]):
 
-                freelancers = Freelancer.objects.select_related("user").filter(
+                talentsent.objects.select_related("user").filter(
                     contract__job=project
                 )
                 computed.append(project)
-                if freelancers.exists():
-                    _freelancer = freelancers[0]
+                if talentss():
+                    _talent = talenttalents
 
                     data = {}
-                    data["freelancer"] = {
-                        "name": _freelancer.user.name,
-                        "title": _freelancer.title,
-                        "avatar": _freelancer.user.avatar,
-                        "username": _freelancer.user.username,
-                        **_freelancer.reviews.select_related().aggregate(
+                    data["talent"] = {
+                        "name": _talent.user.name,
+                        "title": _talent.title,
+                        "avatar": _talent.user.avatar,
+                        "username": _talent.user.username,
+                        **_talent.reviews.select_related().aggregate(
                             rating=models.Avg("rating", 3)
                         ),
                     }
@@ -329,7 +329,7 @@ class ClientDashboardQuery:
 
         return computed
 
-    def get_freelancer_reviews(self):
+    def get_talent_reviews(self):
         try:
             _query = models.Q(pk__isnull=False)
 

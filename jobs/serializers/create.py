@@ -7,9 +7,17 @@ class JobCreateSerializer(serializers.ModelSerializer):
         model = Job
         fields = [
             "title",
+            "country",
+            "address",
+            "pricing",
+            "benefits",
+            "job_type",
             "description",
-            "budget",
-            "activities_id",
             "required_skills",
-            "location",
+            "experience_level",
+            "estimated_duration",
+            "third_party_address",
+            "application_deadline",
+            "job_type_other",
+            "experience_level_other",
         ]

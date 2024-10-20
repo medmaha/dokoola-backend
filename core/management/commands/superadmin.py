@@ -23,11 +23,7 @@ class Command(BaseCommand):
 
         try:
             user = User.objects.get(email=email)
-            if not user.is_superuser:
-                raise Exception('User with email "%s" already exists' % email)
-            self.stdout.write(self.style.WARNING("\nSuperadmin already exists\n"))
             return
-
         except User.DoesNotExist:
             user = User()
             user.is_staff = True
