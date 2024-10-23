@@ -1,7 +1,8 @@
-from users.models.ott import OTTProxy
-from core.services.email import email_service
-from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
+from rest_framework.response import Response
+
+from core.services.email import email_service
+from users.models.ott import OTTProxy
 
 
 class ResendOttAPIView(GenericAPIView):

@@ -1,12 +1,13 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 from users.models import User
 from users.serializer import UserSerializer
+
 
 class GenerateToken(TokenObtainPairSerializer):
     def get_token(self, user, **kwargs):
         token = self.token_class.for_user(user)
         return self.generate_token(token, user, **kwargs)
-
 
     def generate_token(self, token, user, **kwargs):
         serialized_data = UserSerializer(user, **kwargs).data

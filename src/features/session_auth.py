@@ -1,6 +1,6 @@
-from rest_framework.authentication import BaseAuthentication
-from django.contrib.sessions.models import Session
 from django.contrib.auth import get_user_model
+from django.contrib.sessions.models import Session
+from rest_framework.authentication import BaseAuthentication
 
 User = get_user_model()
 

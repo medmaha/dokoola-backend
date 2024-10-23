@@ -1,10 +1,10 @@
 import random
+
 from django.db.models.signals import post_save
-from django.utils.html import strip_tags
 from django.dispatch import receiver
+from django.utils.html import strip_tags
 
 from core.services.email.main import EmailService
-
 from proposals.models import Proposal
 
 from .models import Notification

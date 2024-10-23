@@ -1,12 +1,13 @@
 from itertools import chain
+
 from django.db.models import Q
 from rest_framework.generics import ListAPIView
-from .serializers import TalentSerializer
-from utilities.text import get_url_search_params
-from .models import Talent
-
 
 from users.models import User
+from utilities.text import get_url_search_params
+
+from .models import Talent
+from .serializers import TalentSerializer
 
 
 class TalentsSearchAPIView(ListAPIView):
@@ -23,42 +24,38 @@ class TalentsSearchAPIView(ListAPIView):
 
         queryset = Talent.objects.filter()
 
-        if query:
-            if query.lower() != "all":
-                query = query.replace("%20", " ")
-                queryset = queryset.filter(
-                    Q(skills__icontains=query)
-                    | Q(user__first_name__icontains=query)
-                    | Q(user__last_name__icontains=query)
-                    | Q(user__username__icontains=query)
-                    | Q(title__icontains=query)
-                    | Q(bio__icontains=query)
-                    | Q(skills__icontains=query)
-                )
+        if query and query.lower() != "all":
+            query = query.replace("%20", " ")
+            queryset = queryset.filter(
+                Q(skills__icontains=query)
+                | Q(user__first_name__icontains=query)
+                | Q(user__last_name__icontains=query)
+                | Q(user__username__icontains=query)
+                | Q(title__icontains=query)
+                | Q(bio__icontains=query)
+                | Q(skills__icontains=query)
+            )
 
-        if category:
-            if category.lower() != "all":
-                category = category.replace("%20", " ")
-                queryset = queryset.filter(
-                    Q(skills__icontains=category)
-                    | Q(title__icontains=category)
-                    | Q(bio__icontains=category)
-                )
+        if category and category.lower() != "all":
+            category = category.replace("%20", " ")
+            queryset = queryset.filter(
+                Q(skills__icontains=category)
+                | Q(title__icontains=category)
+                | Q(bio__icontains=category)
+            )
 
-        if badge:
-            if badge.lower() != "all":
-                badge = badge.replace("%20", " ")
-                queryset = queryset.filter(Q(badge__icontains=badge))
+        if badge and badge.lower() != "all":
+            badge = badge.replace("%20", " ")
+            queryset = queryset.filter(Q(badge__icontains=badge))
 
-        if location:
-            if location.lower() != "all":
-                queryset = queryset.filter(
-                    Q(user__country__icontains=location)
-                    | Q(user__state__icontains=location)
-                    | Q(user__city__icontains=location)
-                    | Q(user__address__icontains=location)
-                    | Q(user__zip_code__icontains=location)
-                )
+        if location and location.lower() != "all":
+            queryset = queryset.filter(
+                Q(user__country__icontains=location)
+                | Q(user__state__icontains=location)
+                | Q(user__city__icontains=location)
+                | Q(user__address__icontains=location)
+                | Q(user__zip_code__icontains=location)
+            )
         return queryset.order_by("badge").distinct()
 
     def get_queryset(self):

@@ -1,4 +1,5 @@
 from django.db import models
+
 from projects.models.acknowledgement import Acknowledgement
 
 
@@ -13,7 +14,10 @@ class MilestoneStatusChoices(models.TextChoices):
 class Milestone(models.Model):
     project_pk = models.CharField(max_length=255, db_index=True)
     acknowledgement = models.ForeignKey(
-        Acknowledgement, on_delete=models.SET_NULL, related_name="milestone", null=True
+        Acknowledgement,
+        on_delete=models.SET_NULL,
+        related_name="milestone",
+        null=True,
     )
 
     milestone_name = models.CharField(max_length=255, null=True, blank=True)

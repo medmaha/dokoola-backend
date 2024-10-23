@@ -1,2 +1,2 @@
-from .projects import ProjectModelAdmin
 from .milestone import MilestoneModelAdmin
+from .projects import ProjectModelAdmin

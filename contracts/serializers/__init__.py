@@ -1,9 +1,9 @@
 from .create import ContractCreateSerializer
-from .update import ContractUpdateSerializer
 from .retrieve import (
     ContractListSerializer,
     ContractRetrieveSerializer,
 )
+from .update import ContractUpdateSerializer
 
 __all__ = [
     "ContractCreateSerializer",

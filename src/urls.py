@@ -1,12 +1,11 @@
 import os
-from django.shortcuts import render
+
+from django.conf import settings
 from django.contrib import admin
 from django.core.mail import send_mail
-from django.urls import path, re_path, include
-
-from django.http import JsonResponse
-from django.http import JsonResponse, HttpResponse
-from django.conf import settings
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render
+from django.urls import include, path, re_path
 
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "")
 

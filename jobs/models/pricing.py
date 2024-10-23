@@ -15,15 +15,20 @@ class Pricing(models.Model):
     )
 
     will_pay_more = models.BooleanField(
-        default=False, blank=True, help_text="willing to pay more than the budget?"
+        default=False,
+        blank=True,
+        help_text="willing to pay more than the budget?",
     )
 
     addition_node = models.CharField(
-        max_length=100, help_text="any additional information regarding the payment."
+        max_length=100,
+        help_text="any additional information regarding the payment.",
     )
 
     payment_type = models.CharField(
-        max_length=100, default="PROJECT", help_text="payment type. project or hourly."
+        max_length=100,
+        default="PROJECT",
+        help_text="payment type. project or hourly.",
     )
 
     def __str__(self):

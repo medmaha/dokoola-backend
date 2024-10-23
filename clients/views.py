@@ -1,35 +1,33 @@
 import uuid
+
 from django.db import transaction
 from django.utils import timezone
-
 from rest_framework.generics import (
+    GenericAPIView,
     ListAPIView,
     RetrieveAPIView,
-    GenericAPIView,
 )
 from rest_framework.response import Response
 
-
-from .serializer import (
-    CompanyListSerializer,
-    CompanyCreateSerializer,
-    CompanyUpdateSerializer,
-    #
-    ClientListSerializer,
-    ClientCreateSerializer,
-    ClientUpdateSerializer,
-    ClientRetrieveSerializer,
-    ClientJobDetailSerializer,
-    ClientUpdateDataSerializer,
-    ClientJobPostingSerializer,
-)
-
-from .models import Client, Company
 from jobs.models import Job
 from users.models.user import User
 from users.serializer import UserUpdateSerializer
-
 from utilities.generator import get_serializer_error_message
+
+from .models import Client, Company
+from .serializer import (
+    ClientCreateSerializer,
+    ClientJobDetailSerializer,
+    ClientJobPostingSerializer,
+    #
+    ClientListSerializer,
+    ClientRetrieveSerializer,
+    ClientUpdateDataSerializer,
+    ClientUpdateSerializer,
+    CompanyCreateSerializer,
+    CompanyListSerializer,
+    CompanyUpdateSerializer,
+)
 
 
 def validate_uuid(_id):
@@ -93,7 +91,8 @@ class ClientGenericAPIView(GenericAPIView):
                 password = user.get("password", None)
                 if not password:
                     return Response(
-                        {"message": "User password is required"}, status=400
+                        {"message": "User password is required"},
+                        status=400,
                     )
 
                 _user = User(**user)
@@ -136,7 +135,8 @@ class ClientGenericAPIView(GenericAPIView):
 
         if not user.is_client:
             return Response(
-                {"message": "Forbidden! Only clients are allowed"}, status=403
+                {"message": "Forbidden! Only clients are allowed"},
+                status=403,
             )
 
         _client = None
@@ -208,7 +208,8 @@ class ClientGenericAPIView(GenericAPIView):
 
             if not user.is_client:
                 return Response(
-                    {"message": "Forbidden! Only clients are allowed"}, status=403
+                    {"message": "Forbidden! Only clients are allowed"},
+                    status=403,
                 )
 
             client = Client.objects.get(pk=client_id)
@@ -242,7 +243,7 @@ class UserAPIView(RetrieveAPIView):
         try:
             queryset = Client.objects.get(pk=user_id)
             return queryset
-        except:
+        except Client.DoesNotExist:
             return None
 
     def retrieve(self, request, *args, **kwargs):
@@ -253,7 +254,8 @@ class UserAPIView(RetrieveAPIView):
             )
             return Response(serializer.data, status=200)
         return Response(
-            {"message':'The userID provided, doesn't match our database"}, status=404
+            {"message':'The userID provided, doesn't match our database"},
+            status=404,
         )
 
 
@@ -284,7 +286,9 @@ class ClientUpdateView(GenericAPIView):
         try:
             client = Client.objects.get(user__username=username)
             client_serializer: ClientUpdateSerializer = self.get_serializer(
-                instance=client, data=request.data, context={"request": request}
+                instance=client,
+                data=request.data,
+                context={"request": request},
             )
 
             if not client_serializer.is_valid():
@@ -297,7 +301,7 @@ class ClientUpdateView(GenericAPIView):
                 {"message": "Error: User doesn't exist!"},
                 status=404,
             )
-        except Exception as e:
+        except Exception:
 
             return Response(
                 {"message": "Error: Something went wrong!"},
@@ -335,7 +339,7 @@ class ClientJobDetailView(RetrieveAPIView):
                 instance=client, context={"request": request}
             )
             return Response(client_serializer.data, status=200)
-        except Exception as e:
+        except Exception:
 
             return Response(
                 {"message": "The provided query, doesn't match our database"},
@@ -360,7 +364,7 @@ class ClientJobPostingApiView(ListAPIView):
             )
             return self.get_paginated_response(serializer.data)
 
-        except Exception as e:
+        except Exception:
 
             return Response(
                 {"message": "The provided query, doesn't match our database"},

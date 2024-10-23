@@ -1,0 +1,31 @@
+[lint]
+
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]
+
+ignore = [
+    # Unused import
+    "F401", 
+    # Line too long
+    "E501",
+    # Wildcard import
+    "F403",
+    # Do not use bare `except`
+    "E722",
+    # Unused variable
+    "F841",
+    # Module level import not at top of file
+    "E402"
+]

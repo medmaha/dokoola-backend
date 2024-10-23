@@ -1,16 +1,14 @@
-from .project import ProjectSerializer
-from .milestone import (
-    MilestoneRetrieveSerializer,
-    MilestoneCreateSerializer,
-    MilestoneUpdateSerializer,
-)
 from .acknowledgement import (
-    AcknowledgementRetrieveSerializer,
     AcknowledgementCreateSerializer,
+    AcknowledgementRetrieveSerializer,
     AcknowledgementUpdateSerializer,
 )
-
-
 from .create import ProjectCreateSerializer
-from .update import ProjectStatusUpdateSerializer
+from .milestone import (
+    MilestoneCreateSerializer,
+    MilestoneRetrieveSerializer,
+    MilestoneUpdateSerializer,
+)
+from .project import ProjectSerializer
 from .retrieve import ProjectListSerializer, ProjectRetrieveSerializer
+from .update import ProjectStatusUpdateSerializer

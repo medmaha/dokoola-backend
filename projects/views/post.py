@@ -2,8 +2,6 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 
 from projects.models import Project
-
-
 from projects.serializers import ProjectCreateSerializer
 
 

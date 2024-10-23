@@ -1,6 +1,6 @@
-from users.models import User
 from jobs.models import Job
 from proposals.models import Proposal
+from users.models import User
 
 
 def check_has_proposed(context: dict, instance: Job):

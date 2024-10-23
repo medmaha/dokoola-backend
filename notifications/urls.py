@@ -3,7 +3,11 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("", views.NotificationListAPIView.as_view(), name="notification_list"),
+    path(
+        "",
+        views.NotificationListAPIView.as_view(),
+        name="notification_list",
+    ),
     path(
         "seen/",
         views.NotificationSeenAPIView.as_view(),

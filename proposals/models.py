@@ -1,5 +1,6 @@
 from django.db import models
-from jobs.models import Job
+
+from jobs.models import Activities, Job
 from talents.models import Talent  # Updated import
 
 
@@ -28,7 +29,9 @@ class Proposal(models.Model):
     is_reviewed = models.BooleanField(default=False)
 
     status = models.CharField(
-        max_length=200, choices=ProposalStatusChoices.choices, default="PENDING"
+        max_length=200,
+        choices=ProposalStatusChoices.choices,
+        default="PENDING",
     )
 
     updated_at = models.DateTimeField(auto_now=True)

@@ -1,13 +1,12 @@
+from django.db.models import Q
 from rest_framework.generics import (
     UpdateAPIView,
 )
-from django.db.models import Q
 from rest_framework.response import Response
-from jobs.models.job import JobStatusChoices
+
 from core.models import Category
-
 from jobs.models import Job
-
+from jobs.models.job import JobStatusChoices
 from jobs.serializers import (
     JobUpdateSerializer,
 )
@@ -37,16 +36,17 @@ class JobUpdateAPIView(UpdateAPIView):
         if not instance:
             return Response({"message": "Job not found"}, status=404)
 
-        category = get_category(data.pop("category", "None")) or instance.category_obj
+        category = get_category(data.pop("category", "None")) or instance.category
 
         if not category:
             return Response({"message": "Invalid job category"}, status=400)
 
         serializer = self.get_serializer(
-            instance=instance, data=data, partial=True, context={"request": request}
+            instance=instance,
+            data=data,
+            partial=True,
+            context={"request": request},
         )
-
-        (data)
 
         if serializer.is_valid():
             status = instance.status

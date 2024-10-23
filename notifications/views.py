@@ -1,8 +1,12 @@
+from rest_framework.generics import (
+    ListAPIView,
+    RetrieveAPIView,
+    UpdateAPIView,
+)
 from rest_framework.response import Response
-from rest_framework.generics import ListAPIView, RetrieveAPIView, UpdateAPIView
 
-from .serializer import NotificationSerializer
 from .models import Notification
+from .serializer import NotificationSerializer
 
 
 class NotificationListAPIView(ListAPIView):

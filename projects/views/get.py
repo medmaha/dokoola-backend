@@ -1,9 +1,12 @@
 from django.db.models import Q
-from rest_framework.response import Response
 from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.response import Response
 
 from projects.models.project import Project
-from projects.serializers import ProjectListSerializer, ProjectRetrieveSerializer
+from projects.serializers import (
+    ProjectListSerializer,
+    ProjectRetrieveSerializer,
+)
 from users.models.user import User
 
 

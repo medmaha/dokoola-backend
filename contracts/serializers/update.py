@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from contracts.models import Contract
 from proposals.models import Proposal
 

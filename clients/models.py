@@ -1,8 +1,9 @@
 import uuid
-from django.db import models
+
 from django.core.serializers.json import DjangoJSONEncoder
-from django.utils.translation import gettext_lazy as _
+from django.db import models
 from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 
 from reviews.models import Review
 from users.models import User

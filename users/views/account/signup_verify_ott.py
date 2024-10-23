@@ -1,6 +1,7 @@
-from users.models.ott import OTTProxy
-from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
+from rest_framework.response import Response
+
+from users.models.ott import OTTProxy
 
 
 class VerifyOttAPIView(GenericAPIView):
@@ -10,7 +11,6 @@ class VerifyOttAPIView(GenericAPIView):
     def post(self, request, *args, **kwargs):
         code = request.data.get("code")
         email = request.data.get("email")
-        (email, code)
         verified = OTTProxy.validate_ott(email, code)
 
         if verified:

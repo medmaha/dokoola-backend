@@ -1,14 +1,21 @@
-
-
 months = [
-    "January", "February", "March",
-    "April", "May", "June",
-    "July", "August", "September",
-    "October", "November", "December",
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
 ]
 
-# 
-def get_month_name(month:int) -> str:
+
+#
+def get_month_name(month: int) -> str:
 
     if month < 1:
         month = 1
@@ -19,7 +26,7 @@ def get_month_name(month:int) -> str:
     return months[month - 1]
 
 
-def get_month_index(month:str)-> int:
+def get_month_index(month: str) -> int:
     for index, m in enumerate(months):
         if m == month:
             return index

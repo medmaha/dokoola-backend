@@ -1,27 +1,27 @@
-from rest_framework.generics import RetrieveAPIView, ListAPIView, GenericAPIView
+from rest_framework.generics import (
+    GenericAPIView,
+    ListAPIView,
+    RetrieveAPIView,
+)
 from rest_framework.response import Response
 
-from users.serializer import UserUpdateSerializer
-from proposals.serializers import ProposalPendingListSerializer
 from proposals.models import Proposal
-
-from ..search import TalentsSearchAPIView
-
-from ..serializers import (
-    TalentDetailSerializer,
-    TalentSerializer,
-    TalentMiniInfoSerializer,
-    TalentUpdateSerializer,
-    TalentUpdateDataSerializer,
-)
+from proposals.serializers import ProposalPendingListSerializer
+from users.serializer import UserUpdateSerializer
 
 from ..dashboard import TalentDashboardSerializer
-
 from ..models import Talent
-
-from .portfolio import TalentPortfolioAPIView
+from ..search import TalentsSearchAPIView
+from ..serializers import (
+    TalentDetailSerializer,
+    TalentMiniInfoSerializer,
+    TalentSerializer,
+    TalentUpdateDataSerializer,
+    TalentUpdateSerializer,
+)
 from .certificates import TalentCertificateAPIView
 from .education import TalentEducationAPIView
+from .portfolio import TalentPortfolioAPIView
 
 
 class TalentListAPIView(ListAPIView):
@@ -94,7 +94,7 @@ class TalentUpdateAPIView(GenericAPIView):
                 {"message": "Error: User doesn't exist!"},
                 status=404,
             )
-        except Exception as e:
+        except Exception:
 
             return Response(
                 {"message": "Error: Something went wrong!"},
@@ -162,7 +162,7 @@ class TalentDashboardStatsView(GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         profile, profile_type = request.user.profile
-        if not profile_type == "Talent":
+        if profile_type != "Talent":
             return Response({}, status=403)
 
         serializer = self.get_serializer(profile)

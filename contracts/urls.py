@@ -1,12 +1,16 @@
-from . import views
 from django.urls import path
 
+from . import views
 
 # Url Pattern /api/contracts/*/**/
 
 urlpatterns = [
     path("", views.ContractListAPIView.as_view(), name="contracts"),
-    path("create/", views.ContractCreateAPIView.as_view(), name="contract-create"),
+    path(
+        "create/",
+        views.ContractCreateAPIView.as_view(),
+        name="contract-create",
+    ),
     path(
         "accept/<contract_id>/",
         views.ContractAcceptAPIView.as_view(),

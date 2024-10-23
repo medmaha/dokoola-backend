@@ -1,7 +1,7 @@
-from django.db.models import Q, F
-
-from rest_framework.response import Response
+from django.db.models import F, Q
 from rest_framework.generics import GenericAPIView
+from rest_framework.response import Response
+
 from clients.models import Client  # client_profile
 from talents.models import Talent  # talents_profile
 

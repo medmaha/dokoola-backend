@@ -1,7 +1,7 @@
+import random
+
 from django.db import models
 from django.utils import timezone
-
-import random
 
 
 class OTT(models.Model):
@@ -37,8 +37,6 @@ class OTTProxy(OTT):
         )
 
         ott.save()
-
-        (ott.identifier, ott.code)
 
         return ott
 

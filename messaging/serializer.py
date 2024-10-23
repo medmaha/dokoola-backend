@@ -15,10 +15,7 @@ class MessagingListSerializer(serializers.ModelSerializer):
 
     def get_from_me(self, instance: Message):
         request = self.context.get("request")
-
-        if request and instance.sender == request.user:
-            return True
-        return False
+        return request is not None and instance.sender == request.user
 
     def get_created_at(self, instance: Message):
         return instance.updated_at

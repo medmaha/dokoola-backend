@@ -1,10 +1,9 @@
-from rest_framework.response import Response
+from rest_framework import serializers
 from rest_framework.generics import GenericAPIView
+from rest_framework.response import Response
 
 from core.models import Category, Feedback
 from utilities.generator import get_serializer_error_message
-
-from rest_framework import serializers
 
 
 # Categories ---------------------------------------------------------------------
@@ -53,10 +52,12 @@ class FeedbackAPIView(GenericAPIView):
         early_return = False
 
         # If both author_name and author_email are not provided
-        if not data.get("author_name") and not data.get("author_email"):
-            # And if rating is not provided
-            if not data.get("rating"):
-                early_return = True
+        if (
+            not data.get("author_name")
+            and not data.get("author_email")
+            and not data.get("rating")
+        ):
+            early_return = True
 
         # If message and rating are not provided
         if not data.get("message") and not data.get("rating"):

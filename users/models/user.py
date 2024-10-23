@@ -1,5 +1,7 @@
-from django.db import models
+from typing import Any, Literal, Optional, Union
+
 from django.contrib.auth.models import AbstractUser
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from reviews.models import Review
@@ -51,14 +53,13 @@ class User(AbstractUser):
         return self.get_full_name()
 
     @property
-    def profile(self) -> tuple[object, str]:
-        if self.is_staff:
-            return (self.staff_profile, "Staff")  # type: ignore
+    def profile(self) -> "UserProfile":
+
         if self.is_client:
             return (self.client_profile, "Client")  # type: ignore
         if self.is_talent:
             return (self.talent_profile, "Talent")  # type: ignore
-        return (None, "")
+        return (self.staff_profile, "Staff")  # type: ignore
 
     @property
     def account_type(self):
@@ -102,3 +103,19 @@ class User(AbstractUser):
 
     def calculate_rating(self):
         return self.reviews.aggregate(models.Avg("rating")).get("avg_rating", 0.0)
+
+    # from clients.models import Client
+    # from staffs.models import Staff
+    # from talents.models import Talent
+
+    # type StaffProfile = tuple[Staff, Literal["Staff"]]
+    # type ClientProfile = tuple[Client, Literal["Client"]]
+    # type TalentProfile = tuple[Talent, Literal["Talent"]]
+    # type UserProfile = Union[StaffProfile, ClientProfile, TalentProfile]
+
+
+type UserProfile = Union[
+    tuple[Any, Literal["Staff"]],
+    tuple[Any, Literal["Client"]],
+    tuple[Any, Literal["Talent"]],
+]

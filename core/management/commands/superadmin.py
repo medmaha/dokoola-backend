@@ -1,6 +1,7 @@
 import os
 import random
 from typing import Any
+
 from django.core.management import BaseCommand
 
 

@@ -1,13 +1,11 @@
-from django.db import connection
-from rest_framework.response import Response
+from django.db import connection, models
 from rest_framework.generics import RetrieveAPIView
+from rest_framework.response import Response
 
-from django.db import models
-
-from projects.models.project import Project, ProjectStatusChoices
 from clients.models import Client
-from utilities.formatters import get_month_index, get_month_name
+from projects.models.project import Project, ProjectStatusChoices
 from users.models import User
+from utilities.formatters import get_month_index, get_month_name
 
 
 class ClientDashboardAPIView(RetrieveAPIView):
@@ -24,16 +22,11 @@ class ClientDashboardAPIView(RetrieveAPIView):
 
         year = None
         if "year" in query_params:
-            try:
-                year = int(query_params["year"])
-            except:
-                pass
+            year = int(query_params["year"])
+
         month = None
         if "month" in query_params:
-            try:
-                month = int(query_params["month"])
-            except:
-                pass
+            month = int(query_params["month"])
 
         query = ClientDashboardQuery(client, month=month, year=year)
 
@@ -52,20 +45,26 @@ class ClientDashboardAPIView(RetrieveAPIView):
         try:
             dashboard_data = self.get_queryset(request.user, request.query_params)
             return Response(dashboard_data, status=200)
+        except (ValueError, TypeError) as e:
+            message = e.__str__()
+            return Response({"message": message}, status=404)
+
         except Exception as e:
-            return Response(
-                {"message": "The provided query, doesn't match our database"},
-                status=404,
-            )
+            message = "An error occurred while processing your request"
+            return Response({"message": message}, status=500)
 
 
 class ClientDashboardQuery:
 
     def __init__(
-        self, instance: Client, month: int | None = None, year: int | None = None
+        self,
+        instance: Client,
+        month: int | None = None,
+        year: int | None = None,
     ):
 
         from datetime import datetime
+
         from proposals.models import Job
 
         self.today = datetime.now()
@@ -145,7 +144,7 @@ class ClientDashboardQuery:
                 "percentage": int(percentage),
                 "pending_spent": pending_spent,
             }
-        except Exception as e:
+        except Exception:
             return {"spent": 0.00}
 
     def get_total_projects(self):
@@ -168,7 +167,7 @@ class ClientDashboardQuery:
                 "last_month": last_month,
                 "percentage": int(percentage),
             }
-        except Exception as e:
+        except Exception:
             return {"total": 0.00}
 
     def get_project_spending(self):
@@ -222,110 +221,79 @@ class ClientDashboardQuery:
                     }
                 )
             return result
-        except Exception as e:
+        except Exception:
 
             # DokoolaLogger.critical(message)
 
             return []
 
     def get_average_rating(self):
-        try:
-            reviews = self.instance.reviews.select_related()
+        reviews = self.instance.reviews.select_related()
 
-            this_month = reviews.filter(created_at__month=(self.month - 1) or 1)
-            last_month = reviews.filter(created_at__month=self.month)
+        this_month = reviews.filter(created_at__month=(self.month - 1) or 1)
+        last_month = reviews.filter(created_at__month=self.month)
 
-            data = {
-                "count": reviews.count(),
-                "average": reviews.aggregate(models.Avg("rating"))["rating__avg"]
-                or 0.01,
-                "this_month": this_month.aggregate(models.Avg("rating"))["rating__avg"]
-                or 0.01,
-                "last_month": last_month.aggregate(models.Avg("rating"))["rating__avg"]
-                or 0.01,
-            }
-            data["percentage"] = (
-                (data["this_month"] / 100) / (data["last_month"] / 100)
-            ) * 100
+        data = {
+            "count": reviews.count(),
+            "average": reviews.aggregate(models.Avg("rating"))["rating__avg"] or 0.01,
+            "this_month": this_month.aggregate(models.Avg("rating"))["rating__avg"]
+            or 0.01,
+            "last_month": last_month.aggregate(models.Avg("rating"))["rating__avg"]
+            or 0.01,
+        }
+        data["percentage"] = (
+            (data["this_month"] / 100) / (data["last_month"] / 100)
+        ) * 100
 
-            if (data["percentage"]) > 100:
-                data["percentage"] = 100
-        except Exception as e:
-            pass
+        if (data["percentage"]) > 100:
+            data["percentage"] = 100
 
         return data
 
     def get_project_types(self):
-        try:
-            projects = (
-                self.__jobs.order_by("-created_at")
-                # .distinct("category")
-                .values("slug").annotate(
-                    label=models.F("category_obj__name"),
-                    year=models.F("created_at__year"),
-                    month=models.F("created_at__month"),
-                )
+        projects = (
+            self.__jobs.order_by("-created_at")
+            # .distinct("category")
+            .values("slug").annotate(
+                label=models.F("category_obj__name"),
+                year=models.F("created_at__year"),
+                month=models.F("created_at__month"),
             )
+        )
 
-            _projects = {}
+        _projects = {}
 
-            for p in projects:
-                _projects[p["label"]] = p
+        for p in projects:
+            _projects[p["label"]] = p
 
-            projects = list(_projects.values())[:6]
+        projects = list(_projects.values())[:6]
 
-            return [
-                {
-                    "id": project["slug"],
-                    "year": project["year"],
-                    "month": get_month_name(project["month"]),
-                    "label": project["label"],
-                    "count": self.__jobs.filter(category_obj__name=project["label"])
-                    .values()
-                    .count(),
-                }
-                for project in projects
-            ]
-        except Exception as e:
-            pass
+        return [
+            {
+                "id": project["slug"],
+                "year": project["year"],
+                "month": get_month_name(project["month"]),
+                "label": project["label"],
+                "count": self.__jobs.filter(category_obj__name=project["label"])
+                .values()
+                .count(),
+            }
+            for project in projects
+        ]
 
     def get_recent_projects(self):
         from talents.models import Talent
 
-        projects = self.__jobs.values(
-            "slug",
-            "title",
-            "description",
-            "status",
-            "budget",
-            "created_at",
-        ).annotate(category=models.F("category_obj__name"))[:5]
+        # projects = self.__jobs.values(
+        #     "slug",
+        #     "title",
+        #     "description",
+        #     "status",
+        #     "budget",
+        #     "created_at",
+        # ).annotate(category=models.F("category_obj__name"))[:5]
 
         computed = []
-        try:
-            for i, project in enumerate(projects[:5]):
-
-                talentsent.objects.select_related("user").filter(
-                    contract__job=project
-                )
-                computed.append(project)
-                if talentss():
-                    _talent = talenttalents
-
-                    data = {}
-                    data["talent"] = {
-                        "name": _talent.user.name,
-                        "title": _talent.title,
-                        "avatar": _talent.user.avatar,
-                        "username": _talent.user.username,
-                        **_talent.reviews.select_related().aggregate(
-                            rating=models.Avg("rating", 3)
-                        ),
-                    }
-
-                    computed[i] = data
-        except Exception as e:
-            pass
 
         return computed
 
@@ -362,6 +330,6 @@ class ClientDashboardQuery:
                 for rating in list(duplicate.values())[:6]
             ]
             return result
-        except Exception as e:
+        except Exception:
 
             return []

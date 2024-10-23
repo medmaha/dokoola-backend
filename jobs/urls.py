@@ -9,5 +9,9 @@ urlpatterns = [
     path("search/", views.JobsSearchAPIView.as_view(), name="job_searching"),
     path("update/", views.JobUpdateAPIView.as_view(), name="job_update"),
     path("<job_id>/", views.JobRetrieveAPIView.as_view(), name="job_detail"),
-    path("<slug>/activities/", views.JobActivitiesAPIView.as_view(), name="job_detail"),
+    path(
+        "<slug>/activities/",
+        views.JobActivitiesAPIView.as_view(),
+        name="job_detail",
+    ),
 ]

@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('jobs', '0006_activities_job'),
+        ("jobs", "0006_activities_job"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='job',
-            old_name='href',
-            new_name='third_party_address',
+            model_name="job",
+            old_name="href",
+            new_name="third_party_address",
         ),
         migrations.AddField(
-            model_name='job',
-            name='is_third_party',
+            model_name="job",
+            name="is_third_party",
             field=models.BooleanField(blank=True, default=False),
         ),
     ]

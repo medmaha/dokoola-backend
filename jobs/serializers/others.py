@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from jobs.models import Pricing, Activities
+
+from jobs.models import Activities, Pricing
 
 
 class ActivitySerializer(serializers.ModelSerializer):

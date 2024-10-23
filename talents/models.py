@@ -1,8 +1,9 @@
 from django.db import models
 from django.db.models.manager import Manager
-from utilities.generator import id_generator
-from users.models import User
+
 from reviews.models import Review
+from users.models import User
+from utilities.generator import id_generator
 
 
 class Certificate(models.Model):
@@ -57,7 +58,10 @@ class TalentManager(Manager):
 
 class Talent(models.Model):
     id = models.CharField(
-        primary_key=True, default=id_generator, editable=False, max_length=64
+        primary_key=True,
+        default=id_generator,
+        editable=False,
+        max_length=64,
     )
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name="talent_profile"

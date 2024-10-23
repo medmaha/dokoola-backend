@@ -1,16 +1,16 @@
 from django.db import transaction
-
-from rest_framework.response import Response
 from rest_framework.generics import UpdateAPIView
-from utilities.generator import get_serializer_error_message
+from rest_framework.response import Response
+
 from clients.models import Client
 from clients.serializer import ClientUpdateSerializer
 from talents.models import Talent
 from talents.serializers import TalentUpdateSerializer
 from users.models import User
+from users.serializer import UserUpdateSerializer
+from utilities.generator import get_serializer_error_message
 
 from .auth_token import GenerateToken
-from users.serializer import UserUpdateSerializer
 
 
 class UserProfileUpdateAPIView(UpdateAPIView):
@@ -35,7 +35,8 @@ class UserProfileUpdateAPIView(UpdateAPIView):
 
                 if username_exists:
                     return Response(
-                        {"message": "Sorry! this username already exist"}, status=400
+                        {"message": "Sorry! this username already exist"},
+                        status=400,
                     )
                 data["is_valid"] = True
                 user_serializer = UserUpdateSerializer.merge_serialize(user, data)

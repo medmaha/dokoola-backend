@@ -1,30 +1,30 @@
-from django.db.models import Q
 from django.db import transaction
+from django.db.models import Q
 from rest_framework.generics import (
-    ListAPIView,
-    RetrieveAPIView,
     CreateAPIView,
     GenericAPIView,
+    ListAPIView,
+    RetrieveAPIView,
 )
-from rest_framework.response import Response
 from rest_framework.request import Request
+from rest_framework.response import Response
+
+from jobs.models import Job
 from jobs.models.activities import Activities
 from src.settings.logger import DokoolaLogger
-from utilities.generator import get_serializer_error_message
 from talents.models import Talent  # Updated import
-from jobs.models import Job
-from .models import Proposal, Attachment, ProposalStatusChoices
+from users.models import User
+from utilities.generator import get_serializer_error_message
 
+from .models import Attachment, Proposal, ProposalStatusChoices
 from .serializers import (
     ProposalCreateSerializer,
     ProposalDetailSerializer,
-    ProposalListSerializer,
     ProposalEditSerializer,
-    ProposalUpdateSerializer,
+    ProposalListSerializer,
     ProposalPendingListSerializer,
+    ProposalUpdateSerializer,
 )
-
-from users.models import User
 
 
 class ProposalListApiView(ListAPIView):
@@ -139,7 +139,9 @@ class ProposalUpdateAPIView(GenericAPIView):
             )  # TODO: Handle attachments
 
             serializer = self.get_serializer(
-                instance=proposal, data=request.data, context={"request": request}
+                instance=proposal,
+                data=request.data,
+                context={"request": request},
             )
 
             if serializer.is_valid():
@@ -185,7 +187,8 @@ class ProposalCreateAPIView(CreateAPIView):
                 # If the user has already applied for this job, return an error
                 if existing_proposal:
                     return Response(
-                        {"message": "Already applied for this job"}, status=400
+                        {"message": "Already applied for this job"},
+                        status=400,
                     )
 
             # If the job doesn't exist, return an error
@@ -223,8 +226,6 @@ class ProposalCreateAPIView(CreateAPIView):
 
             error_message = get_serializer_error_message(serializer.errors)
 
-            (error_message)
-
             return Response({"message": error_message}, status=400)
 
     def get_serializer(self, *args, **kwargs) -> ProposalCreateSerializer:
@@ -238,7 +239,8 @@ class ProposalCheckAPIView(RetrieveAPIView):
 
         if not talent:
             return Response(
-                {"message": "You don't have permission for this request"}, status=403
+                {"message": "You don't have permission for this request"},
+                status=403,
             )
 
         slug = self.kwargs.get("slug")
@@ -263,7 +265,7 @@ class ProposalPendingListView(ListAPIView):
             return None
         except Talent.DoesNotExist:
             return None
-        except Exception as e:
+        except Exception:
             return None
         proposals = Proposal.objects.filter(
             job__is_valid=True,

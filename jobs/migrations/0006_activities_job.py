@@ -7,13 +7,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('jobs', '0005_alter_job_application_deadline_and_more'),
+        ("jobs", "0005_alter_job_application_deadline_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='activities',
-            name='job',
-            field=models.OneToOneField(null=True, on_delete=django.db.models.deletion.CASCADE, to='jobs.job'),
+            model_name="activities",
+            name="job",
+            field=models.OneToOneField(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="jobs.job",
+            ),
         ),
     ]

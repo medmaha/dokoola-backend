@@ -1,7 +1,7 @@
 from .create import JobCreateSerializer
-from .update import JobUpdateSerializer
+from .others import ActivitySerializer, PricingSerializer
 from .retrieve import (
-    JobRetrieveSerializer,
     JobListSerializer,
+    JobRetrieveSerializer,
 )
-from .others import PricingSerializer, ActivitySerializer
+from .update import JobUpdateSerializer

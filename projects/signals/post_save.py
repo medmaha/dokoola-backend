@@ -1,19 +1,23 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from projects.models import Project, ProjectStatusChoices
 
+from contracts.models import (
+    Contract,
+    ContractProgressChoices,
+    ContractStatusChoices,
+)
 from notifications.models import Notification
-from contracts.models import Contract, ContractStatusChoices, ContractProgressChoices
+from projects.models import Project, ProjectStatusChoices
 
 
 @receiver(post_save, sender=Contract)
 def on_accepted_contract(sender, instance: Contract, created, **kwargs):
     """Create a new Project when a contract is being accepted."""
 
-    if not instance.status == ContractStatusChoices.ACCEPTED:
+    if instance.status != ContractStatusChoices.ACCEPTED:
         return
 
-    if not instance.progress == ContractProgressChoices.NONE:
+    if instance.progress != ContractProgressChoices.NONE:
         return
 
     # Update the contract progress
@@ -26,7 +30,7 @@ def on_accepted_contract(sender, instance: Contract, created, **kwargs):
     talent = instance.talent
 
     # When an error occurred in the above transaction
-    if not instance.progress == ContractProgressChoices.ACTIVE:
+    if instance.progress != ContractProgressChoices.ACTIVE:
         return
 
     # Notify the talent

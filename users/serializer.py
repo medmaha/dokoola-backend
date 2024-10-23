@@ -1,5 +1,6 @@
 # create a u serializer class
 from rest_framework import serializers
+
 from .models import User
 
 

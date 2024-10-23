@@ -1,15 +1,19 @@
-from rest_framework.generics import ListAPIView, CreateAPIView, DestroyAPIView
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
-
 from django.db.models import Q
+from rest_framework.decorators import api_view
+from rest_framework.generics import (
+    CreateAPIView,
+    DestroyAPIView,
+    ListAPIView,
+)
+from rest_framework.response import Response
 
-from utilities.text import get_url_search_params
 from users.models import User
-from .models import Thread, Message
+from utilities.text import get_url_search_params
+
+from .models import Message, Thread
 from .serializer import (
-    ThreadListSerializer,
     MessagingListSerializer,
+    ThreadListSerializer,
     messagingCreateSerializer,
 )
 
@@ -40,7 +44,8 @@ class ThreadDeleteAPIView(DestroyAPIView):
 
         if not id:
             return Response(
-                {"message": "This request is forbidden/prohibited"}, status=403
+                {"message": "This request is forbidden/prohibited"},
+                status=403,
             )
 
         if self.get_queryset(id):
@@ -99,10 +104,8 @@ class ThreadMessagesAPIView(ListAPIView):
         user = self.request.user
         thread_unique_id = query_params.get("id", "")
 
-        
         if isinstance(thread_unique_id, list):
             thread_unique_id = thread_unique_id[0]
-        
 
         thread = Thread.objects.filter(owner=user, unique_id=thread_unique_id).first()
 
