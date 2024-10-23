@@ -1,10 +1,11 @@
 from django.db import transaction
-
-from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
+from rest_framework.response import Response
+
 from users.models import User
-from .serializer import ReviewListSerializer, ReviewCreateSerializer
+
 from .models import Review
+from .serializer import ReviewCreateSerializer, ReviewListSerializer
 
 
 class ReviewsGenericAPIView(GenericAPIView):
@@ -17,7 +18,7 @@ class ReviewsGenericAPIView(GenericAPIView):
             return profile
         except User.DoesNotExist:
             return None
-        except Exception as e:
+        except Exception:
             pass
 
     def get_queryset(self):
@@ -82,6 +83,6 @@ class ReviewsGenericAPIView(GenericAPIView):
         except Review.DoesNotExist:
             return Response({"message": "Review not found"}, status=404)
 
-        except Exception as e:
+        except Exception:
 
             return Response({"message": "Review not found"}, status=404)

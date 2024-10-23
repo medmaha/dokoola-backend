@@ -1,9 +1,14 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from projects.models.project import Project
+
+from contracts.models import (
+    Contract,
+    ContractProgressChoices,
+    ContractStatusChoices,
+)
 from jobs.models import JobStatusChoices
 from notifications.models import Notification
-from contracts.models import Contract, ContractStatusChoices, ContractProgressChoices
+from projects.models.project import Project
 
 
 @receiver(post_save, sender=Contract)
@@ -13,11 +18,11 @@ def on_accepted_contract(sender, instance: Contract, created, **kwargs):
     """
 
     # Return if the contract is not accepted
-    if not instance.status == ContractStatusChoices.ACCEPTED:
+    if instance.status != ContractStatusChoices.ACCEPTED:
         return
 
     # Return if the contract is already active
-    if not instance.progress == ContractProgressChoices.NONE:
+    if instance.progress != ContractProgressChoices.NONE:
         return
 
     # Update the contract progress
@@ -77,7 +82,7 @@ def on_accepted_contract(sender, instance: Contract, created, **kwargs):
 @receiver(post_save, sender=Contract)
 def on_completed_contract(sender, instance: Contract, created, **kwargs):
 
-    if not instance.progress == ContractProgressChoices.COMPLETED:
+    if instance.progress != ContractProgressChoices.COMPLETED:
         return
 
     client = instance.client

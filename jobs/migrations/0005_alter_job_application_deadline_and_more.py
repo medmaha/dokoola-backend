@@ -6,18 +6,21 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('jobs', '0004_job_experience_level_other_job_job_type_other_and_more'),
+        (
+            "jobs",
+            "0004_job_experience_level_other_job_job_type_other_and_more",
+        ),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='job',
-            name='application_deadline',
+            model_name="job",
+            name="application_deadline",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='job',
-            name='estimated_duration',
+            model_name="job",
+            name="estimated_duration",
             field=models.DateTimeField(blank=True, null=True),
         ),
     ]

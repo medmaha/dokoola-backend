@@ -1,9 +1,11 @@
 import json
+
 from rest_framework import serializers
+
 from jobs.models import Job
 from users.serializer import UserSerializer
 
-from .models import Client, Review, Company
+from .models import Client, Company, Review
 
 
 class UpdateSerializer(serializers.ModelSerializer):
@@ -145,14 +147,7 @@ class ClientUpdateSerializer(UpdateSerializer, serializers.ModelSerializer):
         ]
 
     def validate_country(self, value):
-        print("---------------------------------")
-        print("Validating country....")
-        print("---------------------------------")
-        try:
-            _value = json.loads(value)
-        except ValueError:
-            raise serializers.ValidationError("Invalid Country")
-        return _value
+        return json.loads(value)
 
 
 class ClientRetrieveSerializer(serializers.ModelSerializer):

@@ -1,16 +1,18 @@
 import random
+
 from django.db import transaction
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
-from jobs.models.job import JobStatusChoices
-from users.models.user import User
-from notifications.models import Notification
+
 from contracts.models import Contract
-from proposals.models import Proposal, ProposalStatusChoices
 from contracts.serializers import (
     ContractCreateSerializer,
     ContractRetrieveSerializer,
 )
+from jobs.models.job import JobStatusChoices
+from notifications.models import Notification
+from proposals.models import Proposal, ProposalStatusChoices
+from users.models.user import User
 from utilities.generator import get_serializer_error_message
 
 
@@ -21,7 +23,8 @@ class ContractCreateAPIView(GenericAPIView):
 
         if not user.is_client:
             return Response(
-                {"message": "Forbidden! Only clients are allowed"}, status=403
+                {"message": "Forbidden! Only clients are allowed"},
+                status=403,
             )
 
         profile, profile_name = user.profile
@@ -46,11 +49,12 @@ class ContractCreateAPIView(GenericAPIView):
             return Response({"message": str(e)}, status=400)
 
     def post(self, request, *args, **kwargs):
-        user: User = request.user
+        user: User = request.user  # type: ignore
 
         if not user.is_client:
             return Response(
-                {"message": "Forbidden! Only clients are allowed"}, status=403
+                {"message": "Forbidden! Only clients are allowed"},
+                status=403,
             )
 
         profile, profile_name = user.profile
@@ -101,12 +105,9 @@ class ContractCreateAPIView(GenericAPIView):
                         "You have a new contract for a project you've proposed to",
                     ]
                     talent_notification.hint_text = random.choice(talent_messages)
-                    talent_notification.content_text = (
-                        "You've received a contract for <strong>%s</strong> project, from talent <strong>%s</strong>. Please check it out."
-                        % (proposal.job.title, proposal.job.client.user.name)
-                    )
+                    talent_notification.content_text = f"You've received a contract for <strong>{proposal.job.title}</strong> project, from talent <strong>{proposal.job.client.user.name}</strong>. Please check it out."
                     talent_notification.object_api_link = (
-                        "/contracts/view/%s" % contract.pk
+                        f"/contracts/view/{contract.pk}"
                     )
                     # ----------------------------------------------------------------------------
 
@@ -121,12 +122,9 @@ class ContractCreateAPIView(GenericAPIView):
                         "You have a new contract for your project",
                     ]
                     client_notification.hint_text = random.choice(client_messages)
-                    client_notification.content_text = (
-                        "You've created a contract for <strong>%s</strong> project, with <strong>%s</strong>. Please check it out."
-                        % (proposal.job.title, proposal.talent.user.name)
-                    )
+                    client_notification.content_text = f"You've created a contract for <strong>{proposal.job.title}</strong> project, with <strong>{proposal.talent.user.name}</strong>. Please check it out."
                     client_notification.object_api_link = (
-                        "/contracts/view/%s" % contract.pk
+                        f"/contracts/view/{contract.pk}"
                     )
                     # --------------------------------------------------------------------
 

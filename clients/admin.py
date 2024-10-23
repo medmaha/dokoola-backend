@@ -1,6 +1,7 @@
+from django.contrib import admin
 from django.http import HttpRequest
 from unfold.admin import ModelAdmin
-from django.contrib import admin
+
 from . import models
 
 

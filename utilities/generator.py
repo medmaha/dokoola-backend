@@ -1,4 +1,5 @@
 import uuid
+
 from rest_framework.serializers import ReturnDict, ReturnList
 
 
@@ -23,13 +24,13 @@ def get_serializer_error_message(
 
     if isinstance(error, ReturnDict):
         for key, value in error.items():
-            if isinstance(value, list) or isinstance(value, tuple):
+            if isinstance(value, (list, tuple)):
                 for val in value:
                     if key and key != "non_field_errors":
-                        return "{}: {}".format(key, val)
+                        return f"{key}: {val}"
                     return val
             if key and key != "non_field_errors":
-                return "{}: {}".format(key, value)
+                return f"{key}: {value}"
             return value
 
         if error.get("message"):
@@ -37,7 +38,7 @@ def get_serializer_error_message(
 
     if isinstance(error, ReturnList):
         for value in error:
-            if isinstance(value, list) or isinstance(value, tuple):
+            if isinstance(value, (list, tuple)):
                 for val in value:
                     return val
             return value

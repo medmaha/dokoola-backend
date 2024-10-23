@@ -1,15 +1,11 @@
 from django.db import transaction
-
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
-
+from ..models import Portfolio, Talent
 from ..serializers import (
     TalentPortfolioSerializer,
 )
-
-
-from ..models import Talent, Portfolio
 
 
 class TalentPortfolioAPIView(GenericAPIView):
@@ -27,7 +23,7 @@ class TalentPortfolioAPIView(GenericAPIView):
         except Talent.DoesNotExist:
             return Response({"message": "This request is prohibited"}, status=403)
 
-        except Exception as e:
+        except Exception:
 
             return Response(
                 {"message": "Error: Something went wrong!"},
@@ -38,7 +34,7 @@ class TalentPortfolioAPIView(GenericAPIView):
         user = request.user
         profile, profile_name = user.profile
 
-        if not profile_name.lower() == "talent":
+        if profile_name.lower() != "talent":
             return Response({"message": "This request is prohibited"}, status=403)
 
         serializer = self.get_serializer(data=request.data)

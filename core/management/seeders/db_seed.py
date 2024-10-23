@@ -1,6 +1,7 @@
-import os, sys, subprocess
+import os
+import subprocess
+import sys
 from pathlib import Path
-
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 SEEDERS_PATH = os.path.join(BASE_DIR, ".seeds")

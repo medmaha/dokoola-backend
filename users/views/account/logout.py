@@ -1,9 +1,9 @@
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.views.account.auth_token import GenerateToken
-from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.exceptions import TokenError
 
 
 class LogoutView(APIView):
@@ -19,6 +19,6 @@ class LogoutView(APIView):
             refresh_token.blacklist()
             request.user.online = False
             request.user.save()
-        except TokenError as e:
+        except TokenError:
             pass
         return Response({"success": True}, status=200)

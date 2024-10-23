@@ -7,7 +7,10 @@ from utilities.generator import id_generator
 class Staff(models.Model):
     "The client model. Which is also a subclass of Base User."
     id = models.CharField(
-        primary_key=True, default=id_generator, editable=False, max_length=100
+        primary_key=True,
+        default=id_generator,
+        editable=False,
+        max_length=100,
     )
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name="staff_profile"

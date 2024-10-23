@@ -1,23 +1,20 @@
+import after_response
+from django.db.models import Q
+from django.utils import timezone
 from rest_framework.generics import (
+    GenericAPIView,
     ListAPIView,
     RetrieveAPIView,
-    GenericAPIView,
 )
-from django.db.models import Q
 from rest_framework.response import Response
 
-
-from users.models.user import User
 from jobs.models import Activities, Job, JobStatusChoices
 from jobs.serializers import (
-    JobRetrieveSerializer,
     ActivitySerializer,
     JobListSerializer,
-    JobListSerializer,
+    JobRetrieveSerializer,
 )
-from django.utils import timezone
-
-import after_response
+from users.models.user import User
 
 
 class JobListAPIView(ListAPIView):
@@ -59,7 +56,8 @@ class MyJobListAPIView(ListAPIView):
 
         if not user.is_client:
             return Response(
-                {"message": "Only clients can access this route"}, status=403
+                {"message": "Only clients can access this route"},
+                status=403,
             )
 
         queryset = self.get_queryset()

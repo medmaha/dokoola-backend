@@ -1,11 +1,11 @@
 """ A route controller for retrieving user profile. """
 
-from rest_framework.response import Response
 from rest_framework.generics import RetrieveAPIView
+from rest_framework.response import Response
 
-from users.models import User
 from clients.serializer import ClientRetrieveSerializer
 from talents.serializers import TalentProfileDetailSerializer
+from users.models import User
 
 
 class UserProfileAPIView(RetrieveAPIView):

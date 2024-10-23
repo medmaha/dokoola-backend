@@ -1,18 +1,14 @@
-from django.db import transaction, models
-
+from django.db import models, transaction
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
+from users.models import User
 from utilities.generator import get_serializer_error_message
 
+from ..models import Certificate, Talent
 from ..serializers import (
     TalentCertificateSerializer,
 )
-
-
-from ..models import Talent, Certificate
-from users.models import User
-
 
 MAX_CERTIFICATE_COUNT = 6
 
@@ -42,7 +38,7 @@ class TalentCertificateAPIView(GenericAPIView):
         except Talent.DoesNotExist:
             return Response({"message": "This request is prohibited"}, status=403)
 
-        except Exception as e:
+        except Exception:
             return Response(
                 {"message": "Error: Something went wrong!"},
                 status=500,
@@ -52,7 +48,7 @@ class TalentCertificateAPIView(GenericAPIView):
         user: User = request.user
         profile, profile_type = user.profile
 
-        if not profile_type.lower() == "talent":
+        if profile_type.lower() != "talent":
             return Response({"message": "This request is prohibited"}, status=403)
 
         serializer = self.get_serializer(data=request.data)
@@ -76,7 +72,7 @@ class TalentCertificateAPIView(GenericAPIView):
                     serializer.errors, "ERROR! bad request attempted"
                 )
                 return Response({"message": error_message}, status=400)
-        except Exception as e:
+        except Exception:
 
             return Response(
                 {"message": "Error: Something went wrong!"},

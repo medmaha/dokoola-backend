@@ -1,13 +1,12 @@
 from rest_framework import serializers
 
+from jobs.serializers import JobListSerializer
 from talents.serializers import (
-    TalentSerializer,
     TalentMiniSerializer,
+    TalentSerializer,
 )
 
-from jobs.serializers import JobListSerializer, JobListSerializer
-
-from .models import Proposal, Attachment
+from .models import Attachment, Proposal
 
 
 class AttachmentSerializer(serializers.ModelSerializer):
@@ -140,23 +139,19 @@ class ProposalPendingListSerializer(serializers.ModelSerializer):
 
 def get_job(instance: Proposal):
     return {
-        "slug": instance.job.slug,
+        "slug": instance.job.id,
         "title": instance.job.title,
         "description": instance.job.description[:100],
         "status": instance.job.status,
-        "client": {
-            "avatar": instance.job.client.user.avatar,
-            "username": instance.job.client.user.username,
-            "name": instance.job.client.user.name,
-        },
-    }
-
-
-def get_talent(instance: Proposal):
-    return {
-        "username": instance.talent.user.username,
-        "avatar": instance.talent.user.avatar,
-        "rating": instance.talent.user.calculate_rating(),
+        "client": (
+            {
+                "avatar": instance.job.client.user.avatar,
+                "username": instance.job.client.user.username,
+                "name": instance.job.client.user.name,
+            }
+            if instance.job.client
+            else None
+        ),
     }
 
 

@@ -10,17 +10,9 @@ class Acknowledgement(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def get_project(self):
-        project = None
-        try:
-            project = self.project  # type: ignore
-        except:
-            pass
+        project = self.project  # type: ignore
         return project
 
     def get_milestone(self):
-        milestone = None
-        try:
-            milestone = self.project.milestone  # type: ignore
-        except:
-            pass
+        milestone = self.project.milestone  # type: ignore
         return milestone

@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
-from dotenv import load_dotenv
 
+from dotenv import load_dotenv
 
 # load_dotenv()
 
@@ -140,6 +140,6 @@ from .cors import *
 from .db import *
 from .email import *
 from .jwt import *
+from .logger import *
 from .unfold import *
 from .whitenoice import *
-from .logger import *

@@ -1,7 +1,8 @@
 import os
-from django.shortcuts import render, redirect
+
 from django.contrib import messages
-from django.http import HttpResponseRedirect, HttpRequest, JsonResponse
+from django.http import HttpRequest, HttpResponseRedirect, JsonResponse
+from django.shortcuts import redirect, render
 
 from core.models import Waitlist
 
@@ -27,7 +28,10 @@ def health(request: HttpRequest):
     try:
         Waitlist.objects.first()
         return JsonResponse(
-            {"status": "OK", "message": "Backend Web-server up and running"}
+            {
+                "status": "OK",
+                "message": "Backend Web-server up and running",
+            }
         )
     except Exception as e:
         return JsonResponse({"status": "ERROR", "message": str(e)}, status=400)

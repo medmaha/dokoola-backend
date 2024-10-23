@@ -1,4 +1,5 @@
 from calendar import c
+
 from core.models import Category
 
 categories = [

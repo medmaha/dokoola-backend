@@ -1,24 +1,22 @@
-from django.db import transaction
+import re
 
+from django.db import transaction
 from rest_framework.generics import (
     CreateAPIView,
 )
-from rest_framework.response import Response
-from rest_framework.request import Request
-from utilities.generator import get_serializer_error_message
-from clients.models import Client
-from users.models import User
-
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
+from rest_framework.response import Response
 
+from clients.models import Client
 from jobs.models import Activities, Job, Pricing
 from jobs.serializers import (
-    JobListSerializer,
     JobCreateSerializer,
+    JobListSerializer,
 )
+from users.models import User
+from utilities.generator import get_serializer_error_message
 
-
-import re
 from .utils import get_category
 
 
@@ -33,7 +31,8 @@ class JobCreateAPIView(CreateAPIView):
 
             if not user.is_client:
                 return Response(
-                    {"message": "Talents can't create job openings"}, status=401
+                    {"message": "Talents can't create job openings"},
+                    status=401,
                 )
 
             profile, _ = user.profile

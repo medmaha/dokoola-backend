@@ -6,23 +6,35 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('jobs', '0003_alter_job_experience_level'),
+        ("jobs", "0003_alter_job_experience_level"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='job',
-            name='experience_level_other',
+            model_name="job",
+            name="experience_level_other",
             field=models.CharField(blank=True, max_length=200, null=True),
         ),
         migrations.AddField(
-            model_name='job',
-            name='job_type_other',
+            model_name="job",
+            name="job_type_other",
             field=models.CharField(blank=True, max_length=200, null=True),
         ),
         migrations.AlterField(
-            model_name='job',
-            name='job_type',
-            field=models.CharField(choices=[('full-time', 'Full Time'), ('part-time', 'Part Time'), ('freelance', 'Freelance'), ('contract', 'Contract'), ('internship', 'Internship'), ('other', 'Other')], db_index=True, default='freelance', max_length=20),
+            model_name="job",
+            name="job_type",
+            field=models.CharField(
+                choices=[
+                    ("full-time", "Full Time"),
+                    ("part-time", "Part Time"),
+                    ("freelance", "Freelance"),
+                    ("contract", "Contract"),
+                    ("internship", "Internship"),
+                    ("other", "Other"),
+                ],
+                db_index=True,
+                default="freelance",
+                max_length=20,
+            ),
         ),
     ]

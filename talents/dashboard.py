@@ -1,12 +1,12 @@
 from datetime import datetime
-from django.db.models import Q, F, Sum, Avg, Count
 
-from rest_framework.response import Response
-from rest_framework.generics import GenericAPIView
+from django.db.models import Avg, Count, F, Q, Sum
 from rest_framework import serializers
+from rest_framework.generics import GenericAPIView
+from rest_framework.response import Response
 
-from jobs.models.job import JobStatusChoices
 from contracts.models import Contract
+from jobs.models.job import JobStatusChoices
 from talents.models import Talent
 
 
@@ -133,7 +133,7 @@ class TalentDashboardSerializer(serializers.ModelSerializer):
                 "percentage": int(percentage),
             }
 
-        except Exception as e:
+        except Exception:
             pass
             return {"spent": 0.00}
 
@@ -167,7 +167,7 @@ class TalentDashboardSerializer(serializers.ModelSerializer):
                 for rating in list(duplicate.values())[:6]
             ]
             return result
-        except Exception as e:
+        except Exception:
             pass
             return []
 
@@ -217,27 +217,27 @@ class TalentDashboardSerializer(serializers.ModelSerializer):
             "percentage": avg,
             "portfolio": (
                 "Add a portfolio or resume that proves your profession"
-                if not 1 == portfolio
+                if portfolio != 1
                 else "Done"
             ),
             "proposals": (
                 "Make proposals to jobs interest you and stand a chance"
-                if not 1 == proposals
+                if proposals != 1
                 else "Done"
             ),
             "education": (
                 "Include your education background details, this works for must talents"
-                if not 1 == education
+                if education != 1
                 else "Done"
             ),
             "biography": (
                 "Your bio is one the the first thing client see on your profile, so enhancing it will help"
-                if not 1 == biography
+                if biography != 1
                 else "Done"
             ),
             "email_address": (
                 "Verify your email address to be able to use Dokoola witt ease. CRITICAL"
-                if not 1 == biography
+                if biography != 1
                 else "Done"
             ),
         }

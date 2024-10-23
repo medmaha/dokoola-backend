@@ -1,14 +1,14 @@
 import math
 import re
-from django.db.models import Q
-from rest_framework.response import Response
-from rest_framework.generics import ListAPIView
 from datetime import datetime
 
-from talents.models import Talent
-from jobs.serializers import JobListSerializer
+from django.db.models import Q
+from rest_framework.generics import ListAPIView
+from rest_framework.response import Response
 
 from jobs.models import Job
+from jobs.serializers import JobListSerializer
+from talents.models import Talent
 
 
 class JobsSearchAPIView(ListAPIView):
@@ -186,7 +186,7 @@ class JobsSearchAPIView(ListAPIView):
             if filters and max_value != math.inf:
                 filters &= Q(budget__lte=float(max_value))
 
-        except Exception as e:
+        except Exception:
             pass
 
         if filters:

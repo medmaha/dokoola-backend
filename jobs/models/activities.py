@@ -1,4 +1,5 @@
 from django.db import models
+
 from talents.models import Talent  # Updated import
 
 

@@ -1,6 +1,7 @@
 from django.db import models
+
 from contracts.models import Contract
-from projects.models.milestone import Milestone, Acknowledgement
+from projects.models.milestone import Acknowledgement, Milestone
 
 
 class ProjectStatusChoices(models.TextChoices):

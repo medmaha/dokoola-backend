@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views, search, dashboard
+from . import dashboard, search, views
 
 # Url Pattern /api/talents/*/**
 

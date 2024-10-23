@@ -1,7 +1,8 @@
+import logging
+import logging.config
 import os
-import logging, logging.config
-import after_response
 
+import after_response
 from logtail import LogtailHandler
 
 LOGGING_CONFIG = None

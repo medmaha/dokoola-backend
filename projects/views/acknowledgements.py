@@ -1,14 +1,17 @@
 from django.db.models import Q
+from rest_framework.generics import (
+    CreateAPIView,
+    RetrieveAPIView,
+    UpdateAPIView,
+)
 from rest_framework.response import Response
-from rest_framework.generics import CreateAPIView, UpdateAPIView, RetrieveAPIView
 
+from projects.models import Acknowledgement, Project, ProjectStatusChoices
 from projects.serializers import (
     AcknowledgementCreateSerializer,
-    AcknowledgementUpdateSerializer,
     AcknowledgementRetrieveSerializer,
+    AcknowledgementUpdateSerializer,
 )
-from projects.models import Project, Acknowledgement, ProjectStatusChoices
-
 from utilities.generator import get_serializer_error_message
 
 
@@ -21,11 +24,13 @@ class AcknowledgementCreateAPIView(CreateAPIView):
 
         if not user.is_client:
             return Response(
-                {"message": "Only clients can create acknowledgements"}, status=400
+                {"message": "Only clients can create acknowledgements"},
+                status=400,
             )
         try:
             project = Project.objects.get(
-                id=request.data.get("project_id", 0), contract__client__user=user
+                id=request.data.get("project_id", 0),
+                contract__client__user=user,
             )
 
             if project.status not in [
@@ -74,11 +79,13 @@ class AcknowledgementUpdateAPIView(UpdateAPIView):
 
         if not user.is_client:
             return Response(
-                {"message": "Only clients can create acknowledgements"}, status=400
+                {"message": "Only clients can create acknowledgements"},
+                status=400,
             )
         try:
             project = Project.objects.get(
-                id=request.data.get("project_id", 0), contract__client__user=user
+                id=request.data.get("project_id", 0),
+                contract__client__user=user,
             )
             if project.status not in [
                 ProjectStatusChoices.COMPLETED,

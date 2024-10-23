@@ -1,7 +1,8 @@
-import os, json
-from django.http import HttpRequest, HttpResponse
+import json
+import os
 from datetime import datetime
 
+from django.http import HttpRequest, HttpResponse
 
 DOKOOLA_ACCESS_SERVICES = [
     "DOKOOLA-FRONTEND",
@@ -30,9 +31,8 @@ class DokoolaCSRFMiddleware:
                 or "Firefox" in user_agent
                 or "Safari" in user_agent
                 or "Mozilla" in user_agent
-            ):
-                if base_url in request_url:
-                    return True
+            ) and base_url in request_url:
+                return True
 
         return False
 
@@ -46,7 +46,7 @@ class DokoolaCSRFMiddleware:
 
         csrf_header = request.headers.get(os.environ.get("SERVICE_HTTP_HEADER", "___"))
 
-        if not csrf_header in DOKOOLA_ACCESS_SERVICES:
+        if csrf_header not in DOKOOLA_ACCESS_SERVICES:
             response: HttpResponse = HttpResponse(
                 json.dumps({"message": "Dokoola csrf header not found or not allowed"}),
                 status=403,
@@ -63,9 +63,4 @@ class DokoolaCSRFMiddleware:
         minutes = end_time.minute - start_time.minute
         seconds = str(end_time.microsecond - start_time.microsecond / 1000)[:3]
 
-        if minutes:
-            timestamp = f"{minutes}:{seconds}s"
-        else:
-            timestamp = f"{seconds}ms"
-
-        return timestamp
+        return f"{minutes}:{seconds}s" if minutes else f"{seconds}ms"

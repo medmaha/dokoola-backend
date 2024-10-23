@@ -1,13 +1,12 @@
-from .get import ProjectListAPIView, ProjectRetrieveAPIView
-from .put import ProjectStatusUpdateAPIView
-from .milestones import (
-    MilestoneListAPIView,
-    MilestoneCreateAPIView,
-    MilestoneUpdateAPIView,
-)
-
 from .acknowledgements import (
-    AcknowledgementRetrieveAPIView,
     AcknowledgementCreateAPIView,
+    AcknowledgementRetrieveAPIView,
     AcknowledgementUpdateAPIView,
 )
+from .get import ProjectListAPIView, ProjectRetrieveAPIView
+from .milestones import (
+    MilestoneCreateAPIView,
+    MilestoneListAPIView,
+    MilestoneUpdateAPIView,
+)
+from .put import ProjectStatusUpdateAPIView

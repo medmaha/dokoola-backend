@@ -1,10 +1,11 @@
 from rest_framework.generics import UpdateAPIView
 from rest_framework.response import Response
+
+from contracts.models import Contract, ContractProgressChoices
 from contracts.models.contract import ContractStatusChoices
 from contracts.serializers.update import ContractUpdateSerializer
-from utilities.generator import get_serializer_error_message
 from notifications.models import Notification
-from contracts.models import Contract, ContractProgressChoices
+from utilities.generator import get_serializer_error_message
 
 
 class ContractUpdateAPIView(UpdateAPIView):
@@ -40,11 +41,10 @@ class ContractAcceptAPIView(UpdateAPIView):
 
         accepted = request.data.get("accept", None)
 
-        (request.data)
-
         if accepted is None:
             return Response(
-                {"message": 'Request body missing a "accept" value'}, status=400
+                {"message": 'Request body missing a "accept" value'},
+                status=400,
             )
 
         if accepted in ["true", True]:
@@ -123,9 +123,10 @@ class ContractCompleteAPIView(UpdateAPIView):
 
                 # TODO: Notify 4 through email and create a notification for both users
                 return Response(
-                    {"message": "Contract completed successfully"}, status=200
+                    {"message": "Contract completed successfully"},
+                    status=200,
                 )
-            except Exception as e:
+            except Exception:
 
                 return Response({"message": "Resource not found"}, status=404)
 

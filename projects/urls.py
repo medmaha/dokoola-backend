@@ -8,7 +8,9 @@ urlpatterns = [
     # Projects
     path("", views.ProjectListAPIView.as_view(), name="project_list"),
     path(
-        "<project_id>/", views.ProjectRetrieveAPIView.as_view(), name="project_retrieve"
+        "<project_id>/",
+        views.ProjectRetrieveAPIView.as_view(),
+        name="project_retrieve",
     ),
     path(
         "<project_id>/update-status/",

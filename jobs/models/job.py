@@ -1,8 +1,10 @@
 import uuid
-from django.db import models
-from core.models import Category
-from clients.models import Client
+
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db import models
+
+from clients.models import Client
+from core.models import Category
 
 
 class JobStatusChoices(models.TextChoices):
@@ -65,7 +67,7 @@ class Job(models.Model):
     experience_level = models.CharField(blank=True, null=True, max_length=200)
 
     client = models.ForeignKey(
-        Client, related_name="jobs", on_delete=models.SET_NULL, null=True
+        Client, related_name="jobs", on_delete=models.CASCADE, null=False
     )
 
     bits_amount = models.IntegerField(default=16)
@@ -82,3 +84,11 @@ class Job(models.Model):
         if self.third_party_address:
             self.is_third_party = True
         return super().save(*args, **kwargs)
+
+    @property
+    def activities(self):
+        from .activities import Activities
+
+        activities, _ = Activities.objects.get_or_create(job=self)
+
+        return activities

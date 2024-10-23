@@ -1,11 +1,11 @@
+from django.db.models import Q
+from rest_framework.decorators import api_view
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from users.serializer import UserSerializer
-from users.models import User
-from utilities.text import get_url_search_params
 
-from django.db.models import Q
+from users.models import User
+from users.serializer import UserSerializer
+from utilities.text import get_url_search_params
 
 
 class UserListAPIView(ListAPIView):

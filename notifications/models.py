@@ -6,10 +6,15 @@ from users.models import User
 class Notification(models.Model):
 
     sender = models.ForeignKey(
-        User, related_name="notification_sender", on_delete=models.SET_NULL, null=True
+        User,
+        related_name="notification_sender",
+        on_delete=models.SET_NULL,
+        null=True,
     )
     recipient = models.ForeignKey(
-        User, related_name="notification_recipient", on_delete=models.CASCADE
+        User,
+        related_name="notification_recipient",
+        on_delete=models.CASCADE,
     )
 
     hint_text = models.CharField(max_length=300, default="")

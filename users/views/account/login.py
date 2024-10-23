@@ -1,9 +1,10 @@
 from typing import Any
-from rest_framework.response import Response
 
-from users.views.account.auth_token import GenerateToken
+from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
+
 from users.models import User
+from users.views.account.auth_token import GenerateToken
 
 
 class LoginView(TokenObtainPairView):
@@ -27,7 +28,8 @@ class LoginView(TokenObtainPairView):
                     user.save()
                     message = f"Welcome back {user.name or user.username}"  # type: ignore
                     return Response(
-                        {"tokens": auth_tokens, "message": message}, status=200
+                        {"tokens": auth_tokens, "message": message},
+                        status=200,
                     )
 
                 return Response(

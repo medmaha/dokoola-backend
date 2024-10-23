@@ -1,7 +1,6 @@
 from .get import ContractListAPIView, ContractRetrieveAPIView
-from .put import ContractAcceptAPIView, ContractCompleteAPIView
 from .post import ContractCreateAPIView
-
+from .put import ContractAcceptAPIView, ContractCompleteAPIView
 
 __all__ = [
     "ContractListAPIView",

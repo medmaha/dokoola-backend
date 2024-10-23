@@ -1,10 +1,9 @@
 from django.db.models import Q
-from rest_framework.response import Response
 from rest_framework.generics import UpdateAPIView
+from rest_framework.response import Response
 
-from projects.serializers import ProjectStatusUpdateSerializer
 from projects.models import Project, ProjectStatusChoices
-
+from projects.serializers import ProjectStatusUpdateSerializer
 from utilities.generator import get_serializer_error_message
 
 
@@ -42,7 +41,7 @@ class ProjectStatusUpdateAPIView(UpdateAPIView):
             serializer.save(project_pk=project.pk)
             return Response(
                 {
-                    "message": f"Project status updated successfully",
+                    "message": "Project status updated successfully",
                 },
                 status=200,
             )

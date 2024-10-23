@@ -7,4 +7,3 @@ IGNORABLE_404_URLS = [
 ]
 
 from .main import *
-

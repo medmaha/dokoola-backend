@@ -1,7 +1,7 @@
 from django.db.models import Count
 from rest_framework import serializers
 
-from jobs.models import Job, Activities
+from jobs.models import Activities, Job
 
 
 class JobListSerializer(serializers.ModelSerializer):

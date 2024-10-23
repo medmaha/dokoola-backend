@@ -1,9 +1,12 @@
+import jwt
+from django.conf import settings
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
-from rest_framework_simplejwt.authentication import JWTAuthentication as JwtAuthentication
+from rest_framework_simplejwt.authentication import (
+    JWTAuthentication as JwtAuthentication,
+)
+
 from users.models import User
-from django.conf import settings
-import jwt
 
 
 class JWTAuthentication(JwtAuthentication):
@@ -21,15 +24,10 @@ class JWTAuthentication(JwtAuthentication):
             raise AuthenticationFailed("Authorization header prefix mismatch")
 
         token = auth_header[len(auth_header_prefix) :].strip()
-        try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed("Token has expired")
-        except jwt.DecodeError:
-            raise AuthenticationFailed("Token is invalid")
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
 
         user = User.objects.get(id=payload["user_id"])
         return (user, token)
 
     def _authenticate_header(self):
-        return "JWT", 'Dokoola'
+        return "JWT", "Dokoola"

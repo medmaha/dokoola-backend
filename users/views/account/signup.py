@@ -1,17 +1,17 @@
 import random
 import re
-from django.db import transaction
 
+from django.db import transaction
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from staffs.models import Staff
 from clients.models import Client
+from staffs.models import Staff
 from talents.models import Talent
 from users.models import User
+from users.serializer import UserCreateSerializer
 
 from .auth_token import GenerateToken
-from users.serializer import UserCreateSerializer
 
 
 class SignupAPIView(APIView):

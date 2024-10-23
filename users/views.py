@@ -1,11 +1,12 @@
+from django.db.models import Q
+from rest_framework.decorators import api_view
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from .serializer import UserSerializer
-from .models import User
+
 from utilities.text import get_url_search_params
 
-from django.db.models import Q
+from .models import User
+from .serializer import UserSerializer
 
 
 @api_view(["GET", "POST"])

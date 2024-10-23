@@ -1,25 +1,25 @@
 from django.db import transaction
-
-from rest_framework.generics import RetrieveAPIView, ListAPIView, GenericAPIView
+from rest_framework.generics import (
+    GenericAPIView,
+    ListAPIView,
+    RetrieveAPIView,
+)
 from rest_framework.response import Response
 
-from proposals.serializers import ProposalPendingListSerializer
 from proposals.models import Proposal
-
-from .search import TalentsSearchAPIView
-
-from .serializers import (
-    TalentDetailSerializer,
-    TalentPortfolioSerializer,
-    TalentSerializer,
-    TalentMiniInfoSerializer,
-    TalentUpdateSerializer,
-    TalentUpdateDataSerializer,
-)
+from proposals.serializers import ProposalPendingListSerializer
 
 from .dashboard import TalentDashboardSerializer
-
-from .models import Talent, Portfolio
+from .models import Portfolio, Talent
+from .search import TalentsSearchAPIView
+from .serializers import (
+    TalentDetailSerializer,
+    TalentMiniInfoSerializer,
+    TalentPortfolioSerializer,
+    TalentSerializer,
+    TalentUpdateDataSerializer,
+    TalentUpdateSerializer,
+)
 
 
 class TalentListAPIView(ListAPIView):
@@ -66,7 +66,9 @@ class TalentUpdateAPIView(GenericAPIView):
         try:
             client = Talent.objects.get(user__username=username)
             client_serializer: TalentUpdateSerializer = self.get_serializer(
-                instance=client, data=request.data, context={"request": request}
+                instance=client,
+                data=request.data,
+                context={"request": request},
             )
 
             if not client_serializer.is_valid():
@@ -79,7 +81,7 @@ class TalentUpdateAPIView(GenericAPIView):
                 {"message": "Error: User doesn't exist!"},
                 status=404,
             )
-        except Exception as e:
+        except Exception:
 
             return Response(
                 {"message": "Error: Something went wrong!"},
@@ -153,7 +155,7 @@ class TalentPortfolioAPIView(GenericAPIView):
         except Talent.DoesNotExist:
             return Response({"message": "This request is prohibited"}, status=403)
 
-        except Exception as e:
+        except Exception:
 
             return Response(
                 {"message": "Error: Something went wrong!"},
@@ -164,7 +166,7 @@ class TalentPortfolioAPIView(GenericAPIView):
         user = request.user
         profile, profile_name = user.profile
 
-        if not profile_name.lower() == "talent":
+        if profile_name.lower() != "talent":
             return Response({"message": "This request is prohibited"}, status=403)
 
         serializer = self.get_serializer(data=request.data)
@@ -214,7 +216,7 @@ class TalentDashboardStatsView(GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         profile, profile_type = request.user.profile
-        if not profile_type == "Talent":
+        if profile_type != "Talent":
             return Response({}, status=403)
 
         serializer = self.get_serializer(profile)

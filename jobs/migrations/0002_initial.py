@@ -9,26 +9,35 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('clients', '0002_initial'),
-        ('core', '0001_initial'),
-        ('jobs', '0001_initial'),
-        ('talents', '0001_initial'),
+        ("clients", "0002_initial"),
+        ("core", "0001_initial"),
+        ("jobs", "0001_initial"),
+        ("talents", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='activities',
-            name='hired',
-            field=models.ManyToManyField(blank=True, to='talents.talent'),
+            model_name="activities",
+            name="hired",
+            field=models.ManyToManyField(blank=True, to="talents.talent"),
         ),
         migrations.AddField(
-            model_name='job',
-            name='category',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.category'),
+            model_name="job",
+            name="category",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="core.category",
+            ),
         ),
         migrations.AddField(
-            model_name='job',
-            name='client',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='jobs', to='clients.client'),
+            model_name="job",
+            name="client",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="jobs",
+                to="clients.client",
+            ),
         ),
     ]

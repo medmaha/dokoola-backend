@@ -1,6 +1,7 @@
 from django.db import models
+
 from clients.models import Client
-from proposals.models import Proposal, Job, Talent
+from proposals.models import Job, Proposal, Talent
 
 
 class ContractProgressChoices(models.TextChoices):
@@ -80,7 +81,9 @@ class Contract(models.Model):
 
     # Whether the client has acknowledged the work done by the talent
     talent_acknowledgement = models.CharField(
-        max_length=200, choices=ContractStatusChoices.choices, default="PENDING"
+        max_length=200,
+        choices=ContractStatusChoices.choices,
+        default="PENDING",
     )
 
     created_at = models.DateTimeField(auto_now_add=True)

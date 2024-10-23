@@ -1,5 +1,8 @@
-from .contract import Contract, ContractStatusChoices, ContractProgressChoices
-
+from .contract import (
+    Contract,
+    ContractProgressChoices,
+    ContractStatusChoices,
+)
 
 __all__ = [
     "Contract",
