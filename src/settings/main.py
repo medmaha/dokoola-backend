@@ -3,7 +3,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# load_dotenv()
+load_dotenv()
 
 DEBUG = bool(int(os.environ.get("DEBUG", 0)))
 

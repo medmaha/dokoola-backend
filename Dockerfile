@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt \
     && touch .logs/dokoola.log
 
 # Copy environment-specific files
-# COPY .env.prod ./.env
+COPY .env.prod ./.env
 
 # Copy the rest of the app
 COPY . .

@@ -2,7 +2,7 @@
 .idea/
 .vscode/
 .logs/
-# .env
+.env
 
 .git/
 .seeds/

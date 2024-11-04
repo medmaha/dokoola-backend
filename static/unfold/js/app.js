@@ -8,49 +8,7 @@ window.addEventListener("load", (e) => {
   renderCharts();
 
   filterForm();
-
-  warnWithoutSaving();
 });
-
-/*************************************************************
- * Warn without saving
- *************************************************************/
-const warnWithoutSaving = () => {
-  let formChanged = false;
-  const form = document.querySelector("form.warn-unsaved-form");
-
-  const checkFormChanged = () => {
-    const elements = document.querySelectorAll(
-      "form.warn-unsaved-form input, form.warn-unsaved-form select, form.warn-unsaved-form textarea"
-    );
-
-    Array.from(elements).forEach((field) => {
-      field.addEventListener("input", (e) => (formChanged = true));
-    });
-  };
-
-  if (!form) {
-    return;
-  }
-
-  new MutationObserver((mutationsList, observer) => {
-    checkFormChanged();
-  }).observe(form, { attributes: true, childList: true, subtree: true });
-
-  checkFormChanged();
-
-  preventLeaving = (e) => {
-    if (formChanged) {
-      e.preventDefault();
-    }
-  };
-
-  form.addEventListener("submit", (e) => {
-    window.removeEventListener("beforeunload", preventLeaving);
-  });
-
-  window.addEventListener("beforeunload", preventLeaving);
-};
 
 /*************************************************************
  * Filter form
@@ -124,9 +82,7 @@ const fileInputUpdatePath = () => {
     input.addEventListener("change", (e) => {
       const parts = e.target.value.split("\\");
       const placeholder =
-        input.parentNode.parentNode.parentNode.querySelector(
-          "input[type=text]"
-        );
+        input.parentNode.parentNode.querySelector("input[type=text]");
       placeholder.setAttribute("value", parts[parts.length - 1]);
     });
   });
