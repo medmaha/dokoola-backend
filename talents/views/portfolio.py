@@ -7,6 +7,8 @@ from ..serializers import (
     TalentPortfolioSerializer,
 )
 
+from utilities.generator import get_serializer_error_message
+
 
 class TalentPortfolioAPIView(GenericAPIView):
     serializer_class = TalentPortfolioSerializer
@@ -39,14 +41,16 @@ class TalentPortfolioAPIView(GenericAPIView):
 
         serializer = self.get_serializer(data=request.data)
 
+        if not serializer.is_valid():
+            msg = get_serializer_error_message(serializer)
+            return Response({"message": msg}, status=400)
+
         try:
             with transaction.atomic():
-                if serializer.is_valid():
-                    portfolio = serializer.save()
-                    profile.portfolio.add(portfolio)
-                    return Response(serializer.data, status=200)
+                portfolio = serializer.save()
+                profile.portfolio.add(portfolio)
+                return Response(serializer.data, status=200)
 
-                return Response({"message": "Bad request attempted"}, status=400)
         except:
             return Response(
                 {"message": "Error: Something went wrong!"},
@@ -61,11 +65,13 @@ class TalentPortfolioAPIView(GenericAPIView):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=200)
-            raise Exception(str(serializer.errors))
+
+            msg = get_serializer_error_message(serializer)
+            raise Exception(msg)
         except Portfolio.DoesNotExist:
             return Response({"message": "This request is prohibited"}, status=403)
         except Exception as e:
-            return Response({"message": str(e)}, status=400)
+            return Response({"message": e}, status=400)
 
     def delete(self, request, username: str, *args, **kwargs):
         try:
