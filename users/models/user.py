@@ -17,7 +17,7 @@ class User(AbstractUser):
     first_name = models.CharField(default="", blank=True, max_length=100)
     last_name = models.CharField(default="", blank=True, max_length=100)
 
-    gender = models.CharField(max_length=100, default="")
+    gender = models.CharField(max_length=100, default="", blank=True)
 
     is_active = models.BooleanField(default=False)
     is_client = models.BooleanField(default=False)
