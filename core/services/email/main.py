@@ -97,5 +97,5 @@ class EmailService:
             callback=callback,
             recipient_list=[email],
             fail_silently=self.fail_silently,
-            from_email=settings.EMAIL_HOST_DOMAIN,
+            from_email=settings.EMAIL_HOST_USER,
         )
