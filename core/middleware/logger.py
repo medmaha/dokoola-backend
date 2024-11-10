@@ -103,27 +103,29 @@ class DokoolaLoggerMiddleware:
             request.META.get("HTTP_USER_AGENT", "")
         )
 
-        log_dict = {
-            "path": request.path,
-            "method": request.method,
-            "absolute_path": request.build_absolute_uri(),
-            "duration": self.get_duration(end_time, start_time),
-            "timestamp": self.get_timestamp(start_time),
-            "status_code": response.status_code,
-            "status_message": self.get_response_message(response),
-            "user_id": request.user.pk,
-            "host": request.META.get("HTTP_HOST"),
-            "ip_addr": request.META.get("REMOTE_ADDR"),
-            "service_name": service_name,
-            "user_agent": user_agent,
-        }
+        def log_dict(level):
+            return {
+                "level": level,
+                "path": request.path,
+                "method": request.method,
+                "absolute_path": request.build_absolute_uri(),
+                "duration": self.get_duration(end_time, start_time),
+                "timestamp": self.get_timestamp(start_time),
+                "status_code": response.status_code,
+                "status_message": self.get_response_message(response),
+                "user_id": request.user.pk,
+                "host": request.META.get("HTTP_HOST"),
+                "ip_addr": request.META.get("REMOTE_ADDR"),
+                "service_name": service_name,
+                "user_agent": user_agent,
+            }
 
         if response.status_code in [200, 204, 304, 307]:
-            DokoolaLogger.info(log_dict, extra=log_dict)
+            DokoolaLogger.info(log_dict("INFO"), extra=log_dict)
         elif response.status_code in [401, 404]:
-            DokoolaLogger.warn(log_dict, extra=log_dict)
+            DokoolaLogger.warn(log_dict("WARN"), extra=log_dict)
         else:
-            DokoolaLogger.error(log_dict, extra=log_dict)
+            DokoolaLogger.error(log_dict("ERROR"), extra=log_dict)
         return response
 
     def get_duration(self, end_time: datetime, start_time: datetime):

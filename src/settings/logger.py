@@ -56,12 +56,10 @@ def execute_log(log_attr, message, extras):
     try:
         logger.__getattribute__(log_attr)(message, extra=extras)
         if extras:
-            extras["LEVEL"] = log_attr
             extras["APP_ID"] = APP_ID
             extras["ENVIRONMENT"] = runtime_environment
 
             try:
-                message["LEVEL"] = log_attr
                 message["APP_ID"] = APP_ID
                 message["ENVIRONMENT"] = runtime_environment
             except:
