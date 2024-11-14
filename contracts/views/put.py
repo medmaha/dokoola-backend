@@ -105,6 +105,12 @@ class ContractAcceptAPIView(UpdateAPIView):
 
 class ContractCompleteAPIView(UpdateAPIView):
 
+    def get_serializer_class(self):
+        class ContractCompleteSerializer(ContractUpdateSerializer):
+            pass
+
+        return ContractCompleteSerializer
+
     def update(self, request, contract_id, *args, **kwargs):
         if not contract_id:
             return Response({"message": "Bad request"}, status=400)

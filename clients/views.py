@@ -266,6 +266,7 @@ class ClientUpdateView(GenericAPIView):
     """
 
     permission_classes = []
+    serializer_class = ClientUpdateDataSerializer
 
     def get(self, request, username, **kwargs):
         self.serializer_class = ClientUpdateDataSerializer

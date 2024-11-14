@@ -42,6 +42,7 @@ class TalentPortfolioAPIView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
 
         if not serializer.is_valid():
+            print(serializer.errors)
             msg = get_serializer_error_message(serializer)
             return Response({"message": msg}, status=400)
 
@@ -66,6 +67,7 @@ class TalentPortfolioAPIView(GenericAPIView):
                 serializer.save()
                 return Response(serializer.data, status=200)
 
+            print(serializer.errors)
             msg = get_serializer_error_message(serializer)
             raise Exception(msg)
         except Portfolio.DoesNotExist:

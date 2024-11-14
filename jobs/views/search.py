@@ -44,8 +44,6 @@ class JobsSearchAPIView(ListAPIView):
             self.filter_by_skills(skills)
         if query:
             self.filter_by_query(query)
-        if budget_rate:
-            self.filter_by_budget(budget_rate)
         if order_by:
             if order_by == "relevance":
                 self.get_relevance()
@@ -151,46 +149,6 @@ class JobsSearchAPIView(ListAPIView):
             qs = self.queryset.filter(filters)
             if qs.exists():
                 self.queryset = qs
-
-    # Filters queryset by budget rate
-    def filter_by_budget(self, budget: str):
-
-        min_value = 0
-        max_value = math.inf
-        filters: Q | None = None
-
-        try:
-
-            if "-" in budget:
-                min_budget, max_budget = budget.split("-")
-
-                if max_budget.endswith("k"):
-                    max_budget = int(max_budget[:-1]) * 1000
-                else:
-                    max_budget = int(max_budget)
-
-                if min_budget.endswith("k"):
-                    min_budget = int(min_budget[:-1]) * 1000
-                else:
-                    min_budget = int(min_budget)
-
-                min_value = min_budget
-                max_value = max_budget
-
-            else:
-                digits_before_k = re.findall(r"\d+", budget)
-                min_value = int(digits_before_k[0]) * 1000
-
-            if not min_value < 0:
-                filters = Q(budget__gte=float(min_value))
-            if filters and max_value != math.inf:
-                filters &= Q(budget__lte=float(max_value))
-
-        except Exception:
-            pass
-
-        if filters:
-            self.queryset = self.queryset.filter(filters)
 
     # Filters queryset by duration
     def filter_by_duration(self, duration: str):

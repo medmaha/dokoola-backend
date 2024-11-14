@@ -10,10 +10,21 @@ from utilities.generator import get_serializer_error_message
 class CategoryAPIView(GenericAPIView):
     permission_classes = []
 
+    def get_serializer_class(self):
+
+        class Serializer(serializers.ModelSerializer):
+            class Meta:
+                model = Category
+                fields = ["slug", "name", "image_url", "description"]
+
+        return Serializer
+
     def get(self, request):
-        categories = Category.objects.filter(disabled=False).values(
-            "slug", "name", "image_url", "description"
-        )
+        categories = Category.objects.filter(disabled=False)
+
+        serializers = self.get_serializer(categories, many=True)
+        categories = serializers.data
+
         response = Response(categories, status=200)
         return response
 
@@ -29,19 +40,28 @@ class FeedbackAPIView(GenericAPIView):
     permission_classes = []
     serializer_class = FeedbackCreateSerializer
 
+    def get_serializer_class(self):
+        class Serializer(serializers.ModelSerializer):
+            class Meta:
+                model = Feedback
+                fields = [
+                    "author_name",
+                    "author_email",
+                    "rating",
+                    "likes_count",
+                    "message",
+                    "created_at",
+                ]
+
+        return Serializer
+
     def get(self, request):
-        feedbacks = (
-            Feedback.objects.filter(blacklisted=False)
-            .order_by("-rating", "-created_at")[:3]
-            .values(
-                "author_name",
-                "author_email",
-                "rating",
-                "likes_count",
-                "message",
-                "created_at",
-            )
-        )
+        feedbacks = Feedback.objects.filter(blacklisted=False).order_by(
+            "-rating", "-created_at"
+        )[:3]
+
+        serializers = self.get_serializer(feedbacks, many=True)
+        feedbacks = serializers.data
 
         response = Response(feedbacks, status=200)
         return response

@@ -1,13 +1,21 @@
+from rest_framework import serializers
 from rest_framework.generics import GenericAPIView
-from rest_framework.response import Response
 
 from core.services.email import email_service
-from users.models.ott import OTTProxy
+from users.models.ott import OTTProxy, OTT
 
 
 class ResendOttAPIView(GenericAPIView):
     permission_classes = ()
     authentication_classes = ()
+
+    def get_serializer_class(self):
+        class Serializer(serializers.ModelSerializer):
+            class Meta:
+                model = OTT
+                fields = ("code",)
+
+        return Serializer
 
     def resend_verification_code(self, email):
         ott = OTTProxy.generate_ott(identifier=email)
@@ -24,11 +32,16 @@ class ResendOttAPIView(GenericAPIView):
             html_template_context=html_context,
         )
 
+        return ott
+
     def post(self, request, *args, **kwargs):
         email = request.data.get("email")
-        self.resend_verification_code(email)
+        ott = self.resend_verification_code(email)
+        serializer = self.get_serializer(instance=ott)
+
         return Response(
             {
+                **serializer.data,
                 "message": ("Successfully sent the code"),
             }
         )

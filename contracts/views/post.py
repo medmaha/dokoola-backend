@@ -18,6 +18,9 @@ from utilities.generator import get_serializer_error_message
 
 class ContractCreateAPIView(GenericAPIView):
 
+    def get_serializer_class(self):
+        return ContractCreateSerializer
+
     def get(self, request, *args, **kwargs):
         user: User = request.user
 

@@ -15,10 +15,26 @@ from .auth_token import GenerateToken
 
 class UserProfileUpdateAPIView(UpdateAPIView):
 
+    profile = None
+    profile_type = ""
+
+    def get_serializer_class(self):
+
+        if self.profile_type.lower() == "talent":
+            return TalentUpdateSerializer
+
+        if self.profile_type.lower() == "client":
+            return ClientUpdateSerializer
+
+        return TalentUpdateSerializer
+
     def update(self, request, *args, **kwargs):
         user: User = request.user
 
         profile, profile_name = user.profile
+
+        self.profile = profile
+        self.profile_type = profile_name
 
         data = request.data.copy()
 
@@ -47,15 +63,9 @@ class UserProfileUpdateAPIView(UpdateAPIView):
                     error_message = get_serializer_error_message(user_serializer.errors)
                     return Response(dict(message=error_message), status=400)
 
-                if isinstance(profile, Talent):
-                    profile_serializer = TalentUpdateSerializer.merge_serialize(
-                        profile, data
-                    )
-
-                if isinstance(profile, Client):
-                    profile_serializer = ClientUpdateSerializer.merge_serialize(
-                        profile, data
-                    )
+                profile_serializer = self.get_serializer_class().merge_serialize(
+                    profile, data
+                )
 
                 if profile_serializer.is_valid():
                     profile_serializer.save()

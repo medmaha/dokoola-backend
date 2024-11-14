@@ -3,7 +3,7 @@ import re
 
 from django.db import transaction
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView
 
 from clients.models import Client
 from staffs.models import Staff
@@ -14,8 +14,9 @@ from users.serializer import UserCreateSerializer
 from .auth_token import GenerateToken
 
 
-class SignupAPIView(APIView):
+class SignupAPIView(GenericAPIView):
     permission_classes = ()
+    serializer_class = UserCreateSerializer
 
     def username_suffix(self, _suffix):
         suffix = random.randrange(10, 999)

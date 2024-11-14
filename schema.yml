@@ -1,0 +1,3875 @@
+openapi: 3.0.3
+info:
+  title: ''
+  version: 0.0.0
+paths:
+  /api/account/at/{username}/:
+    get:
+      operationId: api_account_at_retrieve
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TalentProfileDetail'
+          description: ''
+  /api/account/info/:
+    put:
+      operationId: api_account_info_update
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TalentUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TalentUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TalentUpdate'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TalentUpdate'
+          description: ''
+    patch:
+      operationId: api_account_info_partial_update
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTalentUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTalentUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTalentUpdate'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TalentUpdate'
+          description: ''
+  /api/account/login/:
+    post:
+      operationId: api_account_login_create
+      description: A view for getting access token and refreshing tokens
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/account/logout/:
+    post:
+      operationId: api_account_logout_create
+      description: A view for logging out the request.user's Access and Refresh tokens
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/account/signup/:
+    post:
+      operationId: api_account_signup_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCreate'
+          description: ''
+  /api/account/signup/mail-check/:
+    post:
+      operationId: api_account_signup_mail_check_create
+      tags:
+      - api
+      responses:
+        '200':
+          description: No response body
+  /api/account/signup/mail-resend/:
+    post:
+      operationId: api_account_signup_mail_resend_create
+      tags:
+      - api
+      responses:
+        '200':
+          description: No response body
+  /api/account/signup/mail-verify/:
+    post:
+      operationId: api_account_signup_mail_verify_create
+      tags:
+      - api
+      responses:
+        '200':
+          description: No response body
+  /api/account/verify:
+    post:
+      operationId: api_account_verify_create
+      tags:
+      - api
+      responses:
+        '200':
+          description: No response body
+  /api/categories/:
+    get:
+      operationId: api_categories_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/clients/:
+    get:
+      operationId: api_clients_retrieve
+      description: A generic api view for performing CRUD operations on clients
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: api_clients_create
+      description: A generic api view for performing CRUD operations on clients
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+    put:
+      operationId: api_clients_update
+      description: A generic api view for performing CRUD operations on clients
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: api_clients_destroy
+      description: A generic api view for performing CRUD operations on clients
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/clients/{client_id}/:
+    get:
+      operationId: api_clients_retrieve_2
+      description: A generic api view for performing CRUD operations on clients
+      parameters:
+      - in: path
+        name: client_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: api_clients_create_2
+      description: A generic api view for performing CRUD operations on clients
+      parameters:
+      - in: path
+        name: client_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+    put:
+      operationId: api_clients_update_2
+      description: A generic api view for performing CRUD operations on clients
+      parameters:
+      - in: path
+        name: client_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: api_clients_destroy_2
+      description: A generic api view for performing CRUD operations on clients
+      parameters:
+      - in: path
+        name: client_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/clients/{username}/:
+    get:
+      operationId: api_clients_retrieve_3
+      description: A generic api view for performing CRUD operations on clients
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: api_clients_create_3
+      description: A generic api view for performing CRUD operations on clients
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+    put:
+      operationId: api_clients_update_3
+      description: A generic api view for performing CRUD operations on clients
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: api_clients_destroy_3
+      description: A generic api view for performing CRUD operations on clients
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/clients/{username}/job-postings/:
+    get:
+      operationId: api_clients_job_postings_list
+      description: |-
+        This view is used for the job posting view.
+        Gets the recent jobs created by the client
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedClientJobPostingList'
+          description: ''
+  /api/clients/{username}/update/:
+    get:
+      operationId: api_clients_update_retrieve
+      description: |-
+        This view is used for the client mini api view
+        Retrieves clients updatable information
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientUpdateData'
+          description: ''
+    put:
+      operationId: api_clients_update_update
+      description: |-
+        This view is used for the client mini api view
+        Retrieves clients updatable information
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientUpdateData'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ClientUpdateData'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ClientUpdateData'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientUpdateData'
+          description: ''
+  /api/clients/dashboard/:
+    get:
+      operationId: api_clients_dashboard_retrieve
+      description: |-
+        This view is used for the client dashboard view
+        Retrieves all information/statistics related to the client
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/clients/info/:
+    get:
+      operationId: api_clients_info_retrieve
+      description: |-
+        This view is used for the job detail view
+        Retrieves all information related to the job about it's client
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientJobDetail'
+          description: ''
+  /api/contracts/:
+    get:
+      operationId: api_contracts_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedContractListList'
+          description: ''
+  /api/contracts/{contract_id}/:
+    get:
+      operationId: api_contracts_retrieve
+      parameters:
+      - in: path
+        name: contract_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractList'
+          description: ''
+  /api/contracts/accept/{contract_id}/:
+    put:
+      operationId: api_contracts_accept_update
+      parameters:
+      - in: path
+        name: contract_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+    patch:
+      operationId: api_contracts_accept_partial_update
+      parameters:
+      - in: path
+        name: contract_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/contracts/completed/{contract_id}/:
+    put:
+      operationId: api_contracts_completed_update
+      parameters:
+      - in: path
+        name: contract_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContractComplete'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ContractComplete'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ContractComplete'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractComplete'
+          description: ''
+    patch:
+      operationId: api_contracts_completed_partial_update
+      parameters:
+      - in: path
+        name: contract_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedContractComplete'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedContractComplete'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedContractComplete'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractComplete'
+          description: ''
+  /api/contracts/create/:
+    get:
+      operationId: api_contracts_create_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractCreate'
+          description: ''
+    post:
+      operationId: api_contracts_create_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContractCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ContractCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ContractCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractCreate'
+          description: ''
+  /api/contracts/reject/{contract_id}/:
+    put:
+      operationId: api_contracts_reject_update
+      parameters:
+      - in: path
+        name: contract_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+    patch:
+      operationId: api_contracts_reject_partial_update
+      parameters:
+      - in: path
+        name: contract_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/feedbacks/:
+    get:
+      operationId: api_feedbacks_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: api_feedbacks_create
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/jobs/:
+    get:
+      operationId: api_jobs_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedJobListList'
+          description: ''
+  /api/jobs/{job_id}/:
+    get:
+      operationId: api_jobs_retrieve
+      parameters:
+      - in: path
+        name: job_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobRetrieve'
+          description: ''
+  /api/jobs/{slug}/activities/:
+    get:
+      operationId: api_jobs_activities_retrieve
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activity'
+          description: ''
+  /api/jobs/create/:
+    post:
+      operationId: api_jobs_create_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/JobCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/JobCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobCreate'
+          description: ''
+  /api/jobs/me/:
+    get:
+      operationId: api_jobs_me_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedJobListList'
+          description: ''
+  /api/jobs/search/:
+    get:
+      operationId: api_jobs_search_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedJobListList'
+          description: ''
+  /api/jobs/update/:
+    put:
+      operationId: api_jobs_update_update
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/JobUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/JobUpdate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobUpdate'
+          description: ''
+    patch:
+      operationId: api_jobs_update_partial_update
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedJobUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedJobUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedJobUpdate'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobUpdate'
+          description: ''
+  /api/messaging/create/:
+    post:
+      operationId: api_messaging_create_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/messagingCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/messagingCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/messagingCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/messagingCreate'
+          description: ''
+  /api/messaging/threads/:
+    get:
+      operationId: api_messaging_threads_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedThreadListList'
+          description: ''
+  /api/messaging/threads/delete/:
+    delete:
+      operationId: api_messaging_threads_delete_destroy
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/messaging/threads/latest/:
+    get:
+      operationId: api_messaging_threads_latest_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/messaging/threads/messages/:
+    get:
+      operationId: api_messaging_threads_messages_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMessagingListList'
+          description: ''
+  /api/messaging/threads/search/:
+    get:
+      operationId: api_messaging_threads_search_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedThreadListList'
+          description: ''
+  /api/notifications/:
+    get:
+      operationId: api_notifications_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotificationList'
+          description: ''
+  /api/notifications/check/:
+    get:
+      operationId: api_notifications_check_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotificationList'
+          description: ''
+  /api/notifications/reed/:
+    put:
+      operationId: api_notifications_reed_update
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+    patch:
+      operationId: api_notifications_reed_partial_update
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/notifications/seen/:
+    put:
+      operationId: api_notifications_seen_update
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+    patch:
+      operationId: api_notifications_seen_partial_update
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/projects/:
+    get:
+      operationId: api_projects_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProjectListList'
+          description: ''
+  /api/projects/{project_id}/:
+    get:
+      operationId: api_projects_retrieve
+      parameters:
+      - in: path
+        name: project_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectRetrieve'
+          description: ''
+  /api/projects/{project_id}/update-status/:
+    put:
+      operationId: api_projects_update_status_update
+      parameters:
+      - in: path
+        name: project_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectStatusUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProjectStatusUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProjectStatusUpdate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectStatusUpdate'
+          description: ''
+    patch:
+      operationId: api_projects_update_status_partial_update
+      parameters:
+      - in: path
+        name: project_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectStatusUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectStatusUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectStatusUpdate'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectStatusUpdate'
+          description: ''
+  /api/projects/acknowledgements/{project_id}/:
+    get:
+      operationId: api_projects_acknowledgements_retrieve
+      parameters:
+      - in: path
+        name: project_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcknowledgementRetrieve'
+          description: ''
+  /api/projects/acknowledgements/create/:
+    post:
+      operationId: api_projects_acknowledgements_create_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcknowledgementCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AcknowledgementCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AcknowledgementCreate'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcknowledgementCreate'
+          description: ''
+  /api/projects/acknowledgements/update/:
+    put:
+      operationId: api_projects_acknowledgements_update_update
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcknowledgementUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AcknowledgementUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AcknowledgementUpdate'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcknowledgementUpdate'
+          description: ''
+    patch:
+      operationId: api_projects_acknowledgements_update_partial_update
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAcknowledgementUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAcknowledgementUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAcknowledgementUpdate'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcknowledgementUpdate'
+          description: ''
+  /api/projects/milestones/{project_id}/:
+    get:
+      operationId: api_projects_milestones_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: path
+        name: project_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMilestoneRetrieveList'
+          description: ''
+  /api/projects/milestones/create/:
+    post:
+      operationId: api_projects_milestones_create_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MilestoneCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MilestoneCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MilestoneCreate'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MilestoneCreate'
+          description: ''
+  /api/projects/milestones/update/:
+    put:
+      operationId: api_projects_milestones_update_update
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MilestoneUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MilestoneUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MilestoneUpdate'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MilestoneUpdate'
+          description: ''
+    patch:
+      operationId: api_projects_milestones_update_partial_update
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMilestoneUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMilestoneUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMilestoneUpdate'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MilestoneUpdate'
+          description: ''
+  /api/proposals/:
+    get:
+      operationId: api_proposals_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProposalListList'
+          description: ''
+  /api/proposals/{pid}/:
+    get:
+      operationId: api_proposals_retrieve
+      parameters:
+      - in: path
+        name: pid
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProposalDetail'
+          description: ''
+  /api/proposals/{username}/pending/:
+    get:
+      operationId: api_proposals_pending_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProposalPendingListList'
+          description: ''
+  /api/proposals/check/{slug}/:
+    get:
+      operationId: api_proposals_check_retrieve
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/proposals/create/:
+    post:
+      operationId: api_proposals_create_create
+      description: An API View for handling the creation of proposals
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProposalCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProposalCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProposalCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProposalCreate'
+          description: ''
+  /api/proposals/update/:
+    get:
+      operationId: api_proposals_update_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProposalUpdate'
+          description: ''
+    put:
+      operationId: api_proposals_update_update
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProposalUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProposalUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProposalUpdate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProposalUpdate'
+          description: ''
+  /api/reviews/:
+    get:
+      operationId: api_reviews_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: api_reviews_create
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+    put:
+      operationId: api_reviews_update
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: api_reviews_destroy
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/talents/:
+    get:
+      operationId: api_talents_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTalentList'
+          description: ''
+  /api/talents/{username}/:
+    get:
+      operationId: api_talents_retrieve
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TalentDetail'
+          description: ''
+  /api/talents/{username}/certificates/:
+    get:
+      operationId: api_talents_certificates_retrieve
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TalentCertificate'
+          description: ''
+    post:
+      operationId: api_talents_certificates_create
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TalentCertificate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TalentCertificate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TalentCertificate'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TalentCertificate'
+          description: ''
+    put:
+      operationId: api_talents_certificates_update
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TalentCertificate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TalentCertificate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TalentCertificate'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TalentCertificate'
+          description: ''
+    delete:
+      operationId: api_talents_certificates_destroy
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/talents/{username}/educations/:
+    get:
+      operationId: api_talents_educations_retrieve
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TalentEducation'
+          description: ''
+    post:
+      operationId: api_talents_educations_create
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TalentEducation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TalentEducation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TalentEducation'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TalentEducation'
+          description: ''
+    put:
+      operationId: api_talents_educations_update
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TalentEducation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TalentEducation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TalentEducation'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TalentEducation'
+          description: ''
+    delete:
+      operationId: api_talents_educations_destroy
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/talents/{username}/mini-info/:
+    get:
+      operationId: api_talents_mini_info_retrieve
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TalentMiniInfo'
+          description: ''
+  /api/talents/{username}/portfolios/:
+    get:
+      operationId: api_talents_portfolios_retrieve_2
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TalentPortfolio'
+          description: ''
+    post:
+      operationId: api_talents_portfolios_create_2
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TalentPortfolio'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TalentPortfolio'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TalentPortfolio'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TalentPortfolio'
+          description: ''
+    put:
+      operationId: api_talents_portfolios_update_2
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TalentPortfolio'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TalentPortfolio'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TalentPortfolio'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TalentPortfolio'
+          description: ''
+    delete:
+      operationId: api_talents_portfolios_destroy_2
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/talents/{username}/projects/:
+    get:
+      operationId: api_talents_projects_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProposalPendingListList'
+          description: ''
+  /api/talents/{username}/projects/pending:
+    get:
+      operationId: api_talents_projects_pending_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProposalPendingListList'
+          description: ''
+  /api/talents/{username}/update/:
+    get:
+      operationId: api_talents_update_retrieve
+      description: |-
+        This view is used for the client mini api view
+        Retrieves clients updatable information
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+    put:
+      operationId: api_talents_update_update
+      description: |-
+        This view is used for the client mini api view
+        Retrieves clients updatable information
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/talents/dashboard/:
+    get:
+      operationId: api_talents_dashboard_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/talents/dashboard/query/:
+    get:
+      operationId: api_talents_dashboard_query_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/talents/portfolios/:
+    get:
+      operationId: api_talents_portfolios_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TalentPortfolio'
+          description: ''
+    post:
+      operationId: api_talents_portfolios_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TalentPortfolio'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TalentPortfolio'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TalentPortfolio'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TalentPortfolio'
+          description: ''
+    put:
+      operationId: api_talents_portfolios_update
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TalentPortfolio'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TalentPortfolio'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TalentPortfolio'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TalentPortfolio'
+          description: ''
+    delete:
+      operationId: api_talents_portfolios_destroy
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/talents/search/:
+    get:
+      operationId: api_talents_search_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTalentList'
+          description: ''
+  /api/users/:
+    get:
+      operationId: api_users_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserList'
+          description: ''
+  /api/users/{id}/:
+    get:
+      operationId: api_users_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/users/dashboard/:
+    get:
+      operationId: api_users_dashboard_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/users/get-me/:
+    get:
+      operationId: api_users_get_me_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/users/profile/query/:
+    get:
+      operationId: api_users_profile_query_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+components:
+  schemas:
+    ? ''
+    : type: object
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 100
+      required:
+      - email
+    AcknowledgementCreate:
+      type: object
+      properties:
+        comment:
+          type: string
+          nullable: true
+        acknowledged:
+          type: boolean
+    AcknowledgementRetrieve:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        comment:
+          type: string
+          nullable: true
+        acknowledged:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+    AcknowledgementUpdate:
+      type: object
+      properties:
+        comment:
+          type: string
+          nullable: true
+        acknowledged:
+          type: boolean
+    Activity:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        bits_count:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        hired_count:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        invite_count:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        proposal_count:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        interview_count:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        unanswered_invites:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        client_last_visit:
+          type: string
+          format: date-time
+          nullable: true
+        job:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - id
+    Attachment:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        file_url:
+          type: string
+          maxLength: 1500
+      required:
+      - file_url
+      - name
+    ClientJobDetail:
+      type: object
+      description: |-
+        This serializer is used for the job detail view
+        * The return data will vary depending on the requesting user
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        about:
+          type: string
+          nullable: true
+          maxLength: 1500
+        reviews_count:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        country:
+          nullable: true
+        address:
+          type: string
+          maxLength: 1000
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+        user:
+          type: integer
+        company:
+          type: string
+          format: uuid
+          nullable: true
+        reviews:
+          type: array
+          items:
+            type: integer
+      required:
+      - id
+      - user
+    ClientJobPosting:
+      type: object
+      description: |-
+        This serializer is used for the job detail view
+        * The return data will vary depending on the requesting user
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        pricing:
+          nullable: true
+        benefits:
+          nullable: true
+        required_skills:
+          nullable: true
+        country: {}
+        address:
+          type: string
+          nullable: true
+          maxLength: 200
+        job_type:
+          $ref: '#/components/schemas/JobTypeEnum'
+        published:
+          type: boolean
+        status:
+          $ref: '#/components/schemas/Status20cEnum'
+        is_valid:
+          type: boolean
+        is_third_party:
+          type: boolean
+        third_party_address:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 200
+        views_count:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        proposal_count:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        invitation_count:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        client_last_visit:
+          type: string
+          format: date-time
+          nullable: true
+        job_type_other:
+          type: string
+          nullable: true
+          maxLength: 200
+        experience_level_other:
+          type: string
+          nullable: true
+          maxLength: 200
+        estimated_duration:
+          type: string
+          format: date-time
+          nullable: true
+        application_deadline:
+          type: string
+          format: date-time
+          nullable: true
+        experience_level:
+          type: string
+          nullable: true
+          maxLength: 200
+        bits_amount:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        category:
+          type: integer
+          nullable: true
+        client:
+          type: string
+          format: uuid
+      required:
+      - client
+      - country
+      - created_at
+      - description
+      - id
+      - title
+      - updated_at
+    ClientUpdateData:
+      type: object
+      description: A readonly serializer for retrieving the updatable data of a client
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        about:
+          type: string
+          nullable: true
+          maxLength: 1500
+        reviews_count:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        country:
+          nullable: true
+        address:
+          type: string
+          maxLength: 1000
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+        user:
+          type: integer
+        company:
+          type: string
+          format: uuid
+          nullable: true
+        reviews:
+          type: array
+          items:
+            type: integer
+      required:
+      - id
+      - user
+    ContractComplete:
+      type: object
+      properties:
+        start_date:
+          type: string
+          format: date
+          nullable: true
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        duration:
+          type: string
+          nullable: true
+          maxLength: 100
+        additional_terms:
+          type: string
+          nullable: true
+          maxLength: 1500
+    ContractCreate:
+      type: object
+      properties:
+        proposal:
+          type: integer
+        talent:
+          type: string
+        job:
+          type: string
+          format: uuid
+        client:
+          type: string
+          format: uuid
+        start_date:
+          type: string
+          format: date
+          nullable: true
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        duration:
+          type: string
+          nullable: true
+          maxLength: 100
+        additional_terms:
+          type: string
+          nullable: true
+          maxLength: 1500
+      required:
+      - client
+      - job
+      - proposal
+      - talent
+    ContractList:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        start_date:
+          type: string
+          format: date
+          nullable: true
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        duration:
+          type: string
+          nullable: true
+          maxLength: 100
+        status:
+          $ref: '#/components/schemas/StatusA31Enum'
+        progress:
+          $ref: '#/components/schemas/ProgressEnum'
+        payment_method:
+          type: string
+          nullable: true
+          maxLength: 100
+        additional_terms:
+          type: string
+          nullable: true
+          maxLength: 1500
+        talent_acknowledgement:
+          $ref: '#/components/schemas/TalentAcknowledgementEnum'
+      required:
+      - created_at
+      - id
+    JobCreate:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        country: {}
+        address:
+          type: string
+          nullable: true
+          maxLength: 200
+        pricing:
+          nullable: true
+        benefits:
+          nullable: true
+        job_type:
+          $ref: '#/components/schemas/JobTypeEnum'
+        description:
+          type: string
+        required_skills:
+          nullable: true
+        experience_level:
+          type: string
+          nullable: true
+          maxLength: 200
+        estimated_duration:
+          type: string
+          format: date-time
+          nullable: true
+        third_party_address:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 200
+        application_deadline:
+          type: string
+          format: date-time
+          nullable: true
+        job_type_other:
+          type: string
+          nullable: true
+          maxLength: 200
+        experience_level_other:
+          type: string
+          nullable: true
+          maxLength: 200
+      required:
+      - country
+      - description
+      - title
+    JobList:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        country: {}
+        address:
+          type: string
+          nullable: true
+          maxLength: 200
+        client:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/Status20cEnum'
+        pricing:
+          nullable: true
+        job_type:
+          $ref: '#/components/schemas/JobTypeEnum'
+        job_type_other:
+          type: string
+          nullable: true
+          maxLength: 200
+        description:
+          type: string
+        required_skills:
+          nullable: true
+        is_third_party:
+          type: boolean
+        application_deadline:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - client
+      - country
+      - created_at
+      - description
+      - id
+      - title
+    JobRetrieve:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        pricing:
+          nullable: true
+        benefits:
+          nullable: true
+        required_skills:
+          nullable: true
+        country: {}
+        address:
+          type: string
+          nullable: true
+          maxLength: 200
+        category:
+          type: integer
+          nullable: true
+        status:
+          $ref: '#/components/schemas/Status20cEnum'
+        published:
+          type: boolean
+        is_third_party:
+          type: boolean
+        third_party_address:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 200
+        bits_amount:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        views_count:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        proposal_count:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        invitation_count:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        client_last_visit:
+          type: string
+          format: date-time
+          nullable: true
+        job_type:
+          $ref: '#/components/schemas/JobTypeEnum'
+        job_type_other:
+          type: string
+          nullable: true
+          maxLength: 200
+        experience_level:
+          type: string
+          nullable: true
+          maxLength: 200
+        experience_level_other:
+          type: string
+          nullable: true
+          maxLength: 200
+        estimated_duration:
+          type: string
+          format: date-time
+          nullable: true
+        application_deadline:
+          type: string
+          format: date-time
+          nullable: true
+        client:
+          type: string
+          format: uuid
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - client
+      - country
+      - created_at
+      - description
+      - id
+      - title
+      - updated_at
+    JobTypeEnum:
+      enum:
+      - full-time
+      - part-time
+      - freelance
+      - contract
+      - internship
+      - other
+      type: string
+      description: |-
+        * `full-time` - Full Time
+        * `part-time` - Part Time
+        * `freelance` - Freelance
+        * `contract` - Contract
+        * `internship` - Internship
+        * `other` - Other
+    JobUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        pricing:
+          nullable: true
+        country: {}
+        published:
+          type: boolean
+        description:
+          type: string
+        required_skills:
+          nullable: true
+      required:
+      - country
+      - description
+      - title
+    MessagingList:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        content:
+          type: string
+        from_me:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          readOnly: true
+      required:
+      - content
+      - created_at
+      - from_me
+      - id
+    MilestoneCreate:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/Status267Enum'
+        milestone_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        milestone_description:
+          type: string
+          nullable: true
+        published:
+          type: boolean
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+    MilestoneRetrieve:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/Status267Enum'
+        milestone_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        milestone_description:
+          type: string
+          nullable: true
+        acknowledgement:
+          $ref: '#/components/schemas/AcknowledgementRetrieve'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        published:
+          type: boolean
+        is_final:
+          type: boolean
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+        project_pk:
+          type: string
+          maxLength: 255
+      required:
+      - acknowledgement
+      - created_at
+      - id
+      - project_pk
+      - updated_at
+    MilestoneUpdate:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/Status267Enum'
+        milestone_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        milestone_description:
+          type: string
+          nullable: true
+        published:
+          type: boolean
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        sender:
+          type: string
+          readOnly: true
+        is_seen:
+          type: boolean
+        hint_text:
+          type: string
+          maxLength: 300
+        archived:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        content_text:
+          type: string
+          maxLength: 1000
+        object_api_link:
+          type: string
+          nullable: true
+          maxLength: 1000
+      required:
+      - created_at
+      - id
+      - sender
+    PaginatedClientJobPostingList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClientJobPosting'
+    PaginatedContractListList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContractList'
+    PaginatedJobListList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobList'
+    PaginatedMessagingListList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MessagingList'
+    PaginatedMilestoneRetrieveList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MilestoneRetrieve'
+    PaginatedNotificationList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+    PaginatedProjectListList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectList'
+    PaginatedProposalListList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProposalList'
+    PaginatedProposalPendingListList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProposalPendingList'
+    PaginatedTalentList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Talent'
+    PaginatedThreadListList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThreadList'
+    PaginatedUserList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    PatchedAcknowledgementUpdate:
+      type: object
+      properties:
+        comment:
+          type: string
+          nullable: true
+        acknowledged:
+          type: boolean
+    PatchedContractComplete:
+      type: object
+      properties:
+        start_date:
+          type: string
+          format: date
+          nullable: true
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        duration:
+          type: string
+          nullable: true
+          maxLength: 100
+        additional_terms:
+          type: string
+          nullable: true
+          maxLength: 1500
+    PatchedJobUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        pricing:
+          nullable: true
+        country: {}
+        published:
+          type: boolean
+        description:
+          type: string
+        required_skills:
+          nullable: true
+    PatchedMilestoneUpdate:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/Status267Enum'
+        milestone_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        milestone_description:
+          type: string
+          nullable: true
+        published:
+          type: boolean
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+    PatchedProjectStatusUpdate:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/Status0cdEnum'
+        acceptance_comment:
+          type: string
+          nullable: true
+          maxLength: 1000
+        completion_comment:
+          type: string
+          nullable: true
+          maxLength: 1000
+        termination_comment:
+          type: string
+          nullable: true
+          maxLength: 1000
+        cancellation_comment:
+          type: string
+          nullable: true
+          maxLength: 1000
+    PatchedTalentUpdate:
+      type: object
+      description: |-
+        This serializer is used for the talent update view
+        Exposes the talent's updatable fields
+      properties:
+        title:
+          type: string
+          maxLength: 1500
+        bio:
+          type: string
+          maxLength: 1500
+        skills:
+          type: string
+          maxLength: 1000
+        pricing:
+          type: string
+          maxLength: 20
+    ProgressEnum:
+      enum:
+      - NONE
+      - ACTIVE
+      - CANCELLED
+      - COMPLETED
+      type: string
+      description: |-
+        * `NONE` - None
+        * `ACTIVE` - Active
+        * `CANCELLED` - Cancelled
+        * `COMPLETED` - Completed
+    ProjectList:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        duration:
+          type: string
+          maxLength: 255
+        deadline:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          $ref: '#/components/schemas/Status0cdEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - duration
+      - id
+    ProjectRetrieve:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        duration:
+          type: string
+          maxLength: 255
+        deadline:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          $ref: '#/components/schemas/Status0cdEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - duration
+      - id
+    ProjectStatusUpdate:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/Status0cdEnum'
+        acceptance_comment:
+          type: string
+          nullable: true
+          maxLength: 1000
+        completion_comment:
+          type: string
+          nullable: true
+          maxLength: 1000
+        termination_comment:
+          type: string
+          nullable: true
+          maxLength: 1000
+        cancellation_comment:
+          type: string
+          nullable: true
+          maxLength: 1000
+      required:
+      - status
+    ProposalCreate:
+      type: object
+      properties:
+        budget:
+          type: number
+          format: double
+        service_fee:
+          type: number
+          format: double
+          description: In percentage
+        bits_amount:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        duration:
+          type: string
+          nullable: true
+          maxLength: 100
+        cover_letter:
+          type: string
+          maxLength: 1500
+      required:
+      - cover_letter
+    ProposalDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        job:
+          $ref: '#/components/schemas/JobList'
+        budget:
+          type: number
+          format: double
+        service_fee:
+          type: number
+          format: double
+          description: In percentage
+        talent:
+          $ref: '#/components/schemas/Talent'
+        bits_amount:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attachment'
+        cover_letter:
+          type: string
+          maxLength: 1500
+        duration:
+          type: string
+          nullable: true
+          maxLength: 100
+        status:
+          $ref: '#/components/schemas/Status294Enum'
+        is_reviewed:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - attachments
+      - cover_letter
+      - created_at
+      - id
+      - job
+      - talent
+      - updated_at
+    ProposalList:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        budget:
+          type: number
+          format: double
+        service_fee:
+          type: number
+          format: double
+          description: In percentage
+        bits_amount:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attachment'
+        cover_letter:
+          type: string
+          maxLength: 1500
+        duration:
+          type: string
+          nullable: true
+          maxLength: 100
+        status:
+          $ref: '#/components/schemas/Status294Enum'
+        is_reviewed:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - attachments
+      - cover_letter
+      - created_at
+      - id
+      - updated_at
+    ProposalPendingList:
+      type: object
+      description: This is a serializer for the list of pending proposals for the
+        request user (talent)
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        budget:
+          type: number
+          format: double
+        service_fee:
+          type: number
+          format: double
+          description: In percentage
+        talent:
+          type: string
+        duration:
+          type: string
+          nullable: true
+          maxLength: 100
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - talent
+    ProposalUpdate:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        budget:
+          type: number
+          format: double
+        service_fee:
+          type: number
+          format: double
+          description: In percentage
+        bits_amount:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attachment'
+        duration:
+          type: string
+          nullable: true
+          maxLength: 100
+        cover_letter:
+          type: string
+          maxLength: 1500
+        job:
+          $ref: '#/components/schemas/JobList'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - attachments
+      - cover_letter
+      - created_at
+      - id
+      - job
+    Status0cdEnum:
+      enum:
+      - CLOSED
+      - PENDING
+      - ACCEPTED
+      - COMPLETED
+      - CANCELLED
+      - TERMINATED
+      type: string
+      description: |-
+        * `CLOSED` - Closed
+        * `PENDING` - Pending
+        * `ACCEPTED` - Accepted
+        * `COMPLETED` - Completed
+        * `CANCELLED` - Cancelled
+        * `TERMINATED` - Terminated
+    Status20cEnum:
+      enum:
+      - CLOSED
+      - PUBLISHED
+      - SUSPENDED
+      - IN_PROGRESS
+      - COMPLETED
+      type: string
+      description: |-
+        * `CLOSED` - Closed
+        * `PUBLISHED` - Published
+        * `SUSPENDED` - Suspended
+        * `IN_PROGRESS` - In Progress
+        * `COMPLETED` - Completed
+    Status267Enum:
+      enum:
+      - PENDING
+      - COMPLETED
+      - CANCELLED
+      - ACCEPTED
+      - ACTIVE
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `COMPLETED` - Completed
+        * `CANCELLED` - Cancelled
+        * `ACCEPTED` - Accepted
+        * `ACTIVE` - Active
+    Status294Enum:
+      enum:
+      - ACCEPTED
+      - DECLINED
+      - PENDING
+      type: string
+      description: |-
+        * `ACCEPTED` - Accepted
+        * `DECLINED` - Declined
+        * `PENDING` - Pending
+    StatusA31Enum:
+      enum:
+      - PENDING
+      - ACCEPTED
+      - REJECTED
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `ACCEPTED` - Accepted
+        * `REJECTED` - Rejected
+    Talent:
+      type: object
+      description: Serializer for the user object
+      properties:
+        bio:
+          type: string
+          maxLength: 1500
+        badge:
+          type: string
+          maxLength: 200
+        skills:
+          type: string
+          maxLength: 1000
+        title:
+          type: string
+          maxLength: 1500
+        pricing:
+          type: string
+          maxLength: 20
+    TalentAcknowledgementEnum:
+      enum:
+      - PENDING
+      - ACCEPTED
+      - REJECTED
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `ACCEPTED` - Accepted
+        * `REJECTED` - Rejected
+    TalentCertificate:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        name:
+          type: string
+        organization:
+          type: string
+        url:
+          type: string
+          format: uri
+        published:
+          type: boolean
+        date_issued:
+          type: string
+          format: date
+        file_url:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 200
+      required:
+      - created_at
+      - id
+      - updated_at
+    TalentDetail:
+      type: object
+      description: An API View for the talent data statistics
+      properties:
+        bio:
+          type: string
+          maxLength: 1500
+        badge:
+          type: string
+          maxLength: 200
+        pricing:
+          type: string
+          maxLength: 20
+    TalentEducation:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        degree:
+          type: string
+        institution:
+          type: string
+        location:
+          type: string
+        achievements:
+          type: string
+          maxLength: 500
+        end_date:
+          type: string
+          format: date
+        published:
+          type: boolean
+        start_date:
+          type: string
+          format: date
+      required:
+      - created_at
+      - id
+      - updated_at
+    TalentMiniInfo:
+      type: object
+      description: An Serializer for the talent information
+      properties:
+        id:
+          type: string
+          readOnly: true
+        bits:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        pricing:
+          type: string
+          maxLength: 20
+        skills:
+          type: string
+          maxLength: 1000
+      required:
+      - id
+    TalentPortfolio:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        url:
+          type: string
+          format: uri
+          maxLength: 200
+        image:
+          type: string
+          maxLength: 2000
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - description
+      - id
+      - image
+      - name
+      - updated_at
+      - url
+    TalentProfileDetail:
+      type: object
+      description: An serializer class for the talent profile page
+      properties:
+        bio:
+          type: string
+          maxLength: 1500
+        title:
+          type: string
+          maxLength: 1500
+        badge:
+          type: string
+          maxLength: 200
+        skills:
+          type: string
+          maxLength: 1000
+        pricing:
+          type: string
+          maxLength: 20
+        jobs_completed:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+    TalentUpdate:
+      type: object
+      description: |-
+        This serializer is used for the talent update view
+        Exposes the talent's updatable fields
+      properties:
+        title:
+          type: string
+          maxLength: 1500
+        bio:
+          type: string
+          maxLength: 1500
+        skills:
+          type: string
+          maxLength: 1000
+        pricing:
+          type: string
+          maxLength: 20
+    ThreadList:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        unique_id:
+          type: string
+          maxLength: 100
+        recipient:
+          type: string
+          readOnly: true
+        messaging:
+          type: string
+          readOnly: true
+      required:
+      - id
+      - messaging
+      - recipient
+    TokenObtainPair:
+      type: object
+      properties:
+        email:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - email
+      - password
+      - refresh
+    User:
+      type: object
+      description: Serializer for the user object
+      properties:
+        avatar:
+          type: string
+          nullable: true
+          maxLength: 1000
+        name:
+          type: string
+          readOnly: true
+        username:
+          type: string
+          maxLength: 32
+        profile:
+          type: string
+          readOnly: true
+      required:
+      - name
+      - profile
+      - username
+    UserCreate:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 100
+        username:
+          type: string
+          maxLength: 32
+        password:
+          type: string
+          maxLength: 128
+        first_name:
+          type: string
+          maxLength: 100
+        last_name:
+          type: string
+          maxLength: 100
+        is_active:
+          type: boolean
+        is_client:
+          type: boolean
+        is_talent:
+          type: boolean
+      required:
+      - email
+      - password
+      - username
+    messagingCreate:
+      type: object
+      properties:
+        content:
+          type: string
+      required:
+      - content
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid

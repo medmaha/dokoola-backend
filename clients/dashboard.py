@@ -1,4 +1,5 @@
-from django.db import connection, models
+from django.db import models
+from rest_framework import serializers
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.response import Response
 
@@ -6,6 +7,11 @@ from clients.models import Client
 from projects.models.project import Project, ProjectStatusChoices
 from users.models import User
 from utilities.formatters import get_month_index, get_month_name
+
+
+class ClientDashboardSerializer(serializers.Serializer):
+
+    pass
 
 
 class ClientDashboardAPIView(RetrieveAPIView):

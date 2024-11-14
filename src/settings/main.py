@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     "after_response",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
+    "drf_spectacular",
+    "drf_spectacular_sidecar",
     # The core application services and utilities
     "core",
     # Users Account & Profiles apps

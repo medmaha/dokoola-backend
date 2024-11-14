@@ -54,22 +54,21 @@ class TalentUpdateDataSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance: Talent):
         return {
-            # Client Info
-            "bio": instance.bio,
-            # User Info
             **instance.user.get_personal_info(),
             # Address Info
             **instance.user.get_address(),
-            # User Info
+            # Client Info
+            "bio": instance.bio,
             "email": instance.user.email,
+            "pricing": instance.pricing,
+            "skills": instance.skills,
+            # User Info
             "name": instance.user.name,
             "avatar": instance.user.avatar,
             "gender": instance.user.gender,
             "username": instance.user.username,
             "first_name": instance.user.first_name,
             "last_name": instance.user.last_name,
-            "pricing": instance.pricing,
-            "skills": instance.skills,
             "date_joined": instance.user.date_joined,
         }
 
@@ -124,7 +123,7 @@ class TalentDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Talent
-        fields = ("bio", "badge", "pricing", "location")
+        fields = ("bio", "badge", "pricing")
 
     def to_representation(self, instance):
         data = super().to_representation(instance)

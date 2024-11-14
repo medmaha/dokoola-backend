@@ -69,7 +69,7 @@ urlpatterns = [
     ),
     path(
         "<username>/",
-        views.TalentetrieveAPIView.as_view(),
+        views.TalentRetrieveAPIView.as_view(),
         name="talent_retrieve",
     ),
     path(

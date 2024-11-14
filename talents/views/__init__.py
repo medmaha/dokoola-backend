@@ -131,7 +131,7 @@ class FreelanceMiniInfoView(RetrieveAPIView):
         return Response(serializer.data, status=200)
 
 
-class TalentetrieveAPIView(RetrieveAPIView):
+class TalentRetrieveAPIView(RetrieveAPIView):
     serializer_class = TalentDetailSerializer
 
     def retrieve(self, request, *args, **kwargs):
@@ -146,7 +146,6 @@ class TalentetrieveAPIView(RetrieveAPIView):
             return Response({"message": "This request is prohibited"}, status=403)
 
         serializer = self.get_serializer(talent)
-
         return Response(serializer.data, status=200)
 
 

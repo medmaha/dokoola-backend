@@ -8,8 +8,8 @@ class JobUpdateSerializer(serializers.ModelSerializer):
         model = Job
         fields = [
             "title",
-            "budget",
-            "location",
+            "pricing",
+            "country",
             "published",
             "description",
             "required_skills",
