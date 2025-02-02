@@ -15,17 +15,28 @@ class TalentPortfolioAPIView(GenericAPIView):
 
     def get(self, request, username: str, *args, **kwargs):
         try:
-            portfolio = (
-                Talent.objects.get(user__username=username)
-                .portfolio.filter()
-                .order_by("-updated_at")
-            )
+            user = request.user
+
+            if user.username == username:
+                portfolio = (
+                    Portfolio.objects.select_related("client")
+                    .filter(talent__user__username=username)
+                    .order_by("published", "-updated_at")
+                )
+            else:
+                portfolio = (
+                    Portfolio.objects.select_related()
+                    .filter(talent__user__username=username, published=True)
+                    .order_by("-updated_at")
+                )
+
             serializer = self.get_serializer(portfolio, many=True)
             return Response(serializer.data, status=200)
-        except Talent.DoesNotExist:
-            return Response({"message": "This request is prohibited"}, status=403)
 
-        except Exception:
+        except Exception as e:
+            print("----------------------------------------------")
+            print(e)
+            print("----------------------------------------------")
 
             return Response(
                 {"message": "Error: Something went wrong!"},

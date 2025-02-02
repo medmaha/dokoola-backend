@@ -19,12 +19,11 @@ class TalentEducationAPIView(GenericAPIView):
     def get(self, request, username: str, *args, **kwargs):
         try:
             user: User = request.user
-            profile, profile_type = user.profile
 
-            if profile_type.lower() == "talent":
+            if user.username == username:
                 educations = (
                     Education.objects.select_related()
-                    .filter(talent=profile)
+                    .filter(talent__user__username=username)
                     .order_by("-start_date", "end_date", "published")
                 )
             else:

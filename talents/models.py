@@ -27,6 +27,7 @@ class Portfolio(models.Model):
     url = models.URLField()
     image = models.CharField(max_length=2000)
 
+    published = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
