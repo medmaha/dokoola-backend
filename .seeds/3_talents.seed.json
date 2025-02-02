@@ -1,0 +1,131 @@
+[
+  {
+    "model": "talents.certificate",
+    "pk": 1,
+    "fields": {
+      "name": "Cyber Security",
+      "organization": "Alight Solutions",
+      "url": "https://certificate.alight.com/i/e293f93hjw23e8c",
+      "date_issued": "2025-01-18",
+      "file_url": null,
+      "published": false,
+      "created_at": "2025-02-02T01:54:43.177Z",
+      "updated_at": "2025-02-02T01:54:43.177Z"
+    }
+  },
+  {
+    "model": "talents.certificate",
+    "pk": 2,
+    "fields": {
+      "name": "HIPAA Health Security",
+      "organization": "Alight Solutions",
+      "url": "https://certificate.alight.com/i/f411e20wj301c91",
+      "date_issued": "2025-01-28",
+      "file_url": null,
+      "published": true,
+      "created_at": "2025-02-02T01:58:00.221Z",
+      "updated_at": "2025-02-02T01:58:27.984Z"
+    }
+  },
+  {
+    "model": "talents.certificate",
+    "pk": 3,
+    "fields": {
+      "name": "AWS Certified Solutions Architect",
+      "organization": "Amazon Web Service",
+      "url": "https://aws.amazon.com",
+      "date_issued": "2023-10-17",
+      "file_url": null,
+      "published": true,
+      "created_at": "2025-02-02T02:03:21.551Z",
+      "updated_at": "2025-02-02T02:03:52.471Z"
+    }
+  },
+  {
+    "model": "talents.portfolio",
+    "pk": 1,
+    "fields": {
+      "name": "Github Rewind",
+      "description": "A tool to discover your GitHub journey through an AI-powered year in review. Generate stunning visuals and insights to share your public coding achievements.",
+      "url": "https://github-r.vercel.app/",
+      "image": "https://firebasestorage.googleapis.com/v0/b/intrasoftware-36be6.appspot.com/o/dokoola%2Ftalents%2Fmahammedtouray%2Fportfolios%2F37E17780-9866-44D9-994C-236A026F2892.png0.9273672568404163?alt=media&token=c5c2317f-ef62-4f18-be50-ce753000a61e",
+      "published": true,
+      "created_at": "2025-02-02T00:30:57.780Z",
+      "updated_at": "2025-02-02T00:30:57.780Z"
+    }
+  },
+  {
+    "model": "talents.portfolio",
+    "pk": 2,
+    "fields": {
+      "name": "Chatvite",
+      "description": "A powerful web application that enables users to collaborate and chat together in an AI-powered chatroom. The platform is intuitive and engaging, with a range of features that promote interactivity and collaboration.",
+      "url": "https://chatvite.vercel.app/",
+      "image": "https://firebasestorage.googleapis.com/v0/b/intrasoftware-36be6.appspot.com/o/dokoola%2Ftalents%2Fmahammedtouray%2Fportfolios%2F%7B82B0082C-5559-45A7-B5A7-3BFEA8C29EE9%7D.png0.041390740847609964?alt=media&token=d80a0a9d-ebed-4801-bb3d-a13c3ea3b524",
+      "published": true,
+      "created_at": "2025-02-02T00:43:22.430Z",
+      "updated_at": "2025-02-02T00:43:22.430Z"
+    }
+  },
+  {
+    "model": "talents.portfolio",
+    "pk": 3,
+    "fields": {
+      "name": "Codedeluxe",
+      "description": "Codedeluxe is a cutting-edge blog post platform designed for tech enthusiasts, developers, and anyone interested in learning about the latest tech tricks and hacks, frameworks, programming languages, and full-stack development.",
+      "url": "https://codedeluxe.vercel.app/",
+      "image": "https://firebasestorage.googleapis.com/v0/b/intrasoftware-36be6.appspot.com/o/dokoola%2Ftalents%2Fmahammedtouray%2Fportfolios%2Fcodedeluxe.webp0.6328730190134313?alt=media&token=e01a2404-9f1c-4f62-b84b-9731259fe829",
+      "published": true,
+      "created_at": "2025-02-02T02:08:33.813Z",
+      "updated_at": "2025-02-02T02:08:33.813Z"
+    }
+  },
+  {
+    "model": "talents.education",
+    "pk": 1,
+    "fields": {
+      "degree": "Computer Science",
+      "institution": "University Of The Gambia",
+      "location": "The Gambia",
+      "start_date": "2018-01-18",
+      "end_date": "2022-09-12",
+      "published": false,
+      "achievements": "Minor Data Science,\nGraduated With Honors,\nParticipated in ACM Programming Contest",
+      "created_at": "2025-02-02T01:49:21.640Z",
+      "updated_at": "2025-02-02T01:49:21.640Z"
+    }
+  },
+  {
+    "model": "talents.education",
+    "pk": 2,
+    "fields": {
+      "degree": "Certificate Collections Component - v0",
+      "institution": "Stanford University",
+      "location": "Stanford, CA",
+      "start_date": "2024-06-10",
+      "end_date": "2024-11-20",
+      "published": true,
+      "achievements": "Specialization in Artificial Intelligence,\nThesis: Deep Learning Approaches for Natural Language Processing, GPA: 3.9/4.0",
+      "created_at": "2025-02-02T02:05:45.817Z",
+      "updated_at": "2025-02-02T02:06:00.565Z"
+    }
+  },
+  {
+    "model": "talents.talent",
+    "pk": "9b29cc844520427aa7e8",
+    "fields": {
+      "user": 2,
+      "title": "Software Developer",
+      "bio": "I'm a self-taught full-stack developer with a strong background in .NET, Python, and Node.js. Currently working at Primeforge, I have experience in full-stack development, DevOps, and building scalable software solutions.\r\n\r\nPassionate about problem-solving, I thrive in dynamic environments where I can learn, adapt, and deliver impactful solutions. I believe that skills and experience outweigh credentials, and I’m always looking for opportunities to grow, collaborate, and create meaningful solutions.\r\n\r\nLet's connect! 🚀",
+      "skills": "Python,NET,Javascript,Database,DevOps,Project Management",
+      "pricing": "999",
+      "jobs_completed": 0,
+      "badge": "basic",
+      "bits": 60,
+      "reviews": [],
+      "education": [1, 2],
+      "portfolio": [1, 2, 3],
+      "certificates": [1, 2, 3]
+    }
+  }
+]
