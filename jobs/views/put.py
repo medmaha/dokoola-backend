@@ -23,18 +23,33 @@ class JobUpdateAPIView(UpdateAPIView):
 
     def get_queryset(self, slug: str) -> Job | None:
         try:
-            return Job.objects.get(slug=slug, is_valid=True)
+            return Job.objects.get(id=slug, is_valid=True)
         except:
             return None
 
-    def update(self, request, *args, **kwargs) -> Response:
+    def update(self, request, job_id, *args, **kwargs) -> Response:
 
         data: dict = request.data
 
-        instance = self.get_queryset(data.get("slug", ""))
+        instance = self.get_queryset(job_id)
 
         if not instance:
             return Response({"message": "Job not found"}, status=404)
+
+        if instance.proposal_count > 0:
+            return Response({"message": "Job already in progress"}, status=400)
+
+        if "published" in request.query_params:
+            published = data.get("published", False) == True
+            if published:
+                status = JobStatusChoices.PUBLISHED
+            else:
+                status = JobStatusChoices.CLOSED
+                
+            instance.status = status
+            instance.published = published
+            instance.save()
+            return Response({"message": "Job updated successfully", "data":{"published": instance.published}}, status=200)
 
         category = get_category(data.pop("category", "None")) or instance.category
 
@@ -47,7 +62,7 @@ class JobUpdateAPIView(UpdateAPIView):
             partial=True,
             context={"request": request},
         )
-
+ 
         if serializer.is_valid():
             status = instance.status
             if "published" in data:

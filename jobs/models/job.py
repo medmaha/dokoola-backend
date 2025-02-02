@@ -64,6 +64,7 @@ class Job(models.Model):
 
     estimated_duration = models.DateTimeField(blank=True, null=True)
     application_deadline = models.DateTimeField(blank=True, null=True)
+    additional_payment_terms = models.CharField(blank=True, default="")
     experience_level = models.CharField(blank=True, null=True, max_length=200)
 
     client = models.ForeignKey(

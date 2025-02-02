@@ -36,6 +36,7 @@ class JobListSerializer(serializers.ModelSerializer):
         }
         representation["client"] = {
             "id": instance.client.id,
+            # "username": instance.client.user.username,
             "name": instance.client.name,
             "company": (
                 {
@@ -80,8 +81,11 @@ class JobRetrieveSerializer(serializers.ModelSerializer):
             "job_type_other",
             "experience_level",
             "experience_level_other",
+            # 
             "estimated_duration",
             "application_deadline",
+            "additional_payment_terms",
+            # 
             "client",
             "updated_at",
             "created_at",
@@ -96,6 +100,7 @@ class JobRetrieveSerializer(serializers.ModelSerializer):
         representation["client"] = {
             "id": instance.client.id,
             "name": instance.client.name,
+            "username": instance.client.user.username,
             "avatar": instance.client.user.avatar,
             "company": (
                 {

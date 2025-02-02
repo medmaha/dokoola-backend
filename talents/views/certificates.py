@@ -19,9 +19,8 @@ class TalentCertificateAPIView(GenericAPIView):
     def get(self, request, username: str, *args, **kwargs):
         try:
             user: User = request.user
-            profile, profile_type = user.profile
 
-            if profile_type.lower() == "talent":
+            if user.lower() == "talent":
                 certificates = profile.certificates.filter(
                     talent__user__username=username
                 ).order_by("-date_issued")
@@ -38,7 +37,7 @@ class TalentCertificateAPIView(GenericAPIView):
         except Talent.DoesNotExist:
             return Response({"message": "This request is prohibited"}, status=403)
 
-        except Exception:
+        except Exception:  
             return Response(
                 {"message": "Error: Something went wrong!"},
                 status=500,
