@@ -1,15 +1,15 @@
+from datetime import datetime
 from types import FunctionType
 
-import after_response
 from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
+from core.services.after.main import AfterResponseService
 from src.settings.logger import DokoolaLogger
 
 
-@after_response.enable
 def execute_send_mail(
     subject,
     text,
@@ -22,13 +22,14 @@ def execute_send_mail(
     if not (recipient_list and text and from_email):
         log_data = {
             "event": "email-not-sent",
+            "timestamp": datetime.now(),
             "recipient_list": recipient_list,
             "subject": subject,
             "text": text,
             "from_email": from_email,
             "html_message": html_message,
         }
-        DokoolaLogger.warn(log_data, extra=log_data, after_response=False)
+        DokoolaLogger.warn(log_data, extra=log_data)
         return
 
     try:
@@ -46,15 +47,17 @@ def execute_send_mail(
         emails = recipient_list
         log_data = {
             "event": "email-sent",
+            "timestamp": datetime.now(),
             "emails": emails,
             "subject": subject,
             "content": text,
             "sent": bool(response),
         }
-        DokoolaLogger.info(log_data, extra=log_data, after_response=False)
+        DokoolaLogger.info(log_data, extra=log_data)
     except Exception as error:
         log_data = {
             "event": "email-not-sent",
+            "timestamp": datetime.now(),
             "recipient_list": recipient_list,
             "subject": subject,
             "text": text,
@@ -62,7 +65,7 @@ def execute_send_mail(
             "html_message": html_message,
             "error": error,
         }
-        DokoolaLogger.critical(log_data, extra=log_data, after_response=False)
+        DokoolaLogger.critical(log_data, extra=log_data)
         return
 
 
@@ -90,12 +93,21 @@ class EmailService:
         if not text:
             text = strip_tags(html or "")
 
-        execute_send_mail.after_response(
+
+        def callback(subject, text):
+            execute_send_mail(
+                subject,
+                text,
+                html_message=html,
+                recipient_list=[email],
+                fail_silently=self.fail_silently,
+                from_email=settings.EMAIL_HOST_USER,
+            )
+
+        AfterResponseService.register(
+            callback,
             subject,
             text,
-            html_message=html,
-            callback=callback,
-            recipient_list=[email],
-            fail_silently=self.fail_silently,
-            from_email=settings.EMAIL_HOST_USER,
         )
+
+ 

@@ -2,8 +2,9 @@ import logging
 import logging.config
 import os
 
-import after_response
 from logtail import LogtailHandler
+
+from core.services.after.main import AfterResponseService
 
 LOGGING_CONFIG = None
 
@@ -15,7 +16,7 @@ logging.config.dictConfig(
         "loggers": {},
     }
 )
-
+ 
 logger = logging.getLogger(__file__)
 
 runtime_environment = os.environ.get("ENVIRONMENT", "development")
@@ -24,6 +25,7 @@ console_log_allowed = bool(int(os.environ.get("CONSOLE_LOG", "0")))
 APP_ID = os.environ.get("APP_ID", "DEFAULT")
 
 DEVELOPMENT_MODE = runtime_environment.lower() == "development"
+
 
 if DEVELOPMENT_MODE and console_log_allowed:
     stream_handler = logging.StreamHandler()
@@ -51,7 +53,6 @@ if DEVELOPMENT_MODE:
 logger.setLevel(logging.DEBUG)
 
 
-@after_response.enable
 def execute_log(log_attr, message, extras):
     try:
         logger.__getattribute__(log_attr)(message, extra=extras)
@@ -77,31 +78,33 @@ def execute_log(log_attr, message, extras):
 class DokoolaLogger:
 
     @classmethod
-    def __log(cls, log_attr, message, extras, after_response=False):
-        if after_response:
-            execute_log.after_response(log_attr, message, extras)
-        else:
-            execute_log(log_attr, message, extras)
+    def __log(cls, log_attr, message, extras):\
+        
+        is_dict = isinstance(message, dict)
+        if is_dict and not extras:
+            extras = message
+
+        AfterResponseService.register(execute_log, log_attr, message, extras)
 
     @classmethod
     def debug(cls, message, extra: dict | None = None):
         return cls.__log("debug", message, extra)
 
     @classmethod
-    def info(cls, message, extra: dict | None = None, after_response=False):
-        return cls.__log("info", message, extra, after_response)
+    def info(cls, message, extra: dict | None = None):
+        return cls.__log("info", message, extra)
 
     @classmethod
-    def warn(cls, message, extra: dict | None = None, after_response=False):
-        return cls.__log("warn", message, extra, after_response)
+    def warn(cls, message, extra: dict | None = None):
+        return cls.__log("warn", message, extra)
 
     @classmethod
-    def error(cls, message, extra: dict | None = None, after_response=False):
-        return cls.__log("error", message, extra, after_response)
+    def error(cls, message, extra: dict | None = None):
+        return cls.__log("error", message, extra)
 
     @classmethod
-    def critical(cls, message, extra: dict | None = None, after_response=False):
-        return cls.__log("critical", message, extra, after_response)
+    def critical(cls, message, extra: dict | None = None):
+        return cls.__log("critical", message, extra)
 
 
 __all__ = ["DokoolaLogger", "LOGGING_CONFIG"]

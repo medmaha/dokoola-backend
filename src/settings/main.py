@@ -73,6 +73,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.contrib.sites.middleware.CurrentSiteMiddleware",
     "core.middleware.logger.DokoolaLoggerMiddleware",
+    # "core.middleware.aftar.DokoolaAfterMiddleware",
     # "core.middleware.csrf.DokoolaCSRFMiddleware",
 ]
 if DEBUG:

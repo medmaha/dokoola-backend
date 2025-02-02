@@ -6,6 +6,7 @@ from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from rest_framework.utils.serializer_helpers import ReturnDict
 
+from core.services.after.main import AfterResponseService
 from src.settings.logger import DokoolaLogger
 
 
@@ -120,12 +121,20 @@ class DokoolaLoggerMiddleware:
                 "user_agent": user_agent,
             }
 
+        log_content = None
         if response.status_code in [200, 204, 304, 307]:
-            DokoolaLogger.info(log_dict("INFO"), extra=log_dict)
+            log_content = log_dict("INFO")
+            DokoolaLogger.info(log_content)
         elif response.status_code in [401, 404]:
-            DokoolaLogger.warn(log_dict("WARN"), extra=log_dict)
+            log_content = log_dict("WARN")
+            DokoolaLogger.warn(log_content)
+        elif response.status_code in [500,]:
+            log_content = log_dict("CRITICAL")
+            DokoolaLogger.warn(log_content)
         else:
-            DokoolaLogger.error(log_dict("ERROR"), extra=log_dict)
+            log_content = log_dict("ERROR")
+            DokoolaLogger.error(log_content)
+
         return response
 
     def get_duration(self, end_time: datetime, start_time: datetime):
@@ -140,3 +149,10 @@ class DokoolaLoggerMiddleware:
 
     def get_timestamp(self, start_time: datetime):
         return f"{start_time.date()} {str(start_time.time()).split(".")[0]}"
+
+    def process_template_response(self, request, response):
+        """
+        Called just after the view has finished executing.
+        """
+        AfterResponseService.execute()
+        return response
