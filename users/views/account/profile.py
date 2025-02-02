@@ -29,9 +29,12 @@ class UserProfileAPIView(RetrieveAPIView):
             user = User.objects.get(username=username)
             profile, profile_name = user.profile
 
+            print(username, profile, profile_name)
+
             self.profile = profile
-            self.profile_name = profile_name
-        except:
+            self.profile_type = profile_name or ""
+        except Exception as e:
+            print(e)
             return Response(
                 {"message": "The userID provided, doesn't match our database"},
                 status=404,

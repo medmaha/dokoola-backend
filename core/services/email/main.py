@@ -6,20 +6,22 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
-from core.services.after.main import AfterResponseService
 from src.settings.logger import DokoolaLogger
+from src.settings.email import EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
+from core.services.after.main import AfterResponseService
 
 
 def execute_send_mail(
     subject,
     text,
     fail_silently: bool = False,
-    from_email: str | None = None,
     html_message: str | None = None,
     recipient_list: list[str] | None = None,
     callback: FunctionType | None = None,
 ):
-    if not (recipient_list and text and from_email):
+    from_email = f'{settings.APPLICATION_NAME} <{EMAIL_HOST_USER}>'
+
+    if not (recipient_list and text):
         log_data = {
             "event": "email-not-sent",
             "timestamp": datetime.now(),
@@ -33,6 +35,7 @@ def execute_send_mail(
         return
 
     try:
+        
         response = send_mail(
             subject=subject,
             message=text,
@@ -54,6 +57,7 @@ def execute_send_mail(
             "sent": bool(response),
         }
         DokoolaLogger.info(log_data, extra=log_data)
+        return
     except Exception as error:
         log_data = {
             "event": "email-not-sent",
@@ -78,9 +82,9 @@ class EmailService:
         email,
         subject,
         text=None,
+        callback=None,
         html_template_name=None,
         html_template_context=None,
-        callback=None,
     ):
 
         html = None
@@ -101,7 +105,6 @@ class EmailService:
                 html_message=html,
                 recipient_list=[email],
                 fail_silently=self.fail_silently,
-                from_email=settings.EMAIL_HOST_USER,
             )
 
         AfterResponseService.register(

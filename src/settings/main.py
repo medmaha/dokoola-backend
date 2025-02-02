@@ -146,3 +146,7 @@ from .jwt import *
 from .logger import *
 from .unfold import *
 from .whitenoice import *
+
+
+
+APPLICATION_NAME = "Dokoola PLatform"

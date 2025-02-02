@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 
 from core.services.email import email_service

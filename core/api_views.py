@@ -20,6 +20,15 @@ class CategoryAPIView(GenericAPIView):
         return Serializer
 
     def get(self, request):
+
+        # ids = set()
+        # slugs = set()
+        # for _c in Category.objects.all():
+        #     if _c.name not in slugs:
+        #         ids.add(_c.id)
+        #         slugs.add(_c.name)
+        # Category.objects.exclude(id__in=ids).delete()
+
         categories = Category.objects.filter(disabled=False)
 
         serializers = self.get_serializer(categories, many=True)
