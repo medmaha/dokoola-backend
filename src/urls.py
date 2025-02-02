@@ -2,10 +2,7 @@ import os
 
 from django.conf import settings
 from django.contrib import admin
-from django.core.mail import send_mail
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
-from django.urls import include, path, re_path
+from django.urls import include, path
 
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "")
 
@@ -27,14 +24,13 @@ urlpatterns = [
     path("", include("core.urls")),
 ]
 
-from drf_spectacular.views import (
-    SpectacularAPIView,
-    SpectacularRedocView,
-    SpectacularSwaggerView,
-)
-
 
 if settings.DEBUG:
+    from drf_spectacular.views import (
+        SpectacularAPIView,
+        SpectacularRedocView,
+        SpectacularSwaggerView,
+    )
     api_docs_urlpatterns = [
         path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
         # Optional UI:

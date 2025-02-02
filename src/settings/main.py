@@ -40,8 +40,6 @@ INSTALLED_APPS = [
     "after_response",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
-    "drf_spectacular",
-    "drf_spectacular_sidecar",
     # The core application services and utilities
     "core",
     # Users Account & Profiles apps
@@ -78,6 +76,8 @@ MIDDLEWARE = [
 ]
 if DEBUG:
     INSTALLED_APPS.append("silk")
+    INSTALLED_APPS.append("drf_spectacular")
+    INSTALLED_APPS.append("drf_spectacular_sidecar")
     MIDDLEWARE.append("silk.middleware.SilkyMiddleware")
 
 
