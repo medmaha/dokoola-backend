@@ -107,12 +107,12 @@ class DokoolaLoggerMiddleware:
         def log_dict(level):
             return {
                 "level": level,
+                "status": response.status_code,
                 "path": request.path,
                 "method": request.method,
-                "absolute_path": request.build_absolute_uri(),
+                # "absolute_path": request.build_absolute_uri(),
                 "duration": self.get_duration(end_time, start_time),
                 "timestamp": self.get_timestamp(start_time),
-                "status_code": response.status_code,
                 "status_message": self.get_response_message(response),
                 "user_id": request.user.pk,
                 "host": request.META.get("HTTP_HOST"),

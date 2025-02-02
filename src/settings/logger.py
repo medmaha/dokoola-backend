@@ -52,7 +52,6 @@ if DEVELOPMENT_MODE:
 
 logger.setLevel(logging.DEBUG)
 
-
 def execute_log(log_attr, message, extras):
     try:
         logger.__getattribute__(log_attr)(message, extra=extras)
@@ -71,6 +70,7 @@ def execute_log(log_attr, message, extras):
             logging.getLogger("logtail").__getattribute__(log_attr)(
                 message, extra=extras
             )
+
     except:
         pass
 
