@@ -104,7 +104,7 @@ categories = [
         "slug": "photography-videography",
         "keywords": "photography, videography, video editing, drone footage, event photography",
         "image_url": "/img/categories/photography-videography.jpg",
-        "description": "Professional photography and videography services for events, products, and more.",
+        "description": "talent photography and videography services for events, products, and more.",
         "disabled": False,
     },
     {

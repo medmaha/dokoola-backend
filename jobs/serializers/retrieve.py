@@ -2,6 +2,7 @@ from django.db.models import Count
 from rest_framework import serializers
 
 from jobs.models import Activities, Job
+from proposals.models import Proposal
 
 
 class JobListSerializer(serializers.ModelSerializer):
@@ -113,7 +114,25 @@ class JobRetrieveSerializer(serializers.ModelSerializer):
             ),
         }
 
-        activity = Activities.objects.select_related().filter(job=instance)
+        activity = (
+            Activities.objects.select_related()
+            .filter(job=instance)
+            .only(
+                "bits_count",
+                "hired_count",
+                "invite_count",
+                "proposal_count",
+                "interview_count",
+                "unanswered_invites",
+                "client_last_visit",
+            )
+        )
+
+        proposals = (
+            Proposal.objects.filter(job=instance)
+            .select_related("talent__user")
+            .only("talent__user__username")
+        )
 
         representation["activities"] = (
             activity.values(
@@ -128,7 +147,9 @@ class JobRetrieveSerializer(serializers.ModelSerializer):
             if activity
             else None
         )
-
+        
+        representation["activities"]["applicant_ids"] =   [p.talent.user.username for p in proposals]
+        
         if activity:
             representation["activities"]["hired"] = []
 
