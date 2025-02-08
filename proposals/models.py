@@ -1,9 +1,13 @@
 from functools import partial
 from django.db import models
 
-from jobs.models import  Job
+from jobs.models import Job
 from talents.models import Talent  # Updated import
-from utilities.generator import primary_key_generator, public_id_generator, default_pid_generator
+from utilities.generator import (
+    primary_key_generator,
+    public_id_generator,
+    default_pid_generator,
+)
 
 
 class ProposalStatusChoices(models.TextChoices):
@@ -13,7 +17,9 @@ class ProposalStatusChoices(models.TextChoices):
 
 
 class Proposal(models.Model):
-    public_id = models.CharField(max_length=50, db_index=True, default=partial(default_pid_generator, "Proposal"))
+    public_id = models.CharField(
+        max_length=50, db_index=True, default=partial(default_pid_generator, "Proposal")
+    )
 
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="proposals")
 
@@ -41,22 +47,24 @@ class Proposal(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
-        if (self._state.adding):
+        if self._state.adding:
             _id = self.id or primary_key_generator()
-            self.public_id =public_id_generator(_id, "Proposal")
+            self.public_id = public_id_generator(_id, "Proposal")
         return super().save(*args, **kwargs)
 
 
-
 class Attachment(models.Model):
-    public_id = models.CharField(max_length=50, db_index=True, default=partial(default_pid_generator, "Attachment"))
+    public_id = models.CharField(
+        max_length=50,
+        db_index=True,
+        default=partial(default_pid_generator, "Attachment"),
+    )
 
     name = models.CharField(max_length=100)
     file_url = models.CharField(max_length=1500)
 
-
     def save(self, *args, **kwargs):
-        if (self._state.adding):
+        if self._state.adding:
             _id = self.id or primary_key_generator()
-            self.public_id =public_id_generator(_id, "Attachment")
+            self.public_id = public_id_generator(_id, "Attachment")
         return super().save(*args, **kwargs)

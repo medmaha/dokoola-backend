@@ -1,4 +1,4 @@
-""" A route controller for retrieving user profile. """
+"""A route controller for retrieving user profile."""
 
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.response import Response

@@ -45,11 +45,17 @@ class JobUpdateAPIView(UpdateAPIView):
                 status = JobStatusChoices.PUBLISHED
             else:
                 status = JobStatusChoices.CLOSED
-                
+
             instance.status = status
             instance.published = published
             instance.save()
-            return Response({"message": "Job updated successfully", "data":{"published": instance.published}}, status=200)
+            return Response(
+                {
+                    "message": "Job updated successfully",
+                    "data": {"published": instance.published},
+                },
+                status=200,
+            )
 
         category = get_category(data.pop("category", "None")) or instance.category
 
@@ -62,7 +68,7 @@ class JobUpdateAPIView(UpdateAPIView):
             partial=True,
             context={"request": request},
         )
- 
+
         if serializer.is_valid():
             status = instance.status
             if "published" in data:
@@ -71,7 +77,7 @@ class JobUpdateAPIView(UpdateAPIView):
                 else:
                     status = JobStatusChoices.CLOSED
 
-            serializer.save(category_obj=category, status=status)
+            serializer.save(category=category, status=status)
             return Response({"message": "Job updated successfully"}, status=200)
 
         return Response({"message": "Failed to update job"}, status=404)

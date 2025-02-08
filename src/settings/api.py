@@ -16,7 +16,11 @@ REST_FRAMEWORK = {
 from django.conf import settings
 
 if settings.DEBUG:
-    REST_FRAMEWORK.update({'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',})
+    REST_FRAMEWORK.update(
+        {
+            "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+        }
+    )
 
 
 __all__ = ["REST_FRAMEWORK"]

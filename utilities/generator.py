@@ -8,17 +8,27 @@ def primary_key_generator():
     id = uuid7().__str__()
     return id
 
-def default_pid_generator(prefix:str):
+
+def default_pid_generator(prefix: str):
     _id = uuid7().__str__()
     return public_id_generator(_id, prefix)
-    
-def public_id_generator(_id:str, prefix:str, max_length=20):
+
+
+def public_id_generator(_id: str, prefix: str, max_length=20):
     try:
         _uuid = UUID(id).__str__()
-        timestamp_hex = _uuid[:8] + _uuid[9:11]
+        time_hex = _uuid[:8] + _uuid[9:11]
         version = _uuid[14]
-        rand_a = _uuid[15:18]
-        return f"{prefix[:3]}_{timestamp_hex}{version}{rand_a}".replace("-", "").strip().lower()
+        _random = _uuid[15:19]
+
+        _pid = str(f"{time_hex}{version}{_random}").replace("-", "").strip().lower()
+        _prefix = prefix[:3].lower()
+
+        # If the pid is longer than the max length, truncate it
+        if len(_pid) > max_length:
+            _pid = _pid[:max_length]
+
+        return f"{_prefix}_{_pid}"
     except:
         return _id[:max_length]
 

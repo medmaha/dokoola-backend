@@ -31,6 +31,7 @@ if settings.DEBUG:
         SpectacularRedocView,
         SpectacularSwaggerView,
     )
+
     api_docs_urlpatterns = [
         path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
         # Optional UI:

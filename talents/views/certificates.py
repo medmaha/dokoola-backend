@@ -37,7 +37,7 @@ class TalentCertificateAPIView(GenericAPIView):
         except Talent.DoesNotExist:
             return Response({"message": "This request is prohibited"}, status=403)
 
-        except Exception:  
+        except Exception:
             return Response(
                 {"message": "Error: Something went wrong!"},
                 status=500,

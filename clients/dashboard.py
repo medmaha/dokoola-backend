@@ -182,7 +182,7 @@ class ClientDashboardQuery:
 
             # Annotate custom fields with month, year and category
             projects = self.__projects.values("id", "budget").annotate(
-                category=models.F("contract__job__category_obj__name"),
+                category=models.F("contract__job__category__name"),
                 year=models.F("created_at__year"),
                 month=models.F("created_at__month"),
             )
@@ -261,7 +261,7 @@ class ClientDashboardQuery:
             self.__jobs.order_by("-created_at")
             # .distinct("category")
             .values("slug").annotate(
-                label=models.F("category_obj__name"),
+                label=models.F("category__name"),
                 year=models.F("created_at__year"),
                 month=models.F("created_at__month"),
             )
@@ -280,7 +280,7 @@ class ClientDashboardQuery:
                 "year": project["year"],
                 "month": get_month_name(project["month"]),
                 "label": project["label"],
-                "count": self.__jobs.filter(category_obj__name=project["label"])
+                "count": self.__jobs.filter(category__name=project["label"])
                 .values()
                 .count(),
             }
@@ -297,7 +297,7 @@ class ClientDashboardQuery:
         #     "status",
         #     "budget",
         #     "created_at",
-        # ).annotate(category=models.F("category_obj__name"))[:5]
+        # ).annotate(category=models.F("category__name"))[:5]
 
         computed = []
 

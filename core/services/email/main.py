@@ -19,7 +19,7 @@ def execute_send_mail(
     recipient_list: list[str] | None = None,
     callback: FunctionType | None = None,
 ):
-    from_email = f'{settings.APPLICATION_NAME} <{EMAIL_HOST_USER}>'
+    from_email = f"{settings.APPLICATION_NAME} <{EMAIL_HOST_USER}>"
 
     if not (recipient_list and text):
         log_data = {
@@ -35,7 +35,7 @@ def execute_send_mail(
         return
 
     try:
-        
+
         response = send_mail(
             subject=subject,
             message=text,
@@ -97,7 +97,6 @@ class EmailService:
         if not text:
             text = strip_tags(html or "")
 
-
         def callback(subject, text):
             execute_send_mail(
                 subject,
@@ -112,5 +111,3 @@ class EmailService:
             subject,
             text,
         )
-
- 

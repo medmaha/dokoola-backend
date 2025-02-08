@@ -16,7 +16,7 @@ logging.config.dictConfig(
         "loggers": {},
     }
 )
- 
+
 logger = logging.getLogger(__file__)
 
 runtime_environment = os.environ.get("ENVIRONMENT", "development")
@@ -52,6 +52,7 @@ if DEVELOPMENT_MODE:
 
 logger.setLevel(logging.DEBUG)
 
+
 def execute_log(log_attr, message, extras):
     try:
         logger.__getattribute__(log_attr)(message, extra=extras)
@@ -78,8 +79,7 @@ def execute_log(log_attr, message, extras):
 class DokoolaLogger:
 
     @classmethod
-    def __log(cls, log_attr, message, extras):\
-        
+    def __log(cls, log_attr, message, extras):
         is_dict = isinstance(message, dict)
         if is_dict and not extras:
             extras = message

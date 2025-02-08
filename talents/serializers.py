@@ -106,7 +106,7 @@ class TalentMiniInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Talent
-        fields = ("id", "bits", "pricing", "skills")
+        fields = ("public_id", "bits", "pricing", "skills")
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -174,7 +174,7 @@ class TalentPortfolioSerializer(serializers.ModelSerializer):
 
 # ===================== Certificate Serializers ===================== #
 class TalentCertificateSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(required=False, read_only=True)
+    public_id = serializers.CharField(required=False, read_only=True)
     created_at = serializers.DateTimeField(required=False, read_only=True)
     updated_at = serializers.DateTimeField(required=False, read_only=True)
     name = serializers.CharField(required=False)
@@ -190,7 +190,7 @@ class TalentCertificateSerializer(serializers.ModelSerializer):
 
 # ===================== Education Serializers ====================== #
 class TalentEducationSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(required=False, read_only=True)
+    public_id = serializers.CharField(required=False, read_only=True)
     created_at = serializers.DateTimeField(required=False, read_only=True)
     updated_at = serializers.DateTimeField(required=False, read_only=True)
     degree = serializers.CharField(required=False)
@@ -303,7 +303,7 @@ class TalentDashboardSerializer(serializers.ModelSerializer):
             ratings = (
                 instance.reviews.select_related()
                 .filter(_query)
-                .values("id")
+                .values("public_id")
                 .annotate(
                     year=F("created_at__year"),
                     month=F("created_at__month"),
@@ -316,12 +316,12 @@ class TalentDashboardSerializer(serializers.ModelSerializer):
 
             result = [
                 {
-                    "id": rating["id"],
+                    "public_id": rating["public_id"],
                     "year": rating["year"],
                     "month": self.get_months(rating["month"] - 1),
                     **instance.reviews.select_related()
                     .filter(_query, created_at__month=rating["month"])
-                    .aggregate(count=Count("id", 0), avg_rating=Avg("rating")),
+                    .aggregate(count=Count("public_id", 0), avg_rating=Avg("rating")),
                 }
                 for rating in list(duplicate.values())[:6]
             ]

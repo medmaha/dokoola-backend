@@ -1,8 +1,69 @@
-from django.db.models import Count
 from rest_framework import serializers
 
+from clients.models import Client
+from core.models import Category
 from jobs.models import Activities, Job
 from proposals.models import Proposal
+
+
+class JobClientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Client
+        fields = ["public_id", "name", "logo_url"]
+
+    def to_representation(self, instance: Client):
+        company = instance.company
+        data = super().to_representation(instance)
+        data["rating"] = instance.average_rating()
+
+        if "detail" in self.context:
+            data["address"] = instance.address
+            data["country"] = instance.country
+
+        if company:
+            data["company"] = {
+                "slug": company.slug,
+                "name": company.name,
+                "logo_url": company.logo_url,
+            }
+            if "detail" in self.context:
+                data["company"]["website"] = company.website
+                data["company"]["industry"] = company.industry
+                data["company"]["description"] = company.description
+                data["company"]["date_established"] = company.date_established
+
+        return data
+
+
+class JobActivitiesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Activities
+        fields = [
+            "bits_count",
+            "hired_count",
+            "invite_count",
+            "proposal_count",
+            "interview_count",
+            "unanswered_invites",
+            "client_last_visit",
+            "applicant_ids",
+        ]
+
+    applicant_ids = serializers.SerializerMethodField()
+
+    def get_applicant_ids(self, instance: Activities):
+        return [
+            p.talent.user.public_id
+            for p in Proposal.objects.only("talent__user__public_id").filter(
+                job=instance.job
+            )
+        ]
+
+
+class JobCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ["name", "slug"]
 
 
 class JobListSerializer(serializers.ModelSerializer):
@@ -10,10 +71,11 @@ class JobListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
         fields = [
-            "id",
+            "public_id",
             "title",
             "country",
             "address",
+            "category",
             "client",
             "status",
             "pricing",
@@ -24,32 +86,17 @@ class JobListSerializer(serializers.ModelSerializer):
             "is_third_party",
             "application_deadline",
             "created_at",
+            "proposal_count",
         ]
+
+    client = JobClientSerializer()
+    category = JobCategorySerializer()
 
     # Check if the user has proposed to the job
     def to_representation(self, instance: Job):
         representation = super().to_representation(instance)
         representation["proposal_count"] = instance.proposal_count
         representation["description"] = instance.description[:200]
-        representation["category"] = {
-            "slug": instance.category.slug,
-            "name": instance.category.name,
-        }
-        representation["client"] = {
-            "id": instance.client.id,
-            # "username": instance.client.user.username,
-            "name": instance.client.name,
-            "company": (
-                {
-                    "slug": instance.client.company.slug,
-                    "name": instance.client.company.name,
-                    "logo_url": instance.client.company.logo_url,
-                }
-                if instance.client.company
-                else None
-            ),
-        }
-
         return representation
 
 
@@ -58,15 +105,15 @@ class JobRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
         fields = [
-            "id",
+            "public_id",
             "title",
             "description",
             "pricing",
             "benefits",
             "required_skills",
             "country",
-            "address",
             "category",
+            "address",
             "status",
             "published",
             "is_third_party",
@@ -82,75 +129,25 @@ class JobRetrieveSerializer(serializers.ModelSerializer):
             "job_type_other",
             "experience_level",
             "experience_level_other",
-            # 
+            #
             "estimated_duration",
             "application_deadline",
             "additional_payment_terms",
-            # 
+            #
             "client",
             "updated_at",
             "created_at",
+            "client",
+            "activities",
         ]
+
+    category = JobCategorySerializer()
+    activities = JobActivitiesSerializer()
+    client = JobClientSerializer(context={"detail": True})
 
     def to_representation(self, instance: Job):
         representation = super().to_representation(instance)
-        representation["category"] = {
-            "slug": instance.category.slug,
-            "name": instance.category.name,
-        }
-        representation["client"] = {
-            "id": instance.client.id,
-            "name": instance.client.name,
-            "username": instance.client.user.username,
-            "avatar": instance.client.user.avatar,
-            "company": (
-                {
-                    "slug": instance.client.company.slug,
-                    "name": instance.client.company.name,
-                    "logo_url": instance.client.company.logo_url,
-                }
-                if instance.client.company
-                else None
-            ),
-        }
 
-        activity = (
-            Activities.objects.select_related()
-            .filter(job=instance)
-            .only(
-                "bits_count",
-                "hired_count",
-                "invite_count",
-                "proposal_count",
-                "interview_count",
-                "unanswered_invites",
-                "client_last_visit",
-            )
-        )
-
-        proposals = (
-            Proposal.objects.filter(job=instance)
-            .select_related("talent__user")
-            .only("talent__user__username")
-        )
-
-        representation["activities"] = (
-            activity.values(
-                "bits_count",
-                "hired_count",
-                "invite_count",
-                "proposal_count",
-                "interview_count",
-                "unanswered_invites",
-                "client_last_visit",
-            ).first()
-            if activity
-            else None
-        )
-        
-        representation["activities"]["applicant_ids"] =   [p.talent.user.username for p in proposals]
-        
-        if activity:
-            representation["activities"]["hired"] = []
+        Activities.objects.get_or_create(job=instance)
 
         return representation

@@ -89,14 +89,27 @@ class DokoolaLoggerMiddleware:
         return f"{device.capitalize()}/{platform}"
 
     def __call__(self, request: HttpRequest):
+        from django.db import connection
 
         start_time = datetime.now()
         response: HttpResponse = self.get_response(request)
+        end_time = datetime.now()
+
+        # Log slow queries (>100ms)
+        for query in connection.queries:
+            if float(query["time"]) > 0.1:
+                DokoolaLogger.warn(
+                    {
+                        "event": "slow_query",
+                        "query": query["sql"],
+                        "time": query["time"],
+                        "path": request.path,
+                    }
+                )
 
         if hasattr(response, "ignore_logs") and request.ignore_logs:  # type: ignore
             return response
 
-        end_time = datetime.now()
         service_name = request.headers.get(
             os.environ.get("SERVICE_HTTP_HEADER", ""), "UNKNOWN-SERVICE"
         )
@@ -128,7 +141,9 @@ class DokoolaLoggerMiddleware:
         elif response.status_code in [401, 404]:
             log_content = log_dict("WARN")
             DokoolaLogger.warn(log_content)
-        elif response.status_code in [500,]:
+        elif response.status_code in [
+            500,
+        ]:
             log_content = log_dict("CRITICAL")
             DokoolaLogger.warn(log_content)
         else:
