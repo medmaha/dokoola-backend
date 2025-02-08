@@ -1,8 +1,11 @@
+from functools import partial
 from typing import Any, Literal, Optional, Union
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+from utilities.generator import default_pid_generator, public_id_generator
 
 from reviews.models import Review
 
@@ -44,6 +47,10 @@ class User(AbstractUser):
     district = models.CharField(max_length=50, default="", blank=True, null=True)
     city = models.CharField(default="", blank=True, max_length=100, null=True)
     zip_code = models.CharField(max_length=20, default="00000", blank=True, null=True)
+
+    public_id = models.CharField(
+        max_length=50, db_index=True, default=partial(default_pid_generator, "Usr")
+    )
 
     def __str__(self):
         return self.username
@@ -103,6 +110,11 @@ class User(AbstractUser):
 
     def calculate_rating(self):
         return self.reviews.aggregate(models.Avg("rating")).get("avg_rating", 0.0)
+
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            self.public_id = public_id_generator(self.id, "Usr")
+        return super().save(*args, **kwargs)
 
     # from clients.models import Client
     # from staffs.models import Staff
