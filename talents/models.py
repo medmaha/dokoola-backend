@@ -18,7 +18,7 @@ class Certificate(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    public_id = models.CharField(max_length=50, default=partial(default_pid_generator, "Certificate"))
+    public_id = models.CharField(max_length=50, db_index=True, default=partial(default_pid_generator, "Certificate"))
 
     def save(self, *args, **kwargs):
         if (self._state.adding):
@@ -40,7 +40,7 @@ class Portfolio(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    public_id = models.CharField(max_length=50, default=partial(default_pid_generator, "Portfolio"))
+    public_id = models.CharField(max_length=50, db_index=True, default=partial(default_pid_generator, "Portfolio"))
 
     def save(self, *args, **kwargs):
         if (self._state.adding):
@@ -66,7 +66,7 @@ class Education(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    public_id = models.CharField(max_length=50, default=partial(default_pid_generator, "Education"))
+    public_id = models.CharField(max_length=50, db_index=True, default=partial(default_pid_generator, "Education"))
 
     def save(self, *args, **kwargs):
         if (self._state.adding):
@@ -91,7 +91,7 @@ class Talent(models.Model):
         max_length=64,
     )
 
-    public_id = models.CharField(max_length=50, default=partial(default_pid_generator, "Talent"))
+    public_id = models.CharField(max_length=50, db_index=True, default=partial(default_pid_generator, "Talent"))
 
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name="talent_profile"

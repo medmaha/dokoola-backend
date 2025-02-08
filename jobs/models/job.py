@@ -29,7 +29,7 @@ class JobTypeChoices(models.TextChoices):
 
 class Job(models.Model):
     id = models.UUIDField(primary_key=True, default=primary_key_generator, editable=False)
-    public_id = models.CharField(max_length=50, default=partial(default_pid_generator, "Job"))
+    public_id = models.CharField(max_length=50, db_index=True, default=partial(default_pid_generator, "Job"))
 
     title = models.CharField(max_length=200, db_index=True)
     description = models.TextField()

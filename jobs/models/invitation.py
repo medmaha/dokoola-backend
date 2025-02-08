@@ -6,7 +6,7 @@ from utilities.generator import primary_key_generator, public_id_generator, defa
 
 
 class Invitation(models.Model):
-    public_id = models.CharField(max_length=50, default=partial(default_pid_generator, "Invitation"))
+    public_id = models.CharField(max_length=50, db_index=True, default=partial(default_pid_generator, "Invitation"))
 
     job_id = models.CharField(null=True, blank=True)
     talent = models.ForeignKey(Talent, on_delete=models.CASCADE)

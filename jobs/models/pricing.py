@@ -4,7 +4,7 @@ from utilities.generator import primary_key_generator, public_id_generator, defa
 
 
 class Pricing(models.Model):
-    public_id = models.CharField(max_length=50, default=partial(default_pid_generator, "Pricing"))
+    public_id = models.CharField(max_length=50, db_index=True, default=partial(default_pid_generator, "Pricing"))
 
     budget = models.DecimalField(decimal_places=2, max_digits=10)
 

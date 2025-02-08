@@ -14,7 +14,7 @@ class Company(models.Model):
         primary_key=True, default=primary_key_generator, editable=False, max_length=100
     )
 
-    slug = models.CharField(max_length=50, default=partial(default_pid_generator, ""))
+    slug = models.CharField(max_length=50, db_index=True, default=partial(default_pid_generator, ""))
 
     name = models.CharField(max_length=1000, default="", unique=True)
     description = models.TextField(max_length=1500, default="")
@@ -45,7 +45,7 @@ class Client(models.Model):
         primary_key=True, default=primary_key_generator, editable=False, max_length=100
     )
 
-    public_id = models.CharField(max_length=50, default=partial(default_pid_generator, "Client"))
+    public_id = models.CharField(max_length=50, db_index=True, default=partial(default_pid_generator, "Client"))
 
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name="client_profile"

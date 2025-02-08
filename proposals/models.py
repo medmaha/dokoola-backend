@@ -13,7 +13,7 @@ class ProposalStatusChoices(models.TextChoices):
 
 
 class Proposal(models.Model):
-    public_id = models.CharField(max_length=50, default=partial(default_pid_generator, "Proposal"))
+    public_id = models.CharField(max_length=50, db_index=True, default=partial(default_pid_generator, "Proposal"))
 
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="proposals")
 
@@ -49,7 +49,7 @@ class Proposal(models.Model):
 
 
 class Attachment(models.Model):
-    public_id = models.CharField(max_length=50, default=partial(default_pid_generator, "Attachment"))
+    public_id = models.CharField(max_length=50, db_index=True, default=partial(default_pid_generator, "Attachment"))
 
     name = models.CharField(max_length=100)
     file_url = models.CharField(max_length=1500)

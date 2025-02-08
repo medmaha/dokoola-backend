@@ -16,7 +16,7 @@ class Staff(models.Model):
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name="staff_profile"
     )
-    public_id = models.CharField(max_length=50, default=partial(default_pid_generator, "STAFF"))
+    public_id = models.CharField(max_length=50, db_index=True, default=partial(default_pid_generator, "STAFF"))
 
     def __str__(self) -> str:
         return self.user.email  # type: ignore

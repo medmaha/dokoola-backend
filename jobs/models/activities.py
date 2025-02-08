@@ -6,7 +6,7 @@ from utilities.generator import primary_key_generator, public_id_generator, defa
 
 class Activities(models.Model):
 
-    public_id = models.CharField(max_length=50, default=partial(default_pid_generator, "Activities"))
+    public_id = models.CharField(max_length=50, db_index=True, default=partial(default_pid_generator, "Activities"))
     
     job = models.OneToOneField(
         "Job", on_delete=models.CASCADE, null=True, related_name="activity"
