@@ -37,7 +37,7 @@ class Company(models.Model):
     def save(self, *args, **kwargs):
         if (self._state.adding):
             _id = self.id or primary_key_generator()
-            self.public_id = public_id_generator(_id, "Company")
+            self.public_id =public_id_generator(_id, "Company")
         return super().save(*args, **kwargs)
 
 class Client(models.Model):
@@ -88,5 +88,5 @@ class Client(models.Model):
     def save(self, *args, **kwargs):
         if (self._state.adding):
             _id = self.id or primary_key_generator()
-            self.public_id = public_id_generator(_id, "Client")
+            self.public_id =public_id_generator(_id, "Client")
         return super().save(*args, **kwargs)

@@ -25,5 +25,5 @@ class Staff(models.Model):
     def save(self, *args, **kwargs):
         if (self._state.adding):
             _id = self.id or primary_key_generator()
-            self.public_id = public_id_generator(_id, "STAFF")
+            self.public_id =public_id_generator(_id, "STAFF")
         return super().save(*args, **kwargs)

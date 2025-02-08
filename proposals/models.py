@@ -43,7 +43,7 @@ class Proposal(models.Model):
     def save(self, *args, **kwargs):
         if (self._state.adding):
             _id = self.id or primary_key_generator()
-            self.public_id = public_id_generator(_id, "Proposal")
+            self.public_id =public_id_generator(_id, "Proposal")
         return super().save(*args, **kwargs)
 
 
@@ -58,5 +58,5 @@ class Attachment(models.Model):
     def save(self, *args, **kwargs):
         if (self._state.adding):
             _id = self.id or primary_key_generator()
-            self.public_id = public_id_generator(_id, "Attachment")
+            self.public_id =public_id_generator(_id, "Attachment")
         return super().save(*args, **kwargs)

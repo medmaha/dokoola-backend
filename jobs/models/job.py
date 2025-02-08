@@ -91,7 +91,7 @@ class Job(models.Model):
             self.is_third_party = True
         if (self._state.adding):
             _id = self.id or primary_key_generator()
-            self.public_id = public_id_generator(_id, "Job")
+            self.public_id =public_id_generator(_id, "Job")
         
         return super().save(*args, **kwargs)
 

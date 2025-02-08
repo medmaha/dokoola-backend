@@ -23,7 +23,7 @@ class Certificate(models.Model):
     def save(self, *args, **kwargs):
         if (self._state.adding):
             _id = primary_key_generator()
-            self.public_id = public_id_generator(_id, "Certificate")
+            self.public_id =public_id_generator(_id, "Certificate")
         return super().save(*args, **kwargs)
 
     def __str__(self):
@@ -45,7 +45,7 @@ class Portfolio(models.Model):
     def save(self, *args, **kwargs):
         if (self._state.adding):
             _id =  primary_key_generator()
-            self.public_id = public_id_generator(_id, "Portfolio")
+            self.public_id =public_id_generator(_id, "Portfolio")
         return super().save(*args, **kwargs)
 
     def __str__(self):
@@ -71,7 +71,7 @@ class Education(models.Model):
     def save(self, *args, **kwargs):
         if (self._state.adding):
             _id = primary_key_generator()
-            self.public_id = public_id_generator(_id, "Education")
+            self.public_id =public_id_generator(_id, "Education")
         return super().save(*args, **kwargs)
 
 
@@ -131,5 +131,5 @@ class Talent(models.Model):
     def save(self, *args, **kwargs):
         if (self._state.adding):
             _id = self.id or primary_key_generator()
-            self.public_id = public_id_generator(_id, "Talent")
+            self.public_id =public_id_generator(_id, "Talent")
         return super().save(*args, **kwargs)

@@ -25,5 +25,5 @@ class Activities(models.Model):
     def save(self, *args, **kwargs):
         if (self._state.adding):
             _id = primary_key_generator()
-            self.public_id = public_id_generator(_id, "Activities")
+            self.public_id =public_id_generator(_id, "Activities")
         return super().save(*args, **kwargs)

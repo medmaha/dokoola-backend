@@ -17,5 +17,5 @@ class Invitation(models.Model):
     def save(self, *args, **kwargs):
         if (self._state.adding):
             _id = primary_key_generator()
-            self.public_id = public_id_generator(_id, "Invitation")
+            self.public_id =public_id_generator(_id, "Invitation")
         return super().save(*args, **kwargs)

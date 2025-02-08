@@ -41,5 +41,5 @@ class Pricing(models.Model):
     def save(self, *args, **kwargs):
         if (self._state.adding):
             _id = primary_key_generator()
-            self.public_id = public_id_generator(_id, "Pricing")
+            self.public_id =public_id_generator(_id, "Pricing")
         return super().save(*args, **kwargs)
