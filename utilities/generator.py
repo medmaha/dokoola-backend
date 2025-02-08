@@ -1,20 +1,26 @@
-import uuid
+from uuid import UUID
+from uuid_v7.base import uuid7
 
 from rest_framework.serializers import ReturnDict, ReturnList
 
 
-def id_generator(size=20):
-    id = uuid.uuid4().hex
+def primary_key_generator():
+    id = uuid7().__str__()
+    return id
 
-    return id[:size]
-
-
-def hex_generator(size=15):
-    id = uuid.uuid4().hex
-
-    id.replace("-", "")
-
-    return id[:size]
+def default_pid_generator(prefix:str):
+    _id = uuid7().__str__()
+    return public_id_generator(_id, prefix)
+    
+def public_id_generator(_id:str, prefix:str, max_length=20):
+    try:
+        _uuid = UUID(id).__str__()
+        timestamp_hex = _uuid[:8] + _uuid[9:11]
+        version = _uuid[14]
+        rand_a = _uuid[15:18]
+        return f"{prefix[:3]}_{timestamp_hex}{version}{rand_a}".replace("-", "").strip().lower()
+    except:
+        return _id[:max_length]
 
 
 def get_serializer_error_message(

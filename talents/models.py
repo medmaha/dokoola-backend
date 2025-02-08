@@ -1,9 +1,10 @@
+from functools import partial
 from django.db import models
 from django.db.models.manager import Manager
 
 from reviews.models import Review
 from users.models import User
-from utilities.generator import id_generator
+from utilities.generator import primary_key_generator, public_id_generator, default_pid_generator
 
 
 class Certificate(models.Model):
@@ -16,6 +17,14 @@ class Certificate(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    public_id = models.CharField(max_length=50, default=partial(default_pid_generator, "Certificate"))
+
+    def save(self, *args, **kwargs):
+        if (self._state.adding):
+            _id = primary_key_generator()
+            self.public_id = public_id_generator(_id, "Certificate")
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -30,6 +39,14 @@ class Portfolio(models.Model):
     published = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    public_id = models.CharField(max_length=50, default=partial(default_pid_generator, "Portfolio"))
+
+    def save(self, *args, **kwargs):
+        if (self._state.adding):
+            _id =  primary_key_generator()
+            self.public_id = public_id_generator(_id, "Portfolio")
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -49,6 +66,15 @@ class Education(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    public_id = models.CharField(max_length=50, default=partial(default_pid_generator, "Education"))
+
+    def save(self, *args, **kwargs):
+        if (self._state.adding):
+            _id = primary_key_generator()
+            self.public_id = public_id_generator(_id, "Education")
+        return super().save(*args, **kwargs)
+
+
     def __str__(self):
         return self.institution[:25]
 
@@ -58,12 +84,15 @@ class TalentManager(Manager):
 
 
 class Talent(models.Model):
-    id = models.CharField(
+    id = models.UUIDField(
         primary_key=True,
-        default=id_generator,
+        default=primary_key_generator,
         editable=False,
         max_length=64,
     )
+
+    public_id = models.CharField(max_length=50, default=partial(default_pid_generator, "Talent"))
+
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name="talent_profile"
     )
@@ -97,3 +126,10 @@ class Talent(models.Model):
 
     def __str__(self) -> str:
         return self.user.email
+
+
+    def save(self, *args, **kwargs):
+        if (self._state.adding):
+            _id = self.id or primary_key_generator()
+            self.public_id = public_id_generator(_id, "Talent")
+        return super().save(*args, **kwargs)

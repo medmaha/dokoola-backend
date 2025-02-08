@@ -1,7 +1,11 @@
+from functools import partial
 from django.db import models
+from utilities.generator import primary_key_generator, public_id_generator, default_pid_generator
 
 
 class Pricing(models.Model):
+    public_id = models.CharField(max_length=50, default=partial(default_pid_generator, "Pricing"))
+
     budget = models.DecimalField(decimal_places=2, max_digits=10)
 
     fixed_price = models.BooleanField(
@@ -33,3 +37,9 @@ class Pricing(models.Model):
 
     def __str__(self):
         return f"{self.payment_type} | Fixed: {self.fixed_price}"
+
+    def save(self, *args, **kwargs):
+        if (self._state.adding):
+            _id = primary_key_generator()
+            self.public_id = public_id_generator(_id, "Pricing")
+        return super().save(*args, **kwargs)

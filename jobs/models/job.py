@@ -1,3 +1,4 @@
+from functools import partial
 import uuid
 
 from django.core.serializers.json import DjangoJSONEncoder
@@ -5,6 +6,8 @@ from django.db import models
 
 from clients.models import Client
 from core.models import Category
+from utilities.generator import primary_key_generator, public_id_generator, default_pid_generator
+
 
 
 class JobStatusChoices(models.TextChoices):
@@ -25,7 +28,9 @@ class JobTypeChoices(models.TextChoices):
 
 
 class Job(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.UUIDField(primary_key=True, default=primary_key_generator, editable=False)
+    public_id = models.CharField(max_length=50, default=partial(default_pid_generator, "Job"))
+
     title = models.CharField(max_length=200, db_index=True)
     description = models.TextField()
 
@@ -84,6 +89,10 @@ class Job(models.Model):
     def save(self, *args, **kwargs):
         if self.third_party_address:
             self.is_third_party = True
+        if (self._state.adding):
+            _id = self.id or primary_key_generator()
+            self.public_id = public_id_generator(_id, "Job")
+        
         return super().save(*args, **kwargs)
 
     @property
