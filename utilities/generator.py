@@ -17,6 +17,10 @@ def default_pid_generator(prefix: str):
 def public_id_generator(_id: str, prefix: str, max_length=20):
     try:
         _uuid = UUID(id).__str__()
+    except:
+        _uuid = primary_key_generator()
+
+    try:
         time_hex = _uuid[:8] + _uuid[9:11]
         version = _uuid[14]
         _random = _uuid[15:19]
