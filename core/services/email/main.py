@@ -1,4 +1,5 @@
 from datetime import datetime
+import re
 from types import FunctionType
 
 from django.conf import settings
@@ -6,6 +7,7 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
+from core.processors.base import email_environment
 from src.settings.logger import DokoolaLogger
 from src.settings.email import EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
 from core.services.after.main import AfterResponseService
@@ -14,12 +16,17 @@ from core.services.after.main import AfterResponseService
 def execute_send_mail(
     subject,
     text,
+    sender_name: str | None = None,
     fail_silently: bool = False,
     html_message: str | None = None,
     recipient_list: list[str] | None = None,
     callback: FunctionType | None = None,
 ):
-    from_email = f"{settings.APPLICATION_NAME} <{EMAIL_HOST_USER}>"
+
+    if sender_name:
+        from_email = f"{sender_name} <{EMAIL_HOST_USER}>"
+    else:
+        from_email = f"{settings.APPLICATION_NAME} <{EMAIL_HOST_USER}>"
 
     if not (recipient_list and text):
         log_data = {
@@ -31,7 +38,7 @@ def execute_send_mail(
             "from_email": from_email,
             "html_message": html_message,
         }
-        DokoolaLogger.warn(log_data, extra=log_data)
+        DokoolaLogger.error(log_data, extra=log_data)
         return
 
     try:
@@ -47,17 +54,17 @@ def execute_send_mail(
         if callback:
             callback()
 
-        emails = recipient_list
         log_data = {
             "event": "email-sent",
             "timestamp": datetime.now(),
-            "emails": emails,
+            "emails": recipient_list,
             "subject": subject,
             "content": text,
             "sent": bool(response),
         }
         DokoolaLogger.info(log_data, extra=log_data)
         return
+
     except Exception as error:
         log_data = {
             "event": "email-not-sent",
@@ -83,31 +90,69 @@ class EmailService:
         subject,
         text=None,
         callback=None,
+        sender_name=None,
         html_template_name=None,
         html_template_context=None,
+        execute_now=False,
     ):
+        """
+            A utility function to send an email.
+
+            Args:
+                email: The email address to send the email to.
+                subject: The subject of the email.
+                text: The text of the email.
+                callback: A function to call after the email is sent.
+                sender_name: The name of the sender.
+                html_template_name: The name of the html template to render.
+                html_template_context: The context to pass to the html template.
+                execute_now: Whether to send the email immediately.
+                    otherwise email is sent after the http-response is sent.
+            Returns:
+                None
+                
+        """
 
         html = None
 
+        # If a template is provided, render it
         if html_template_name is not None:
+
+            # Update the context with the email environment
+            context = html_template_context or {}
+            context.update(email_environment())
+
+            # Render the template
             html = render_to_string(
-                html_template_name, context=html_template_context or {}
+                html_template_name, context=context
             )
 
         if not text:
-            text = strip_tags(html or "")
-
+            # Attempt to extract the content from the html element with id "__content"
+            content = re.search(r'<span id="__content">(.*?)</span>', html, re.DOTALL)
+            if content:
+                text = strip_tags(content.group(1)).strip()
+            else:
+                text = strip_tags(html or "").strip()
+        
+        # A callback function that sends the email
         def callback(subject, text):
             execute_send_mail(
                 subject,
                 text,
                 html_message=html,
+                sender_name=sender_name,
                 recipient_list=[email],
                 fail_silently=self.fail_silently,
             )
 
-        AfterResponseService.register(
-            callback,
-            subject,
-            text,
-        )
+        # If the email is to be sent immediately, call the callback function
+        if execute_now:
+            callback(subject, text)
+        else:
+            # Register the callback function to be called after the response is sent
+            AfterResponseService.register(
+                callback,
+                subject,
+                text,
+            )
