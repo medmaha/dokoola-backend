@@ -19,13 +19,13 @@ class TalentPortfolioAPIView(GenericAPIView):
 
             if user.username == username:
                 portfolio = (
-                    Portfolio.objects.select_related("client")
+                    Portfolio.objects
                     .filter(talent__user__username=username)
                     .order_by("published", "-updated_at")
                 )
             else:
                 portfolio = (
-                    Portfolio.objects.select_related()
+                    Portfolio.objects
                     .filter(talent__user__username=username, published=True)
                     .order_by("-updated_at")
                 )
@@ -34,9 +34,6 @@ class TalentPortfolioAPIView(GenericAPIView):
             return Response(serializer.data, status=200)
 
         except Exception as e:
-            print("----------------------------------------------")
-            print(e)
-            print("----------------------------------------------")
 
             return Response(
                 {"message": "Error: Something went wrong!"},

@@ -22,13 +22,13 @@ class TalentEducationAPIView(GenericAPIView):
 
             if user.username == username:
                 educations = (
-                    Education.objects.select_related()
+                    Education.objects
                     .filter(talent__user__username=username)
                     .order_by("-start_date", "end_date", "published")
                 )
             else:
                 educations = (
-                    Education.objects.select_related()
+                    Education.objects
                     .filter(talent__user__username=username, published=True)
                     .order_by("-start_date")
                 )

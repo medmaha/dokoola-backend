@@ -19,14 +19,14 @@ class TalentCertificateAPIView(GenericAPIView):
     def get(self, request, username: str, *args, **kwargs):
         try:
             user: User = request.user
-
-            if user.lower() == "talent":
-                certificates = profile.certificates.filter(
+        
+            if user.username == username:
+                certificates = Certificate.objects.filter(
                     talent__user__username=username
                 ).order_by("-date_issued")
             else:
                 certificates = (
-                    Certificate.objects.select_related()
+                    Certificate.objects
                     .filter(talent__user__username=username, published=True)
                     .order_by("-date_issued")
                 )
