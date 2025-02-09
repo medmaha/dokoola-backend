@@ -10,71 +10,222 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Activities',
+            name="Activities",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('public_id', models.CharField(db_index=True, default=functools.partial(utilities.generator.default_pid_generator, *('Activities',), **{}), max_length=50)),
-                ('bits_count', models.IntegerField(default=0)),
-                ('hired_count', models.IntegerField(default=0)),
-                ('invite_count', models.IntegerField(default=0)),
-                ('proposal_count', models.IntegerField(default=0)),
-                ('interview_count', models.IntegerField(default=0)),
-                ('unanswered_invites', models.IntegerField(default=0)),
-                ('client_last_visit', models.DateTimeField(blank=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "public_id",
+                    models.CharField(
+                        db_index=True,
+                        default=functools.partial(
+                            utilities.generator.default_pid_generator,
+                            *("Activities",),
+                            **{},
+                        ),
+                        max_length=50,
+                    ),
+                ),
+                ("bits_count", models.IntegerField(default=0)),
+                ("hired_count", models.IntegerField(default=0)),
+                ("invite_count", models.IntegerField(default=0)),
+                ("proposal_count", models.IntegerField(default=0)),
+                ("interview_count", models.IntegerField(default=0)),
+                ("unanswered_invites", models.IntegerField(default=0)),
+                ("client_last_visit", models.DateTimeField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Job',
+            name="Job",
             fields=[
-                ('id', models.UUIDField(default=utilities.generator.primary_key_generator, editable=False, primary_key=True, serialize=False)),
-                ('public_id', models.CharField(db_index=True, default=functools.partial(utilities.generator.default_pid_generator, *('Job',), **{}), max_length=50)),
-                ('title', models.CharField(db_index=True, max_length=200)),
-                ('description', models.TextField()),
-                ('pricing', models.JSONField(blank=True, encoder=django.core.serializers.json.DjangoJSONEncoder, null=True)),
-                ('benefits', models.JSONField(blank=True, encoder=django.core.serializers.json.DjangoJSONEncoder, null=True)),
-                ('required_skills', models.JSONField(blank=True, encoder=django.core.serializers.json.DjangoJSONEncoder, null=True)),
-                ('country', models.JSONField(encoder=django.core.serializers.json.DjangoJSONEncoder)),
-                ('address', models.CharField(blank=True, max_length=200, null=True)),
-                ('job_type', models.CharField(choices=[('full-time', 'Full Time'), ('part-time', 'Part Time'), ('freelance', 'Freelance'), ('contract', 'Contract'), ('internship', 'Internship'), ('other', 'Other')], db_index=True, default='freelance', max_length=20)),
-                ('published', models.BooleanField(blank=True, default=False)),
-                ('status', models.CharField(choices=[('CLOSED', 'Closed'), ('PUBLISHED', 'Published'), ('SUSPENDED', 'Suspended'), ('IN_PROGRESS', 'In Progress'), ('COMPLETED', 'Completed')], default='CLOSED', max_length=200)),
-                ('is_valid', models.BooleanField(blank=True, default=True)),
-                ('is_third_party', models.BooleanField(blank=True, default=False)),
-                ('third_party_address', models.URLField(blank=True, null=True)),
-                ('views_count', models.IntegerField(default=0)),
-                ('proposal_count', models.IntegerField(default=0)),
-                ('invitation_count', models.IntegerField(default=0)),
-                ('client_last_visit', models.DateTimeField(blank=True, null=True)),
-                ('job_type_other', models.CharField(blank=True, max_length=200, null=True)),
-                ('experience_level_other', models.CharField(blank=True, max_length=200, null=True)),
-                ('estimated_duration', models.DateTimeField(blank=True, null=True)),
-                ('application_deadline', models.DateTimeField(blank=True, null=True)),
-                ('additional_payment_terms', models.CharField(blank=True, default='')),
-                ('experience_level', models.CharField(blank=True, max_length=200, null=True)),
-                ('bits_amount', models.IntegerField(default=16)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=utilities.generator.primary_key_generator,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "public_id",
+                    models.CharField(
+                        db_index=True,
+                        default=functools.partial(
+                            utilities.generator.default_pid_generator, *("Job",), **{}
+                        ),
+                        max_length=50,
+                    ),
+                ),
+                ("title", models.CharField(db_index=True, max_length=200)),
+                ("description", models.TextField()),
+                (
+                    "pricing",
+                    models.JSONField(
+                        blank=True,
+                        encoder=django.core.serializers.json.DjangoJSONEncoder,
+                        null=True,
+                    ),
+                ),
+                (
+                    "benefits",
+                    models.JSONField(
+                        blank=True,
+                        encoder=django.core.serializers.json.DjangoJSONEncoder,
+                        null=True,
+                    ),
+                ),
+                (
+                    "required_skills",
+                    models.JSONField(
+                        blank=True,
+                        encoder=django.core.serializers.json.DjangoJSONEncoder,
+                        null=True,
+                    ),
+                ),
+                (
+                    "country",
+                    models.JSONField(
+                        encoder=django.core.serializers.json.DjangoJSONEncoder
+                    ),
+                ),
+                ("address", models.CharField(blank=True, max_length=200, null=True)),
+                (
+                    "job_type",
+                    models.CharField(
+                        choices=[
+                            ("full-time", "Full Time"),
+                            ("part-time", "Part Time"),
+                            ("freelance", "Freelance"),
+                            ("contract", "Contract"),
+                            ("internship", "Internship"),
+                            ("other", "Other"),
+                        ],
+                        db_index=True,
+                        default="freelance",
+                        max_length=20,
+                    ),
+                ),
+                ("published", models.BooleanField(blank=True, default=False)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("CLOSED", "Closed"),
+                            ("PUBLISHED", "Published"),
+                            ("SUSPENDED", "Suspended"),
+                            ("IN_PROGRESS", "In Progress"),
+                            ("COMPLETED", "Completed"),
+                        ],
+                        default="CLOSED",
+                        max_length=200,
+                    ),
+                ),
+                ("is_valid", models.BooleanField(blank=True, default=True)),
+                ("is_third_party", models.BooleanField(blank=True, default=False)),
+                ("third_party_address", models.URLField(blank=True, null=True)),
+                ("views_count", models.IntegerField(default=0)),
+                ("proposal_count", models.IntegerField(default=0)),
+                ("invitation_count", models.IntegerField(default=0)),
+                ("client_last_visit", models.DateTimeField(blank=True, null=True)),
+                (
+                    "job_type_other",
+                    models.CharField(blank=True, max_length=200, null=True),
+                ),
+                (
+                    "experience_level_other",
+                    models.CharField(blank=True, max_length=200, null=True),
+                ),
+                ("estimated_duration", models.DateTimeField(blank=True, null=True)),
+                ("application_deadline", models.DateTimeField(blank=True, null=True)),
+                ("additional_payment_terms", models.CharField(blank=True, default="")),
+                (
+                    "experience_level",
+                    models.CharField(blank=True, max_length=200, null=True),
+                ),
+                ("bits_amount", models.IntegerField(default=16)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
             options={
-                'ordering': ['is_valid', '-created_at', 'published'],
+                "ordering": ["is_valid", "-created_at", "published"],
             },
         ),
         migrations.CreateModel(
-            name='Pricing',
+            name="Pricing",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('public_id', models.CharField(db_index=True, default=functools.partial(utilities.generator.default_pid_generator, *('Pricing',), **{}), max_length=50)),
-                ('budget', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('fixed_price', models.BooleanField(blank=True, default=True, help_text='fixed price? If not, the price will be negotiable.')),
-                ('negotiable_price', models.BooleanField(blank=True, default=False, help_text='open to negotiate the price?')),
-                ('will_pay_more', models.BooleanField(blank=True, default=False, help_text='willing to pay more than the budget?')),
-                ('addition_node', models.CharField(help_text='any additional information regarding the payment.', max_length=100)),
-                ('payment_type', models.CharField(default='PROJECT', help_text='payment type. project or hourly.', max_length=100)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "public_id",
+                    models.CharField(
+                        db_index=True,
+                        default=functools.partial(
+                            utilities.generator.default_pid_generator,
+                            *("Pricing",),
+                            **{},
+                        ),
+                        max_length=50,
+                    ),
+                ),
+                ("budget", models.DecimalField(decimal_places=2, max_digits=10)),
+                (
+                    "fixed_price",
+                    models.BooleanField(
+                        blank=True,
+                        default=True,
+                        help_text="fixed price? If not, the price will be negotiable.",
+                    ),
+                ),
+                (
+                    "negotiable_price",
+                    models.BooleanField(
+                        blank=True,
+                        default=False,
+                        help_text="open to negotiate the price?",
+                    ),
+                ),
+                (
+                    "will_pay_more",
+                    models.BooleanField(
+                        blank=True,
+                        default=False,
+                        help_text="willing to pay more than the budget?",
+                    ),
+                ),
+                (
+                    "addition_node",
+                    models.CharField(
+                        help_text="any additional information regarding the payment.",
+                        max_length=100,
+                    ),
+                ),
+                (
+                    "payment_type",
+                    models.CharField(
+                        default="PROJECT",
+                        help_text="payment type. project or hourly.",
+                        max_length=100,
+                    ),
+                ),
             ],
         ),
     ]

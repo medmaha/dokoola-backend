@@ -9,15 +9,31 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Staff',
+            name="Staff",
             fields=[
-                ('id', models.UUIDField(default=utilities.generator.primary_key_generator, editable=False, primary_key=True, serialize=False)),
-                ('public_id', models.CharField(db_index=True, default=functools.partial(utilities.generator.default_pid_generator, *('STAFF',), **{}), max_length=50)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=utilities.generator.primary_key_generator,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "public_id",
+                    models.CharField(
+                        db_index=True,
+                        default=functools.partial(
+                            utilities.generator.default_pid_generator, *("STAFF",), **{}
+                        ),
+                        max_length=50,
+                    ),
+                ),
             ],
         ),
     ]

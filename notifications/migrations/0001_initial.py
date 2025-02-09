@@ -7,23 +7,33 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Notification',
+            name="Notification",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('hint_text', models.CharField(default='', max_length=300)),
-                ('content_text', models.CharField(default='', max_length=1000)),
-                ('object_api_link', models.CharField(blank=True, max_length=1000, null=True)),
-                ('is_seen', models.BooleanField(default=False)),
-                ('is_read', models.BooleanField(default=False)),
-                ('archived', models.BooleanField(default=False)),
-                ('deleted', models.BooleanField(default=False)),
-                ('type', models.CharField(blank=True, max_length=60, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("hint_text", models.CharField(default="", max_length=300)),
+                ("content_text", models.CharField(default="", max_length=1000)),
+                (
+                    "object_api_link",
+                    models.CharField(blank=True, max_length=1000, null=True),
+                ),
+                ("is_seen", models.BooleanField(default=False)),
+                ("is_read", models.BooleanField(default=False)),
+                ("archived", models.BooleanField(default=False)),
+                ("deleted", models.BooleanField(default=False)),
+                ("type", models.CharField(blank=True, max_length=60, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
         ),
     ]

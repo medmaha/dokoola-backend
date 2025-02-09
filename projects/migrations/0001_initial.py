@@ -9,59 +9,155 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('contracts', '0001_initial'),
+        ("contracts", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Acknowledgement',
+            name="Acknowledgement",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('comment', models.TextField(blank=True, null=True)),
-                ('acknowledged', models.BooleanField(default=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("comment", models.TextField(blank=True, null=True)),
+                ("acknowledged", models.BooleanField(default=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Milestone',
+            name="Milestone",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('project_pk', models.CharField(db_index=True, max_length=255)),
-                ('milestone_name', models.CharField(blank=True, max_length=255, null=True)),
-                ('milestone_description', models.TextField(blank=True, null=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('is_final', models.BooleanField(default=False)),
-                ('published', models.BooleanField(default=False)),
-                ('due_date', models.DateTimeField(blank=True, null=True)),
-                ('status', models.CharField(choices=[('PENDING', 'Pending'), ('COMPLETED', 'Completed'), ('CANCELLED', 'Cancelled'), ('ACCEPTED', 'Accepted'), ('ACTIVE', 'Active')], default='ACTIVE', max_length=255)),
-                ('acknowledgement', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='milestone', to='projects.acknowledgement')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("project_pk", models.CharField(db_index=True, max_length=255)),
+                (
+                    "milestone_name",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("milestone_description", models.TextField(blank=True, null=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("is_final", models.BooleanField(default=False)),
+                ("published", models.BooleanField(default=False)),
+                ("due_date", models.DateTimeField(blank=True, null=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("PENDING", "Pending"),
+                            ("COMPLETED", "Completed"),
+                            ("CANCELLED", "Cancelled"),
+                            ("ACCEPTED", "Accepted"),
+                            ("ACTIVE", "Active"),
+                        ],
+                        default="ACTIVE",
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "acknowledgement",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="milestone",
+                        to="projects.acknowledgement",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['due_date'],
+                "ordering": ["due_date"],
             },
         ),
         migrations.CreateModel(
-            name='Project',
+            name="Project",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('duration', models.CharField(max_length=255)),
-                ('deadline', models.DateTimeField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('status', models.CharField(choices=[('CLOSED', 'Closed'), ('PENDING', 'Pending'), ('ACCEPTED', 'Accepted'), ('COMPLETED', 'Completed'), ('CANCELLED', 'Cancelled'), ('TERMINATED', 'Terminated')], default='PENDING', max_length=20)),
-                ('acceptance_comment', models.TextField(blank=True, max_length=1000, null=True)),
-                ('completion_comment', models.TextField(blank=True, max_length=1000, null=True)),
-                ('termination_comment', models.TextField(blank=True, max_length=1000, null=True)),
-                ('cancellation_comment', models.TextField(blank=True, max_length=1000, null=True)),
-                ('system_closed', models.BooleanField(default=False)),
-                ('acknowledgement', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='project', to='projects.acknowledgement')),
-                ('contract', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contracts.contract')),
-                ('milestones', models.ManyToManyField(blank=True, related_name='milestone_project', to='projects.milestone')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("duration", models.CharField(max_length=255)),
+                ("deadline", models.DateTimeField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("CLOSED", "Closed"),
+                            ("PENDING", "Pending"),
+                            ("ACCEPTED", "Accepted"),
+                            ("COMPLETED", "Completed"),
+                            ("CANCELLED", "Cancelled"),
+                            ("TERMINATED", "Terminated"),
+                        ],
+                        default="PENDING",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "acceptance_comment",
+                    models.TextField(blank=True, max_length=1000, null=True),
+                ),
+                (
+                    "completion_comment",
+                    models.TextField(blank=True, max_length=1000, null=True),
+                ),
+                (
+                    "termination_comment",
+                    models.TextField(blank=True, max_length=1000, null=True),
+                ),
+                (
+                    "cancellation_comment",
+                    models.TextField(blank=True, max_length=1000, null=True),
+                ),
+                ("system_closed", models.BooleanField(default=False)),
+                (
+                    "acknowledgement",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="project",
+                        to="projects.acknowledgement",
+                    ),
+                ),
+                (
+                    "contract",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="contracts.contract",
+                    ),
+                ),
+                (
+                    "milestones",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="milestone_project",
+                        to="projects.milestone",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
+                "ordering": ["-created_at"],
             },
         ),
     ]

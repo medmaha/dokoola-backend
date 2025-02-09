@@ -10,34 +10,50 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('messaging', '0001_initial'),
+        ("messaging", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='message',
-            name='recipient',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='messaging_received', to=settings.AUTH_USER_MODEL),
+            model_name="message",
+            name="recipient",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="messaging_received",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='message',
-            name='sender',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='messaging_sent', to=settings.AUTH_USER_MODEL),
+            model_name="message",
+            name="sender",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="messaging_sent",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='thread',
-            name='messaging',
-            field=models.ManyToManyField(related_name='thread', to='messaging.message'),
+            model_name="thread",
+            name="messaging",
+            field=models.ManyToManyField(related_name="thread", to="messaging.message"),
         ),
         migrations.AddField(
-            model_name='thread',
-            name='owner',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='thread_owner', to=settings.AUTH_USER_MODEL),
+            model_name="thread",
+            name="owner",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="thread_owner",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='thread',
-            name='recipient',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='thread_recipient', to=settings.AUTH_USER_MODEL),
+            model_name="thread",
+            name="recipient",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="thread_recipient",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]
