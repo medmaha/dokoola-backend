@@ -15,6 +15,7 @@ from jobs.serializers import (
     JobRetrieveSerializer,
 )
 from users.models.user import User
+from utilities.generator import public_id_generator
 
 
 class JobListAPIView(ListAPIView):
@@ -92,6 +93,11 @@ class JobRetrieveAPIView(RetrieveAPIView):
         if instance:
             serializer = self.get_serializer(instance=instance)
 
+            # for j in Job.objects.filter():
+            #     j.public_id = public_id_generator(j.id, "job")
+            #     print("Job ID: ",j.id,"Public ID: ",j.public_id)
+            #     j.save()
+
             if instance.client.user.pk == request.user.pk:
                 AfterResponseService.register(self.update_last_visit, instance)
             return Response(serializer.data, status=200)
@@ -114,6 +120,7 @@ class JobActivitiesAPIView(GenericAPIView):
 
     def get(self, request, public_id, **kwargs):
         queryset = self.get_queryset(public_id)
+
         if queryset:
             serializer = self.get_serializer(instance=queryset)
             return Response(serializer.data, status=200)

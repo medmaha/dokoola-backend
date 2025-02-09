@@ -1,11 +1,12 @@
 from functools import partial
-import uuid
+import random
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 
 from clients.models import Client
 from core.models import Category
+from core.services.email.main import EmailService
 from utilities.generator import (
     primary_key_generator,
     public_id_generator,
@@ -19,6 +20,12 @@ class JobStatusChoices(models.TextChoices):
     SUSPENDED = "SUSPENDED"
     IN_PROGRESS = "IN_PROGRESS"
     COMPLETED = "COMPLETED"
+
+    @classmethod
+    def verify_status(cls, status: str):
+        if status not in cls.values:
+            return False
+        return True
 
 
 class JobTypeChoices(models.TextChoices):
@@ -101,6 +108,98 @@ class Job(models.Model):
             self.public_id = public_id_generator(_id, "Job")
 
         return super().save(*args, **kwargs)
+
+    def update_status_and_withdraw_proposals(
+        self, job_status=None, is_after_response=True
+    ):
+        """
+        Update the job status and notify the client and talent about the status through email
+        """
+
+        if JobStatusChoices.verify_status(job_status):
+            self.status = job_status
+            self.save()
+
+        from proposals.models import Proposal, ProposalStatusChoices
+
+        other_proposals = (
+            Proposal.objects.select_related("talent__user")
+            .filter(
+                job=self,
+                status__in=[
+                    ProposalStatusChoices.REVIEW,
+                    ProposalStatusChoices.PENDING,
+                ],
+            )
+            .exclude(status=ProposalStatusChoices.ACCEPTED)
+        )
+
+        for other_proposal in other_proposals:
+            other_proposal.status = ProposalStatusChoices.WITHDRAWN
+            other_proposal.notify_talent(
+                ProposalStatusChoices.WITHDRAWN, is_after_response=is_after_response
+            )
+
+        Proposal.objects.bulk_update(other_proposals, ["status"])
+
+    def notify_client(
+        self, job_status, proposal=None, new_proposal=None, is_after_response=True
+    ):
+        """
+        Notify the client about the job status through email
+        """
+
+        sender_name = "Dokoola Team"
+        html_template_context = {
+            "job": self,
+            "client": self.client,
+        }
+
+        if new_proposal:
+            subjects = [
+                "New Application",
+                "New Proposal",
+                "New Job Proposal",
+                "New Job Application",
+            ]
+            subject = random.choice(subjects)
+            sender_name = new_proposal.talent.name
+            html_template_context["proposal"] = new_proposal
+            html_template_name = "emails/jobs/new_proposal.html"
+
+        elif job_status == JobStatusChoices.IN_PROGRESS:
+            subject = "Job Proposal Accepted"
+            html_template_context["proposal"] = proposal
+            html_template_name = "emails/jobs/proposal_accepted_client.html"
+
+        elif job_status == JobStatusChoices.COMPLETED:
+            subject = "Job Completed"
+            html_template_name = "emails/jobs/job_completed.html"
+
+        elif job_status == JobStatusChoices.CLOSED:
+            subject = "Job Closed"
+            html_template_name = "emails/jobs/job_closed.html"
+
+        elif job_status == JobStatusChoices.SUSPENDED:
+            subject = "Job Suspended"
+            html_template_name = "emails/jobs/job_suspended.html"
+
+        elif job_status == JobStatusChoices.PUBLISHED:
+            subject = "Job Published"
+            html_template_name = "emails/jobs/job_published.html"
+
+        else:
+            return
+
+        email_service = EmailService()
+        email_service.send(
+            self.client.user.email,
+            subject,
+            sender_name=sender_name,
+            html_template_name=html_template_name,
+            html_template_context=html_template_context,
+            execute_now=is_after_response == True,
+        )
 
     @property
     def activities(self):

@@ -84,11 +84,13 @@ class Client(models.Model):
             self.reviews.select_related().aggregate(rating=models.Avg("rating"))[
                 "rating"
             ]
-            or 0.0
+            or 3.6
         )
 
     @property
     def name(self):
+        if self.company:
+            return self.company.name
         return self.user.name
 
     @property
