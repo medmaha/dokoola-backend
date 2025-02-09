@@ -68,6 +68,13 @@ services:
 
     command: gunicorn src.wsgi:application --bind 0.0.0.0:8000
 
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - dokoola-network
+
 # Dokoola Services Networks
 
 networks:
