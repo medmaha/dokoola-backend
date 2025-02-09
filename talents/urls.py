@@ -42,7 +42,6 @@ urlpatterns = [
         views.TalentEducationAPIView.as_view(),
     ),
     # ----------------------------------------------------------------
-    #
     # Talent Projects APIView
     path(
         "<username>/projects/",
@@ -73,8 +72,8 @@ urlpatterns = [
         name="talent_retrieve",
     ),
     path(
-        "<username>/mini-info/",
-        views.FreelanceMiniInfoView.as_view(),
+        "<username>/mini/",
+        views.TalentMiniInfoView.as_view(),
         name="talent_statistics",
     ),
     #

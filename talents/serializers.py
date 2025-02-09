@@ -108,11 +108,13 @@ class TalentMiniInfoSerializer(serializers.ModelSerializer):
         model = Talent
         fields = ("public_id", "bits", "pricing", "skills")
 
-    def to_representation(self, instance):
+    def to_representation(self, instance: Talent):
         data = super().to_representation(instance)
-        data["pricing"] = float(data["pricing"])
-        data["location"] = instance.user.get_location()
-        data["skills"] = data.get("skills", "").split(", ")
+        data["badge"] = instance.badge
+        data["name"] = instance.user.name
+        data["avatar"] = instance.user.avatar
+        data["rating"] = instance.average_rating()
+
         return data
 
 

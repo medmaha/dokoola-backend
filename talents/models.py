@@ -99,13 +99,18 @@ class TalentManager(Manager):
 
 
 class Talent(models.Model):
-    id = models.UUIDField(
+    id = models.CharField(
         primary_key=True,
         default=primary_key_generator,
         editable=False,
         max_length=64,
     )
-
+    # id = models.UUIDField(
+    #     primary_key=True,
+    #     default=primary_key_generator,
+    #     editable=False,
+    #     max_length=64,
+    # )
     public_id = models.CharField(
         max_length=50, db_index=True, default=partial(default_pid_generator, "Talent")
     )
@@ -149,3 +154,8 @@ class Talent(models.Model):
             _id = self.id or primary_key_generator()
             self.public_id = public_id_generator(_id, "Talent")
         return super().save(*args, **kwargs)
+
+        # Calculates the client's average rating
+
+    def average_rating(self):
+        return self.reviews.aggregate(rating=models.Avg("rating"))["rating"] or 3.6
