@@ -36,7 +36,7 @@ class NotificationSeenAPIView(UpdateAPIView):
 
     def update(self, request, *args, **kwargs):
         user = request.user
-        notification_ids = request.data
+        notification_ids = request.data.get("ids", [])
 
         Notification.objects.select_related().filter(
             recipient=user, id__in=notification_ids
@@ -49,7 +49,7 @@ class NotificationReadAPIView(UpdateAPIView):
 
     def update(self, request, *args, **kwargs):
         user = request.user
-        notification_ids = request.data
+        notification_ids = request.data.get("ids", [])
 
         Notification.objects.select_related().filter(
             recipient=user, id__in=notification_ids
