@@ -1,3 +1,4 @@
+import datetime
 from django.db import transaction
 from django.db.models import Q
 from rest_framework.generics import (
@@ -9,8 +10,11 @@ from rest_framework.generics import (
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from core.constants import DokoolaConstants
+from core.services.after.main import AfterResponseService
 from jobs.models import Job
 from jobs.models.activities import Activities
+from jobs.models.job import JobStatusChoices
 from src.settings.logger import DokoolaLogger
 from talents.models import Talent  # Updated import
 from users.models import User
@@ -59,10 +63,10 @@ class ProposalListApiView(ListAPIView):
         return self.get_paginated_response(serializer.data)
 
 
-class ProposalDetailsApiView(RetrieveAPIView):
+class ProposalRetrieveApiView(RetrieveAPIView):
     serializer_class = ProposalDetailSerializer
 
-    def get_queryset(self, proposal_id: str):
+    def get_queryset(self, publid_id: str):
         if not self.request.user.is_authenticated:
             return "Unauthorized! Please log in"
 
@@ -74,7 +78,7 @@ class ProposalDetailsApiView(RetrieveAPIView):
             # or from the current user
             proposal = Proposal.objects.get(
                 Q(job__client__user=user) | Q(talent__user=user),
-                pk=proposal_id,
+                public_id=publid_id,
             )
         except Proposal.DoesNotExist:
             return "Proposal not found"
@@ -83,8 +87,9 @@ class ProposalDetailsApiView(RetrieveAPIView):
 
         return proposal
 
-    def retrieve(self, request, pid, *args, **kwargs):
-        queryset = self.get_queryset(pid)
+    def retrieve(self, request, publid_id, *args, **kwargs):
+
+        queryset = self.get_queryset(publid_id)
 
         if isinstance(queryset, str):
             return Response({"message": queryset}, status=400)
@@ -95,63 +100,192 @@ class ProposalDetailsApiView(RetrieveAPIView):
 class ProposalUpdateAPIView(GenericAPIView):
     serializer_class = ProposalUpdateSerializer
 
-    def get(self, request, *args, **kwargs):
-        proposal_id = self.request.query_params.get("slug")  # type: ignore
-        if not proposal_id:
-            return Response({"message": "Invalid proposal"}, status=400)
+    def get(self, request, publid_id, *args, **kwargs):
 
+        # Get the user and the profile
         user = request.user
+        profile, profile_name = user.profile
 
-        [profile, profile_name] = user.profile
-
+        # Check if the user is a talent
         if profile_name.lower() != "talent":
             return Response({"message": "Bad request attempted"}, status=400)
 
         try:
             proposal = Proposal.objects.get(
-                talent=profile,
-                id=proposal_id,
+                talent__id=profile.id,
+                public_id=publid_id,
                 status=ProposalStatusChoices.PENDING,
-            )
+            )  # Get the proposal
+
+            # Check if user is the owner of the proposal
+            if proposal.talent != profile:
+                return Response(
+                    {
+                        "message": "Forbidden! You are not allowed to perform this action"
+                    },
+                    status=403,
+                )
+
+            # Check if the proposal is pending
+            if proposal.status != ProposalStatusChoices.PENDING:
+                return Response({"message": "Bad request attempted"}, status=400)
+
+            # Serialize the proposal
             serializer = self.get_serializer(proposal, context={"request": request})
             return Response(serializer.data, status=200)
+
         except Proposal.DoesNotExist:
             return Response({"message": "Bad request attempted"}, status=400)
 
-        except:
+        except Exception as e:
             return Response({"message": "An unexpected error occurred"}, status=400)
 
-    def put(self, request, *args, **kwargs):
-        proposal_id = request.data.get("proposal_id")
-        self.serializer_class = ProposalEditSerializer
+    def put(self, request, publid_id, *args, **kwargs):
+        # Get the user and the profile
+        user = request.user
+        profile, profile_name = user.profile
 
-        if proposal_id:
-            try:
-                proposal = Proposal.objects.get(id=proposal_id)
-            except Proposal.DoesNotExist:
-                return Response({"message": "Bad request attempted"}, status=400)
-            except:
-                return Response({"message": "An unexpected error occurred"}, status=400)
+        try:
+            with transaction.atomic():
+                self.serializer_class = ProposalEditSerializer
 
-            # Get the attachment data of the request
-            attachment_data = request.data.get(
-                "attachments"
-            )  # TODO: Handle attachments
+                proposal = Proposal.objects.get(public_id=publid_id)
 
-            serializer = self.get_serializer(
-                instance=proposal,
-                data=request.data,
-                context={"request": request},
-            )
+                # Proposal review update
+                # Check if the review query parameter is present
+                if "review" in request.query_params:
+                    if proposal.status == ProposalStatusChoices.REVIEW:
+                        return Response(status=204)
+                    proposal.status = ProposalStatusChoices.REVIEW
+                    proposal.save()
+                    return Response(status=204)
 
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=200)
+                # Proposal status update
+                if "status" in request.query_params:
 
-                # return Response({'message':'Request is forbidden'}, status=400)
-            error_message = get_serializer_error_message(serializer.errors)
-            return Response({"message": error_message}, status=400)
-        return Response({"message": "Proposal does not exist"}, status=400)
+                    # Check if to see if this proposal can be updated
+                    if proposal.status == ProposalStatusChoices.ACCEPTED:
+                        return Response(
+                            {"message": "Proposal already accepted"}, status=400
+                        )
+                    if proposal.status == ProposalStatusChoices.TERMINATED:
+                        return Response(
+                            {"message": "Proposal already terminated"}, status=400
+                        )
+                    if proposal.status == ProposalStatusChoices.WITHDRAWN:
+                        return Response(
+                            {"message": "Proposal already withdrawn"}, status=400
+                        )
+
+                    _comment = request.data.get("comment", "")
+                    _status = request.query_params.get("status", "").upper()
+              
+                    proposal.client_comment = _comment
+
+                    if _status == ProposalStatusChoices.ACCEPTED:
+
+                        if proposal.job.client != profile:
+                            return Response(
+                                {
+                                    "message": "Forbidden! You are not allowed to perform this action"
+                                },
+                                status=403,
+                            )
+
+                        proposal.status = ProposalStatusChoices.ACCEPTED
+                        proposal.save()
+
+                        AfterResponseService.register(
+                            proposal.notify_talent, ProposalStatusChoices.ACCEPTED
+                        )
+                        AfterResponseService.register(
+                            proposal.job.notify_client,
+                            JobStatusChoices.IN_PROGRESS,
+                            proposal,
+                        )
+                        AfterResponseService.register(
+                            proposal.job.update_status_and_withdraw_proposals,
+                            job_status=JobStatusChoices.IN_PROGRESS,
+                        )
+
+                    elif _status == ProposalStatusChoices.DECLINED:
+
+                        if proposal.job.client != profile:
+                            return Response(
+                                {
+                                    "message": "Forbidden! You are not allowed to perform this action"
+                                },
+                                status=403,
+                            )
+
+                        proposal.status = ProposalStatusChoices.DECLINED
+                        proposal.save()
+                        AfterResponseService.register(
+                            proposal.notify_talent, ProposalStatusChoices.DECLINED
+                        )
+
+                    elif _status == ProposalStatusChoices.TERMINATED:
+
+                        if proposal.talent != profile:
+                            return Response(
+                                {
+                                    "message": "Forbidden! You are not allowed to perform this action"
+                                },
+                                status=403,
+                            )
+
+                        proposal.status = ProposalStatusChoices.TERMINATED
+                        proposal.save()
+                        AfterResponseService.register(
+                            proposal.notify_talent, ProposalStatusChoices.TERMINATED
+                        )
+
+                    else:
+                        return Response({"message": "Invalid status"}, status=400)
+
+                    return Response(status=204)
+
+                # Check if user is the owner of the proposal
+                if proposal.talent != profile:
+                    return Response(
+                        {
+                            "message": "Forbidden! You are not allowed to perform this action"
+                        },
+                        status=403,
+                    )
+
+                # Check if the proposal is pending
+                if proposal.status != ProposalStatusChoices.PENDING:
+                    return Response({"message": "Bad request attempted"}, status=400)
+
+                # Serialize the proposal
+                serializer = self.get_serializer(
+                    proposal, data=request.data, context={"request": request}
+                )
+
+                # Get the attachment data of the request
+                attachment_data = request.data.get(
+                    "attachments"
+                )  # TODO: Handle attachments
+
+                # If the serializer is valid, save the proposal
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(
+                        {
+                            "public_id": publid_id,
+                            "message": "Proposal updated successfully",
+                        },
+                        status=200,
+                    )
+
+                error_message = get_serializer_error_message(serializer.errors)
+                return Response({"message": error_message}, status=400)
+        except Proposal.DoesNotExist:
+            return Response({"message": "Bad request attempted"}, status=400)
+        except Exception as e:
+            print("error", e)
+            return Response({"message": "An unexpected error occurred"}, status=400)
 
 
 class ProposalCreateAPIView(CreateAPIView):
@@ -174,10 +308,19 @@ class ProposalCreateAPIView(CreateAPIView):
         # Copy the request data to avoid mutating the original request
         data: dict = request.data.copy()  # type: ignore
 
+        # Execute this process in a db-transaction mode
         with transaction.atomic():
             try:
                 # Check if the job exists
-                job = Job.objects.select_related().get(slug=data.get("job", ""))
+                job_public_id = data.get("job", "")
+                job = Job.objects.select_related().get(public_id=job_public_id)
+
+                # Check if the job is in published state
+                if job.status != JobStatusChoices.PUBLISHED:
+                    return Response(
+                        {"message": "This job is not published"},
+                        status=403,
+                    )
 
                 # Check if the user has already applied for this job
                 existing_proposal = Proposal.objects.filter(
@@ -195,11 +338,17 @@ class ProposalCreateAPIView(CreateAPIView):
             except Job.DoesNotExist:
                 return Response({"message": "Job doesn't exist"}, status=400)
 
+            # If an unexpected error occurs, log the error and return an error
             except Exception as e:
                 log_data = {
-                    "event": "Exception in ProposalCreateAPIView",
+                    "event": "ProposalCreateAPIView",
                     "exception": str(e),
-                    "user_id": user.pk,
+                    "user_id": user.public_id,
+                    "request_path": request.path,
+                    "request_method": request.method,
+                    "timestamp": datetime.datetime.now().__str__(),
+                    "job_public_id": job_public_id,
+                    "talent_public_id": talent.public_id,
                 }
                 DokoolaLogger.critical(log_data, extra=log_data)
                 return Response({"message": "An unexpected error occurred"}, status=400)
@@ -207,25 +356,46 @@ class ProposalCreateAPIView(CreateAPIView):
             # Get the attachment data of the request
             attachment_data = data.pop("attachments", [])  # TODO: Handle attachments
 
-            serializer = self.get_serializer(data=data, context={"request": request})
-
-            if serializer.is_valid():
-                proposal: Proposal = serializer.save(job=job, talent=talent)
-                activity: Activities = job.activities
+            def after_response(proposal: Proposal):
+                # Update the job's activity
+                activity, _ = Activities.objects.get_or_create(job=job)
                 activity.proposal_count = activity.proposal_count + 1
                 activity.save()
+
+                # Update the job's proposal count
+                job.proposal_count = activity.proposal_count
+                job.save()
+
+                # Update the talent's bits
                 talent.bits = talent.bits - proposal.bits_amount
                 talent.save()
+
+                proposal.job.notify_client(
+                    JobStatusChoices.PUBLISHED, new_proposal=proposal
+                )
+
+            serializer = self.get_serializer(data=data, context={"request": request})
+            if serializer.is_valid():
+
+                # Create the proposal
+                proposal: Proposal = serializer.save(
+                    job=job,
+                    talent=talent,
+                    service_fee=DokoolaConstants.get_service_fee(),
+                )
+
+                AfterResponseService.register(after_response, proposal)
+
                 return Response(
                     {
-                        "proposal_id": proposal.pk,
+                        "public_id": proposal.public_id,
                         "message": "Proposal created successfully",
                     },
                     status=201,
                 )
 
+            # Get the error message from the serializer
             error_message = get_serializer_error_message(serializer.errors)
-
             return Response({"message": error_message}, status=400)
 
     def get_serializer(self, *args, **kwargs) -> ProposalCreateSerializer:

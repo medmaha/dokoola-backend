@@ -2,7 +2,6 @@ from rest_framework import serializers
 
 from jobs.serializers import JobListSerializer
 from talents.serializers import (
-    TalentMiniSerializer,
     TalentSerializer,
 )
 
@@ -24,7 +23,7 @@ class ProposalListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Proposal
         fields = [
-            "id",
+            "public_id",
             "budget",
             "service_fee",
             "bits_amount",
@@ -53,7 +52,7 @@ class ProposalDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Proposal
         fields = [
-            "id",
+            "public_id",
             "job",
             "budget",
             "service_fee",
@@ -74,9 +73,11 @@ class ProposalUpdateSerializer(serializers.ModelSerializer):
     attachments = AttachmentSerializer(many=True)
 
     class Meta:
+        readonly = True
         model = Proposal
+
         fields = [
-            "id",
+            "public_id",
             "budget",
             "service_fee",
             "bits_amount",
@@ -84,6 +85,7 @@ class ProposalUpdateSerializer(serializers.ModelSerializer):
             "duration",
             "cover_letter",
             "job",
+            "status",
             "created_at",
         ]
 
@@ -104,7 +106,6 @@ class ProposalCreateSerializer(serializers.ModelSerializer):
         model = Proposal
         fields = [
             "budget",
-            "service_fee",
             "bits_amount",
             "duration",
             "cover_letter",
@@ -119,7 +120,7 @@ class ProposalPendingListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Proposal
         fields = [
-            "id",
+            "public_id",
             "budget",
             "service_fee",
             "talent",

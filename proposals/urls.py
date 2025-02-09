@@ -5,7 +5,7 @@ from . import views
 urlpatterns = [
     path("", views.ProposalListApiView.as_view(), name="proposals_list"),
     path(
-        "update/",
+        "<publid_id>/edit/",
         views.ProposalUpdateAPIView.as_view(),
         name="proposals_edit",
     ),
@@ -15,8 +15,8 @@ urlpatterns = [
         name="proposals_create",
     ),
     path(
-        "<pid>/",
-        views.ProposalDetailsApiView.as_view(),
+        "<publid_id>/",
+        views.ProposalRetrieveApiView.as_view(),
         name="proposals_list",
     ),
     path(
