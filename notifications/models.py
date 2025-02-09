@@ -25,6 +25,7 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False)
     archived = models.BooleanField(default=False)
     deleted = models.BooleanField(default=False)
+    is_emailed = models.BooleanField(default=True)
 
     type = models.CharField(null=True, blank=True, max_length=60)
     created_at = models.DateTimeField(auto_now_add=True)
