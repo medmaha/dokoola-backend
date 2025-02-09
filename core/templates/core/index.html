@@ -18,7 +18,7 @@
         <nav class="ml-auto flex gap-4 sm:gap-6">
           <a
             class="text-sm font-medium hover:underline underline-offset-4"
-            href="{{ frontend_url }}"
+            href="{{ FRONTEND_URL }}"
           >
             Platform
           </a>
@@ -48,6 +48,7 @@
           </a>
         </nav>
       </header>
+      {{FRONTEND_URL}}
       <main class="flex-1 pt-12 relative">
         {% if messages %}
         <div class="absolute top-4 z-10 w-full justify-center items-center">
@@ -116,5 +117,7 @@
         </div>
       </main>
     </div>
+
+    <p style="margin: 10px auto; text-align: center;">© {% now "Y" %} {{ APPLICATION_NAME }}. All rights reserved.</p>
   </body>
 </html>

@@ -1,0 +1,43 @@
+{% extends "emails/base.html" %}
+
+{% block title %}
+    Job Proposal Withdrawn
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+
+    <div style="background-color: #f8f9fa; padding: 20px; text-align: center; border-bottom: 3px solid #ff6b6b;">
+        <h1 style="color: #333333; margin: 0;">Job Proposal Update</h1>
+    </div>
+    
+    <div style="padding: 30px 20px; background-color: #ffffff;">
+        <p>Hello, {{ talent.user.name }}</p>
+        
+        <p>We regret to inform you that your proposal for the following job has been withdrawn as another candidate has been selected:</p>
+        
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 20px 0;">
+            <h3 style="margin-top: 0;">{{ job.title }}</h3>
+            <p><strong>Job ID:</strong> {{ job.public_id }}</p>
+            <p><strong>Your Proposal ID:</strong> {{ proposal.public_id }}</p>
+            <p><strong>Submitted on:</strong> {{ proposal.created_at|date:"F j, Y" }}</p>
+        </div>
+        
+        <p>While we understand this may be disappointing, we encourage you to:</p>
+        <ul style="text-align: left;">
+            <li>Continue exploring other job opportunities on our platform</li>
+            <li>Keep your profile updated to increase your chances of being selected</li>
+            <li>Apply to similar jobs that match your skills and experience</li>
+        </ul>
+        
+        <a href="{{ FRONTEND_URL }}/jobs?category={{proposal.job.category.name}}" style="display: inline-block; padding: 12px 24px; background-color: #ff6b6b; color: #ffffff; text-decoration: none; border-radius: 4px; margin-top: 20px;">Browse More Jobs</a>
+        
+
+        <p style="margin-top: 30px;">Thank you for your interest and participation. We wish you success in your future applications.</p>
+        
+        <p>Best regards,<br>The {{ APPLICATION_NAME }} Team</p>
+    </div>
+</div>
+{% endblock %}
+
+

@@ -1,0 +1,30 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<tr>
+    <td style="padding: 20px;">
+        <h2 style="color: #2c3e50; margin-bottom: 20px;">Job Successfully Published</h2>
+        <p style="margin: 10px 0;">Hello {{ job.client.user.first_name }},</p>
+        
+        <p style="margin: 10px 0;">Your job "<strong>{{ job.title }}</strong>" has been successfully published on our platform.</p>
+
+        <p style="margin: 15px 0 10px 0;">Job Details:</p>
+        <ul style="padding-left: 20px; margin: 10px 0;">
+            <li style="margin: 5px 0;">Job Title: {{ job.title }}</li>
+            <li style="margin: 5px 0;">Job ID: {{ job.public_id }}</li>
+            <li style="margin: 5px 0;">Publication Date: {{ job.updated_at|date:"F j, Y" }}</li>
+            <li style="margin: 5px 0;">Job Type: {{ job.get_job_type_display }}</li>
+            {% if job.application_deadline %}
+            <li style="margin: 5px 0;">Application Deadline: {{ job.application_deadline|date:"F j, Y" }}</li>
+            {% endif %}
+        </ul>
+
+        <p style="margin: 15px 0;">Your job is now visible to potential talents. You'll receive notifications when proposals are submitted.</p>
+        
+        <p style="margin: 20px 0 10px 0;">
+            Best regards,<br>
+            The {{ APPLICATION_NAME }} Team
+        </p>
+    </td>
+</tr>
+{% endblock %} 

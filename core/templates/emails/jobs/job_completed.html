@@ -1,0 +1,24 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<tr>
+    <td style="padding: 20px;">
+        <h2 style="color: #333333; margin-bottom: 20px;">Job Completed</h2>
+        <p style="margin: 10px 0; color: #333333;">Hello {{ job.client.user.first_name }},</p>
+        
+        <p style="margin: 10px 0; color: #333333;">Your job "<strong>{{ job.title }}</strong>" has been marked as completed.</p>
+
+        <p style="margin: 15px 0 10px; color: #333333;">Job Details:</p>
+        <ul style="margin: 0 0 20px; padding-left: 20px; color: #333333;">
+            <li style="margin-bottom: 5px;">Job Title: {{ job.title }}</li>
+            <li style="margin-bottom: 5px;">Job ID: {{ job.public_id }}</li>
+            <li style="margin-bottom: 5px;">Completion Date: {{ job.updated_at|date:"F j, Y" }}</li>
+        </ul>
+
+        <p style="margin: 15px 0; color: #333333;">Thank you for using our platform!</p>
+        
+        <p style="margin: 20px 0 10px; color: #333333;">Best regards,<br>
+        The {{ APPLICATION_NAME }} Team</p>
+    </td>
+</tr>
+{% endblock %} 

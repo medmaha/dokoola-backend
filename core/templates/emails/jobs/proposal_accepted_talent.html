@@ -1,0 +1,45 @@
+{% extends "emails/base.html" %}
+
+{% block title %}
+    Job Proposal Accepted
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background-color: #f8f9fa; padding: 20px; text-align: center; border-bottom: 3px solid #4CAF50;">
+
+        <h1 style="color: #333333; margin: 0;">Congratulations!</h1>
+    </div>
+    
+    <div style="padding: 30px 20px; background-color: #ffffff;">
+        <p>Hello {{ talent.user.name }},</p>
+        
+        <p>Great news! Your proposal has been accepted for the following job:</p>
+        
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 20px 0;">
+            <h3 style="margin-top: 0;">{{ job.title }}</h3>
+            <p><strong>Job ID:</strong> {{ job.public_id }}</p>
+            <p><strong>Your Proposal ID:</strong> {{ proposal.public_id }}</p>
+            <p><strong>Submitted on:</strong> {{ proposal.created_at|date:"F j, Y" }}</p>
+            <p><strong>Budget:</strong> {{proposal.job.pricing.currency.symbol}} {{ proposal.budget }}</p>
+        </div>
+        
+
+        <p>Next steps:</p>
+        <ul style="text-align: left;">
+            <li>Review the project details and requirements</li>
+            <li>Contact the client to discuss project specifics</li>
+            <li>Set up your initial milestones</li>
+            <li>Begin work once the contract is finalized</li>
+        </ul>
+        
+        <a href="{{ FRONTEND_URL }}/jobs/{{ job.public_id }}?pid={{ proposal.public_id }}" style="display: inline-block; padding: 12px 24px; background-color: #4CAF50; color: #ffffff; text-decoration: none; border-radius: 4px; margin-top: 20px;">View Job Details</a>
+        
+        <p style="margin-top: 30px;">We're excited to see what you'll achieve with this project!</p>
+
+        <p>Best regards,<br>The {{ APPLICATION_NAME }} Team</p>
+    </div>
+</div>
+{% endblock %}
+
+

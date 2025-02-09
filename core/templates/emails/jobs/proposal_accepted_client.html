@@ -1,0 +1,49 @@
+{% extends "emails/base.html" %}
+
+{% block title %}
+Proposal Acceptance Confirmed
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+
+    <div style="background-color: #f8f9fa; padding: 20px; text-align: center; border-bottom: 3px solid #2196F3;">
+        <h1 style="color: #333333; margin: 0;">Proposal Acceptance Confirmed</h1>
+    </div>
+    
+    <div style="padding: 30px 20px; background-color: #ffffff;">
+        <p>Hello {{ client.user.name }},</p>
+        
+        <p>This email confirms that you have accepted a proposal for your job posting:</p>
+        
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 20px 0;">
+            <h3 style="margin-top: 0;">{{ job.title }}</h3>
+            <p><strong>Job ID:</strong> {{ job.public_id }}</p>
+            <p><strong>Selected Proposal ID:</strong> {{ proposal.public_id }}</p>
+            <p><strong>Talent:</strong> {{ proposal.talent.user.name }}</p>
+            <p><strong>Agreed Budget:</strong> {{proposal.job.pricing.currency.symbol}} {{ proposal.budget }}</p>
+        </div>
+        
+
+        <p>What happens next:</p>
+        <ul style="text-align: left;">
+            <li>The talent has been notified of your acceptance</li>
+            <li>Other proposals have been automatically withdrawn</li>
+            <li>You can now proceed with contract creation</li>
+            <li>Set up project milestones and payment schedule</li>
+        </ul>
+        
+        <div style="margin: 30px 0; padding: 15px; border-left: 4px solid #2196F3; background-color: #f8f9fa;">
+            <p style="margin: 0;"><strong>Important:</strong> Please ensure you review and finalize the contract details promptly to begin the project.</p>
+        </div>
+        
+        <a href="{{ FRONTEND_URL }}/jobs/{{ job.public_id }}/contract?pid={{ proposal.public_id }}/" style="display: inline-block; padding: 12px 24px; background-color: #2196F3; color: #ffffff; text-decoration: none; border-radius: 4px; margin-top: 20px;">Manage Project</a>
+
+        <p style="margin-top: 30px;">Thank you for using {{ APPLICATION_NAME }} for your project needs. We're here to help ensure your project's success!</p>
+        
+        <p>Best regards,<br>The {{ APPLICATION_NAME }} Team</p>
+    </div>
+</div>
+{% endblock %}
+
+
