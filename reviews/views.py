@@ -2,6 +2,9 @@ from django.db import transaction
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
+from clients.models import Client
+from staffs.models import Staff
+from talents.models import Talent
 from users.models import User
 
 from .models import Review
@@ -11,11 +14,34 @@ from .serializer import ReviewCreateSerializer, ReviewListSerializer
 class ReviewsGenericAPIView(GenericAPIView):
 
     def get_profile(self):
-        username = self.request.query_params.get("user")  # type: ignore
+        public_id    = self.request.query_params.get("pid")  # type: ignore
+        profile_type = self.request.query_params.get("pt")  # type: ignore
+
+        if not public_id or not profile_type:
+            raise Exception("Invalid request")
+
+        print("-------------------------------")
+        print("--------------public_id-----------------")
+        print(public_id)
+        print("-------------------------------")
+        print("-------------------------------")
+
+        print("-------------------------------")
+        print("--------------profile_type-----------------")
+        print(profile_type)
+        print("-------------------------------")
+        print("-------------------------------")
+
         try:
-            user = User.objects.get(username=username)
-            profile, _ = user.profile
-            return profile
+            if profile_type == "Client":
+                user = Client.objects.get(public_id=public_id)
+            elif profile_type == "Talent":
+                user = Talent.objects.get(public_id=public_id)
+            elif profile_type == "Staff":
+                user = Staff.objects.get(public_id=public_id)
+            else:
+                raise Exception("Invalid profile type")            
+            return user
         except User.DoesNotExist:
             return None
         except Exception:
