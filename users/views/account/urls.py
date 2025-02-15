@@ -42,7 +42,7 @@ urlpatterns = [
         name="signup-info",
     ),
     path(
-        "at/<username>/",
+        "at/<public_id>/",
         profile.UserProfileAPIView.as_view(),
         name="profile",
     ),
