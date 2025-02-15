@@ -1,6 +1,8 @@
 import uuid
 
 from django.db import transaction
+from django.db.models import Q
+
 from django.utils import timezone
 from rest_framework.generics import (
     GenericAPIView,
@@ -52,27 +54,36 @@ class ClientGenericAPIView(GenericAPIView):
 
     def get(self, request, client_id=None, *args, **kwargs):
 
-        if client_id:
-            queryset = Client.objects.get(pk=client_id)
-            serializer = ClientRetrieveSerializer(
-                queryset, context={"request": request}
-            )
-        else:
-            queryset = self.get_queryset()
-            page = self.paginate_queryset(queryset)
+        try:
 
-            # Check if paginator is enabled
-            if page is not None:
-                serializer = ClientListSerializer(
-                    page, many=True, context={"request": request}
+            if client_id:
+                queryset = Client.objects.get(Q(public_id=client_id) | Q(user__username=client_id))
+                serializer = ClientRetrieveSerializer(
+                    queryset, context={"request": request}
                 )
-                return self.get_paginated_response(serializer.data)
 
-            serializer = ClientListSerializer(
-                queryset, many=True, context={"request": request}
+            else:
+                queryset = self.get_queryset()
+                page = self.paginate_queryset(queryset)
+
+                # Check if paginator is enabled
+                if page is not None:
+                    serializer = ClientListSerializer(
+                        page, many=True, context={"request": request}
+                    )
+                    return self.get_paginated_response(serializer.data)
+
+                serializer = ClientListSerializer(
+                    queryset, many=True, context={"request": request}
+                )
+            return Response(serializer.data, status=200)
+
+        except:
+            return Response(
+                {"message": "The provided query, doesn't match our database"},
+                status=400,
             )
 
-        return Response(serializer.data, status=200)
 
     def post(self, request):
 
@@ -149,7 +160,7 @@ class ClientGenericAPIView(GenericAPIView):
                 print("client_id:", client_id)
                 print("validate_uuid:", validate_uuid(client_id))
                 if _valid_uuid:
-                    _client = Client.objects.get(uuid=client_id)
+                    _client = Client.objects.get(public_id=client_id)
                 else:
                     _client = Client.objects.get(user__username=client_id)
 

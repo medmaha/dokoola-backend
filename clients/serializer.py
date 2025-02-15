@@ -161,6 +161,7 @@ class ClientRetrieveSerializer(serializers.ModelSerializer):
         model = Client
         fields = [
             "id",
+            "public_id",
             "country",
             "address",
             "about",
