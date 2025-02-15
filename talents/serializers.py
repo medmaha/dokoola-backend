@@ -13,7 +13,7 @@ class TalentMiniSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Talent
-        fields = []
+        fields = ["public_id"]
 
     def to_representation(self, instance: Talent):
         return {
@@ -29,7 +29,7 @@ class TalentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Talent
-        fields = ("bio", "badge", "skills", "title", "pricing")
+        fields = ("bio", "badge", "skills", "title", "pricing", "public_id")
 
     def to_representation(self, instance: Talent):
         data = super().to_representation(instance)
@@ -50,7 +50,7 @@ class TalentUpdateDataSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Talent
-        fields = []
+        fields = ["public_id"]
 
     def to_representation(self, instance: Talent):
         return {
@@ -82,6 +82,7 @@ class TalentUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Talent
         fields = (
+            "public_id",
             "title",
             "bio",
             "skills",
@@ -125,7 +126,7 @@ class TalentDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Talent
-        fields = ("bio", "badge", "pricing")
+        fields = ("bio", "badge", "pricing", "public_id")
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -142,6 +143,7 @@ class TalentProfileDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Talent
         fields = [
+            "public_id",
             "bio",
             "title",
             "badge",
@@ -156,6 +158,7 @@ class TalentProfileDetailSerializer(serializers.ModelSerializer):
         data.update(user)
         data.update({"rating": instance.user.calculate_rating()})
         data.update({"address": instance.user.get_address()})
+        data.update({"profile_type": "Talent"})
         return data
 
 

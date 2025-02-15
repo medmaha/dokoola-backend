@@ -194,7 +194,7 @@ class ClientRetrieveSerializer(serializers.ModelSerializer):
         data["phone"] = instance.user.phone
         data["gender"] = instance.user.gender
         data["avg_rating"] = instance.average_rating()
-
+        data["profile_type"] = "Client"
         return data
 
 
