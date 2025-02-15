@@ -4,7 +4,7 @@ from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
 
 from users.models import User
-from users.serializer import UserSerializer
+from users.serializer import AuthUserSerializer, UserSerializer
 from utilities.text import get_url_search_params
 
 
@@ -46,7 +46,21 @@ class UserDetailAPIView(RetrieveAPIView):
         if queryset:
             serializer = self.get_serializer(self.get_queryset())
             return Response(serializer.data, status=200)
-        return Response({}, status=404)
+        return Response({
+            "message": "User not found"
+        }, status=404)
+
+
+class UserAuthAPIView(RetrieveAPIView):
+    serializer_class = AuthUserSerializer
+
+    def get_queryset(self):
+        return self.request.user
+    
+    def get(self, request, *args, **kwargs):
+        user = self.get_queryset()
+        serializer = self.get_serializer(user)
+        return Response(serializer.data, status=200)
 
 
 class UserDashboardAPIView(RetrieveAPIView):

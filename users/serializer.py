@@ -6,9 +6,21 @@ from .models import User
 
 class AuthUserSerializer(serializers.ModelSerializer):
     """Serializer for the user object"""
+    
+    class Meta:
+        model = User
+        fields = ("avatar", "name", "is_active")
+
 
     def to_representation(self, instance: User):
         data = super().to_representation(instance)
+
+        profile, profile_name = instance.profile
+
+        if profile:
+            data.update({"profile": profile_name})
+        if hasattr(profile, "public_id"):
+            data.update({ "public_id": profile.public_id})
 
         if instance.is_staff:
             data.update({"is_staff": True})
@@ -17,16 +29,8 @@ class AuthUserSerializer(serializers.ModelSerializer):
         if instance.is_talent:
             data.update({"is_talent": True})
 
+        data.update({"is_authenticated": True})
         return data
-
-    class Meta:
-        model = User
-        fields = (
-            "name",
-            "avatar",
-            "username",
-            "is_active",
-        )
 
 
 class UserSerializer(serializers.ModelSerializer):
