@@ -21,17 +21,17 @@ class JobUpdateAPIView(UpdateAPIView):
     permission_classes = []
     serializer_class = JobUpdateSerializer
 
-    def get_queryset(self, slug: str) -> Job | None:
+    def get_queryset(self, public_id: str) -> Job | None:
         try:
-            return Job.objects.get(id=slug, is_valid=True)
+            return Job.objects.get(public_id=public_id)
         except:
             return None
 
-    def update(self, request, job_id, *args, **kwargs) -> Response:
+    def update(self, request, public_id=None) -> Response:
 
         data: dict = request.data
 
-        instance = self.get_queryset(job_id)
+        instance = self.get_queryset(public_id)
 
         if not instance:
             return Response({"message": "Job not found"}, status=404)
