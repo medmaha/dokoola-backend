@@ -24,3 +24,5 @@ whitenoise==6.7.0
 
 # Web server gateway interface (WSGI)
 gunicorn==23.0.0
+
+uuid_v7==1.0.0
