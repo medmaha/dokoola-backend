@@ -25,4 +25,5 @@ dependencies = [
     # Web server gateway interface (WSGI)
     "gunicorn==23.0.0",
     "drf-spectacular[sidecar]>=0.27.2",
+    "ratelimit>=2.2.1",
 ]
