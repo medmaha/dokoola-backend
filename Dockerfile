@@ -8,10 +8,7 @@ WORKDIR /app
 # Install dependencies
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt \
-    # Create log directory and log file
-    && mkdir -p .logs \
-    && touch .logs/dokoola.log
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy environment-specific files
 COPY .env.prod ./.env
