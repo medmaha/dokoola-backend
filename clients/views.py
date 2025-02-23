@@ -57,7 +57,9 @@ class ClientGenericAPIView(GenericAPIView):
         try:
 
             if client_id:
-                queryset = Client.objects.get(Q(public_id=client_id) | Q(user__username=client_id))
+                queryset = Client.objects.get(
+                    Q(public_id=client_id) | Q(user__username=client_id)
+                )
                 serializer = ClientRetrieveSerializer(
                     queryset, context={"request": request}
                 )
@@ -83,7 +85,6 @@ class ClientGenericAPIView(GenericAPIView):
                 {"message": "The provided query, doesn't match our database"},
                 status=400,
             )
-
 
     def post(self, request):
 

@@ -99,17 +99,21 @@ def notification_proposals(sender, instance: Proposal, created, **kwargs):
         notification.sender = client
         notification.recipient = talent
         notification.hint_text = "Proposal withdrawn"
-        notification.content_text = f"Your proposal for the job '{instance.job.title}' has been withdrawn."
+        notification.content_text = (
+            f"Your proposal for the job '{instance.job.title}' has been withdrawn."
+        )
         notification.object_api_link = f"/proposals/{instance.public_id}"
         notification.type = "PROPOSAL"
         notification.save()
         return
-    
+
     if instance.status == ProposalStatusChoices.TERMINATED:
         notification = Notification()
         notification.recipient = talent
         notification.hint_text = "Proposal terminated"
-        notification.content_text = f"The proposal for the job '{instance.job.title}' has been terminated."
+        notification.content_text = (
+            f"The proposal for the job '{instance.job.title}' has been terminated."
+        )
         notification.object_api_link = f"/proposals/{instance.public_id}"
         notification.type = "PROPOSAL"
         notification.save()

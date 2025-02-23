@@ -1,9 +1,11 @@
 from functools import partial
 import random
+from typing import List
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 
+from agent.scrapper.base import ScrapedJob
 from clients.models import Client
 from core.models import Category
 from core.services.email.main import EmailService
@@ -63,6 +65,7 @@ class Job(models.Model):
         default=JobTypeChoices.FREELANCE,
         db_index=True,
     )
+    job_type_other = models.CharField(blank=True, null=True, max_length=200)
 
     published = models.BooleanField(default=False, blank=True)
     status = models.CharField(
@@ -72,19 +75,21 @@ class Job(models.Model):
     is_valid = models.BooleanField(default=True, blank=True)
     is_third_party = models.BooleanField(default=False, blank=True)
     third_party_address = models.URLField(blank=True, null=True)
+    third_party_metadata = models.JSONField(
+        encoder=DjangoJSONEncoder, blank=True, null=True
+    )
 
     views_count = models.IntegerField(default=0)
     proposal_count = models.IntegerField(default=0)
     invitation_count = models.IntegerField(default=0)
     client_last_visit = models.DateTimeField(blank=True, null=True)
 
-    job_type_other = models.CharField(blank=True, null=True, max_length=200)
+    experience_level = models.CharField(blank=True, null=True, max_length=200)
     experience_level_other = models.CharField(blank=True, null=True, max_length=200)
 
     estimated_duration = models.CharField(blank=True, null=True)
     application_deadline = models.DateTimeField(blank=True, null=True)
     additional_payment_terms = models.CharField(blank=True, default="")
-    experience_level = models.CharField(blank=True, null=True, max_length=200)
 
     client = models.ForeignKey(
         Client, related_name="jobs", on_delete=models.CASCADE, null=False
@@ -208,3 +213,64 @@ class Job(models.Model):
         activities, _ = Activities.objects.get_or_create(job=self)
 
         return activities
+
+
+class JobAgentProxy(Job):
+    class Meta:
+        proxy = True
+
+    def save_scraped_jobs(self, _jobs: dict | List[ScrapedJob]) -> None:
+
+        if len(_jobs) < 1:
+            return
+
+        if len(_jobs) == 0:
+            return
+
+        client = Client.objects.filter(is_agent=True).first()
+        category = Category.objects.filter(is_agent=True).first()
+
+        if not client or not category:
+            return
+
+        # Remove existing jobs
+        existing_jobs = set(
+            Job.objects.only("third_party_address")
+            .filter(third_party_address__in=[job.url for job in _jobs])
+            .values_list("third_party_address", flat=True)
+        )
+
+        _jobs = [job for job in _jobs if job.url not in existing_jobs]
+
+        _lazy_jobs = []
+
+        for job in _jobs:
+            _lazy = Job(
+                published=True,
+                client=client,
+                title=job.title,
+                category=category,
+                pricing=job.pricing,
+                address=job.address,
+                country=job.country,
+                is_third_party=True,
+                benefits=job.benefits,
+                job_type=job.job_type,
+                created_at=job.created_at,
+                description=job.description,
+                third_party_address=job.url,
+                job_type_other=job.job_type_other,
+                status=JobStatusChoices.PUBLISHED,
+                required_skills=job.required_skills,
+                application_deadline=job.application_deadline,
+                third_party_metadata=job.third_party_metadata
+            )
+
+            try:
+                _lazy.full_clean()
+            except Exception as e:
+                print(f"Error cleaning job {job.url}: {e}")
+            _lazy_jobs.append(_lazy)
+
+        print(_lazy_jobs)
+        Job.objects.bulk_create(_lazy_jobs)

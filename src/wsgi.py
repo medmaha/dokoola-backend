@@ -23,4 +23,4 @@ if not settings.DEBUG:
         application,
         root=settings.STATIC_ROOT,
     )
-    application.add_files(settings.BASE_DIR / "public", prefix="more-files/")
+    application.add_files(settings.BASE_DIR / "public", prefix="staticfile/")

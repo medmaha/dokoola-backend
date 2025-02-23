@@ -96,21 +96,21 @@ class EmailService:
         execute_now=False,
     ):
         """
-            A utility function to send an email.
+        A utility function to send an email.
 
-            Args:
-                email: The email address to send the email to.
-                subject: The subject of the email.
-                text: The text of the email.
-                callback: A function to call after the email is sent.
-                sender_name: The name of the sender.
-                html_template_name: The name of the html template to render.
-                html_template_context: The context to pass to the html template.
-                execute_now: Whether to send the email immediately.
-                    otherwise email is sent after the http-response is sent.
-            Returns:
-                None
-                
+        Args:
+            email: The email address to send the email to.
+            subject: The subject of the email.
+            text: The text of the email.
+            callback: A function to call after the email is sent.
+            sender_name: The name of the sender.
+            html_template_name: The name of the html template to render.
+            html_template_context: The context to pass to the html template.
+            execute_now: Whether to send the email immediately.
+                otherwise email is sent after the http-response is sent.
+        Returns:
+            None
+
         """
 
         html = None
@@ -123,9 +123,7 @@ class EmailService:
             context.update(email_environment())
 
             # Render the template
-            html = render_to_string(
-                html_template_name, context=context
-            )
+            html = render_to_string(html_template_name, context=context)
 
         if not text:
             # Attempt to extract the content from the html element with id "__content"
@@ -134,7 +132,7 @@ class EmailService:
                 text = strip_tags(content.group(1)).strip()
             else:
                 text = strip_tags(html or "").strip()
-        
+
         # A callback function that sends the email
         def callback(subject, text):
             execute_send_mail(

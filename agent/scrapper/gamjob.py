@@ -1,118 +1,31 @@
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import datetime
-import threading
-import logging
-from typing import List, Optional, Dict
-import requests
+from ast import Set
+from typing import List, Optional
 from bs4 import BeautifulSoup
-from dataclasses import dataclass
-from ratelimit import limits, sleep_and_retry
+from agent.scrapper.base import JobScraper, JobParser, ScrapedJob
 
-# logging Configuration
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
-@dataclass
-class GamJob:
-    title: str
-    description: str
-    address: str
-    job_type: str
-    pricing: dict
-    country: dict
-    benefits: dict
-    created_at: datetime
-    application_deadline: datetime
-    required_skills: List[str]
-    third_party_metadata: dict
-
-# Rate limit: 1 request per second
-@sleep_and_retry
-@limits(calls=1, period=1)
-def rate_limited_request(url: str, headers: Dict[str, str]) -> requests.Response:
-    """Make a rate-limited HTTP request"""
-    response = requests.get(url, headers=headers, timeout=10)
-    response.raise_for_status()
-    return response
-
-class GamJobParser:
-    def __init__(self, html_content: Optional[str] = None, soup: Optional[BeautifulSoup] = None):
-        if html_content:
-            self.soup = BeautifulSoup(html_content, "html.parser")
-        elif soup:
-            self.soup = soup
-        else:
-            raise ValueError("Either html_content or soup must be provided")
-
-        self.job_detail = self.soup.find("div", class_="noo-main")
-        self.job_company = self.soup.find("div", class_="noo-sidebar-wrap")
-
-    def parse(self) -> Optional[GamJob]:
-        """
-        Parse job details from HTML content
-        Returns:
-            Optional[GamJob]: Parsed job object or None if parsing fails
-        """
-        try:
-            if not self.job_detail or not self.job_company:
-                return None
-
-            title = self._get_title()
-            if not title:
-                return None
-
-            company_name = self._get_company_name()
-            if not company_name:
-                return None
-
-            description = self._get_description()
-            if not description:
-                return None
-
-            location_info = self._get_location_info()
-            job_type = self._get_job_type()
-            categories = self._get_categories()
-            date_info = self._get_date_info("job-date__posted")
-            application_deadline = self._get_date_info("job-date__closing")
-
-            third_party_metadata = {
-                "categories": categories,
-                "company_name": company_name,
-            }
-
-            return GamJob(
-                title=title,
-                job_type=job_type,
-                created_at=date_info,
-                description=description,
-                country=location_info["country"],
-                address=location_info["address"],
-                application_deadline=application_deadline,
-                third_party_metadata=third_party_metadata,
-                required_skills=categories,
-                benefits=[],
-                pricing={},
-            )
-        except Exception as e:
-            logger.error(f"Error parsing job: {str(e)}")
-            return None
+class GamJobParser(JobParser):
+    def __init__(
+        self,
+        url: Optional[str] = "",
+        html_content: Optional[str] = None,
+        soup: Optional[BeautifulSoup] = None,
+    ):
+        super().__init__(url=url, html_content=html_content, soup=soup)
 
     def _get_title(self):
-        """Extract job title"""
         title_elm = self.job_detail.find("h1", class_="page-title")
         if title_elm:
             return list(title_elm.children)[0].text.strip()
         return None
 
     def _get_company_name(self):
-        """Extract company name"""
         company_name_elm = self.job_company.find("h3", class_="company-title")
         if company_name_elm:
             return company_name_elm.text.strip()
         return None
 
     def _get_description(self):
-        """Extract job description"""
         description = self.job_detail.find("div", attrs={"itemprop": "description"})
         if not description:
             return None
@@ -123,12 +36,25 @@ class GamJobParser:
         return description
 
     def _get_job_type(self):
-        """Extract job type"""
         job_type_elem = self.job_detail.find("span", class_="job-type")
         return job_type_elem.text.strip() if job_type_elem else "N/A"
 
+    def _get_job_type_other(self, job_type: str):
+
+        if "full" in job_type:
+            return ["full-time", None]
+        elif "part" in job_type:
+            return ["part-time", None]
+        elif "freelance" in job_type:
+            return ["freelance", None]
+        elif "contract" in job_type:
+            return ["contract", None]
+        elif "intern" in job_type:
+            return ["internship", None]
+        else:
+            return ["other", job_type]
+
     def _get_location_info(self):
-        """Extract location information"""
         locations = []
         country = {}
         address = ""
@@ -145,13 +71,15 @@ class GamJobParser:
 
         return {"country": country, "address": address}
 
-    def _get_date_info(self, class_name):
-        """Extract date information"""
-        date_elem = self.job_detail.find("span", class_=class_name)
+    def _get_created_at(self):
+        date_elem = self.job_detail.find("span", class_="job-date__posted")
+        return date_elem.text.strip() if date_elem else "N/A"
+
+    def _get_application_deadline(self):
+        date_elem = self.job_detail.find("span", class_="job-date__closing")
         return date_elem.text.strip() if date_elem else "N/A"
 
     def _get_categories(self):
-        """Extract job categories"""
         categories = []
         categories_elm = self.job_detail.select("span.job-category a")
         if categories_elm:
@@ -161,96 +89,88 @@ class GamJobParser:
                     categories.append(_v)
         return categories
 
-class GamJobScraper:
-    def __init__(self, max_workers: int = 3, base_url: str = "https://gamjobs.com"):
-        self._base_url = base_url
-        self._max_workers = max_workers
-        self._headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-        }
-        self._session = requests.Session()
 
-    def _clean_system_threads(self):
-        """
-        Clean up any zombie threads that may be left over from ThreadPoolExecutor
-        """
-        current = threading.current_thread()
-        for thread in threading.enumerate():
-            if thread != current and not thread.daemon:
-                try:
-                    thread.join(timeout=1.0)
-                except Exception:
-                    pass
+class GamJobScraper(JobScraper):
+    """
+    A scraper for gamjobs.com that extracts job listings.
 
-    def _get_job_links(self) -> List[str]:
-        """Fetch and extract job links from the main page"""
-        try:
-            response = rate_limited_request(f"{self._base_url}/jobs", self._headers)
-            soup = BeautifulSoup(response.text, "html.parser")
-            job_links = [link["href"] for link in soup.find_all("a", class_="job-details-link")]
-            logger.info(f"Found {len(job_links)} job links")
-            return job_links
-        except Exception as e:
-            logger.error(f"Error fetching job links: {str(e)}")
-            return []
+    This scraper inherits from the base JobScraper class and implements
+    scraping functionality specific to gamjobs.com. It handles pagination,
+    rate limiting, and parsing of job details from the site's HTML structure.
 
-    def _get_job_link_page(self, links: List[str]) -> List[BeautifulSoup]:
-        """Fetch job pages concurrently with rate limiting"""
-        soups: List[BeautifulSoup] = []
-        
-        def _fetch_page(url: str) -> Optional[BeautifulSoup]:
-            try:
-                response = rate_limited_request(url, self._headers)
-                return BeautifulSoup(response.text, "html.parser")
-            except Exception as e:
-                logger.error(f"Error fetching {url}: {str(e)}")
-                return None
+    The scraper uses a ThreadPoolExecutor for concurrent requests while
+    respecting rate limits. It extracts job information like:
+    - Title
+    - Company
+    - Description
+    - Location
+    - Job type
+    - Required skills
+    - Posting date
+    - Application deadline
 
-        with ThreadPoolExecutor(max_workers=self._max_workers) as executor:
-            future_to_url = {executor.submit(_fetch_page, link): link for link in links}
-            for future in as_completed(future_to_url):
-                url = future_to_url[future]
-                try:
-                    soup = future.result()
-                    if soup:
-                        soups.append(soup)
-                except Exception as e:
-                    logger.error(f"Error processing {url}: {str(e)}")
-        self._clean_system_threads()
-        return soups
+    Usage:
+        scraper = GamJobScraper()
+        jobs = scraper.scrape()
+    """
 
-    def scrape(self) -> List[GamJob]:
+    _BASE_URL = "https://gamjobs.com"
+
+    def __init__(
+        self, max_workers: int = 3, base_url: str = _BASE_URL, to_json=False
+    ):
+        super().__init__(
+            max_workers=max_workers,
+            base_url=base_url,
+            to_json=to_json,
+            parser=GamJobParser,
+        )
+
+    def scrape(self):
         """
         Scrape all jobs from the website
         Returns:
             List[GamJob]: List of parsed job objects
         """
-        jobs: List[GamJob] = []
-        
-        try:
-            links = self._get_job_links()
-            if not links:
-                return jobs
+        jobs = super().scrape(pathname="/jobs", link_class="job-details-link")
+        self.update_metadata(jobs)
+        return jobs
 
-            soups = self._get_job_link_page(links)
-            
-            with ThreadPoolExecutor(max_workers=self._max_workers) as executor:
-                future_to_soup = {executor.submit(GamJobParser(soup=soup).parse): soup 
-                                for soup in soups}
-                
-                for future in as_completed(future_to_soup):
-                    try:
-                        job = future.result()
-                        if job:
-                            jobs.append(job)
-                    except Exception as e:
-                        logger.error(f"Error parsing job: {str(e)}")
+    def update_metadata(self, jobs: List[ScrapedJob]):
 
-            logger.info(f"Successfully scraped {len(jobs)} jobs")
-            self._clean_system_threads()
-            return jobs
-            
-        except Exception as e:
-            logger.error(f"Error in scrape process: {str(e)}")
-            return jobs
+        for job in jobs:
+
+            job.third_party_metadata.update(
+                {
+                    "source": "gamjobs.com",
+                    "source_url": job.url,
+                }
+            )
+
+            soup = BeautifulSoup(job.description, "html.parser")
+
+            description = ""
+
+            # Find all tags with text content greater than 30 characters
+            items = soup.find_all(lambda tag: len(tag.get_text(strip=True)) > 30)
+
+            # Remove duplicate items
+            unique_items = list(set([item.text.strip() for item in items]))
+
+            for paragraph in unique_items:
+
+                text = paragraph.strip()
+                if len(text) > 10:
+                    description += text + "\n"
+
+                if len(description) > 300:
+                    break
+
+            _s = BeautifulSoup(description, "html.parser")
+
+            # strips html tags
+            description = _s.get_text(strip=True)
+
+            job.third_party_metadata["description"] = description
+
+        return jobs

@@ -1,3 +1,4 @@
+import time
 from uuid import UUID
 from uuid_v7.base import uuid7
 
@@ -23,9 +24,10 @@ def public_id_generator(_id: str, prefix: str, max_length=20):
     try:
         time_hex = _uuid[:8] + _uuid[9:11]
         version = _uuid[14]
-        _random = _uuid[15:19]
+        _randomA = _uuid[15:22]
+        _randomB = _uuid[25:]
 
-        _pid = str(f"{time_hex}{version}{_random}").replace("-", "").strip().lower()
+        _pid = str(f"{time_hex}{version}{_randomB}{_randomA}").replace("-", "").strip().lower()
         _prefix = prefix[:3].lower()
 
         # If the pid is longer than the max length, truncate it

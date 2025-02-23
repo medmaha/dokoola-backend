@@ -179,7 +179,7 @@ class ProposalUpdateAPIView(GenericAPIView):
 
                     _comment = request.data.get("comment", "")
                     _status = request.query_params.get("status", "").upper()
-              
+
                     proposal.client_comment = _comment
 
                     if _status == ProposalStatusChoices.ACCEPTED:

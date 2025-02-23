@@ -83,10 +83,11 @@ class JobListSerializer(serializers.ModelSerializer):
             "job_type_other",
             "description",
             "required_skills",
-            "is_third_party",
             "application_deadline",
             "created_at",
             "proposal_count",
+            "is_third_party",
+            "third_party_metadata",
         ]
 
     client = JobClientSerializer()
@@ -96,7 +97,10 @@ class JobListSerializer(serializers.ModelSerializer):
     def to_representation(self, instance: Job):
         representation = super().to_representation(instance)
         representation["proposal_count"] = instance.proposal_count
-        representation["description"] = instance.description[:200]
+        if instance.is_third_party and "description" in instance.third_party_metadata:
+            representation["description"] = instance.third_party_metadata["description"]
+        else:
+            representation["description"] = instance.description[:500]
         return representation
 
 
@@ -118,6 +122,7 @@ class JobRetrieveSerializer(serializers.ModelSerializer):
             "published",
             "is_third_party",
             "third_party_address",
+            "third_party_metadata",
             # Stats
             "bits_amount",
             "views_count",

@@ -20,14 +20,14 @@ def application_environment(request=None):
         ),
     }
 
+
 def email_environment():
     """
     Return the application email environment variables to be used in the templates
     """
-    
+
     environment = application_environment()
 
     return {
         **environment,
     }
-

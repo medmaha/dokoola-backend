@@ -18,17 +18,13 @@ class TalentPortfolioAPIView(GenericAPIView):
             user = request.user
 
             if user.username == username:
-                portfolio = (
-                    Portfolio.objects
-                    .filter(talent__user__username=username)
-                    .order_by("published", "-updated_at")
-                )
+                portfolio = Portfolio.objects.filter(
+                    talent__user__username=username
+                ).order_by("published", "-updated_at")
             else:
-                portfolio = (
-                    Portfolio.objects
-                    .filter(talent__user__username=username, published=True)
-                    .order_by("-updated_at")
-                )
+                portfolio = Portfolio.objects.filter(
+                    talent__user__username=username, published=True
+                ).order_by("-updated_at")
 
             serializer = self.get_serializer(portfolio, many=True)
             return Response(serializer.data, status=200)

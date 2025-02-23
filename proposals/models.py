@@ -33,7 +33,9 @@ class Proposal(models.Model):
 
     duration = models.CharField(max_length=100, null=True, blank=True)
     cover_letter = models.TextField(max_length=1500)
-    attachments = models.ManyToManyField("Attachment", related_name="proposal", blank=True)
+    attachments = models.ManyToManyField(
+        "Attachment", related_name="proposal", blank=True
+    )
 
     budget = models.FloatField(default=0, blank=True)
     service_fee = models.FloatField(default=0.00, blank=True, help_text="In percentage")

@@ -9,6 +9,7 @@ from rest_framework.response import Response
 
 from core.services.after.main import AfterResponseService
 from jobs.models import Activities, Job
+from jobs.models.job import JobStatusChoices
 from jobs.serializers import (
     ActivitySerializer,
     JobListSerializer,
@@ -80,8 +81,11 @@ class JobRetrieveAPIView(RetrieveAPIView):
 
     def get_queryset(self, public_id: str):
         try:
+            print("Job ID:",public_id)
+            # Job.objects.filter(is_third_party=True).update(status=JobStatusChoices.PUBLISHED)
             return Job.objects.get(public_id=public_id)
-        except:
+        except Exception as e:
+            print("Error:",e)
             return None
 
     def update_last_visit(self, job: Job):

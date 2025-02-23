@@ -22,6 +22,9 @@ class Feedback(models.Model):
 
 
 class Category(models.Model):
+
+    is_agent = models.BooleanField(default=False)
+
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
     keywords = models.TextField()

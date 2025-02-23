@@ -19,17 +19,15 @@ class TalentCertificateAPIView(GenericAPIView):
     def get(self, request, username: str, *args, **kwargs):
         try:
             user: User = request.user
-        
+
             if user.username == username:
                 certificates = Certificate.objects.filter(
                     talent__user__username=username
                 ).order_by("-date_issued")
             else:
-                certificates = (
-                    Certificate.objects
-                    .filter(talent__user__username=username, published=True)
-                    .order_by("-date_issued")
-                )
+                certificates = Certificate.objects.filter(
+                    talent__user__username=username, published=True
+                ).order_by("-date_issued")
 
             serializer = self.get_serializer(certificates, many=True)
             return Response(serializer.data, status=200)

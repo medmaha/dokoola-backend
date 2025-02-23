@@ -48,10 +48,12 @@ class Company(models.Model):
 
 
 class Client(models.Model):
+
     id = models.UUIDField(
         primary_key=True, default=primary_key_generator, editable=False, max_length=100
     )
 
+    is_agent = models.BooleanField(default=False)
     public_id = models.CharField(
         max_length=50, db_index=True, default=partial(default_pid_generator, "Client")
     )

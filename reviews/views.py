@@ -14,7 +14,7 @@ from .serializer import ReviewCreateSerializer, ReviewListSerializer
 class ReviewsGenericAPIView(GenericAPIView):
 
     def get_profile(self):
-        public_id    = self.request.query_params.get("pid")  # type: ignore
+        public_id = self.request.query_params.get("pid")  # type: ignore
         profile_type = self.request.query_params.get("pt")  # type: ignore
 
         if not public_id or not profile_type:
@@ -40,7 +40,7 @@ class ReviewsGenericAPIView(GenericAPIView):
             elif profile_type == "Staff":
                 user = Staff.objects.get(public_id=public_id)
             else:
-                raise Exception("Invalid profile type")            
+                raise Exception("Invalid profile type")
             return user
         except User.DoesNotExist:
             return None

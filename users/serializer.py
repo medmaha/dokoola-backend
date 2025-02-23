@@ -6,11 +6,10 @@ from .models import User
 
 class AuthUserSerializer(serializers.ModelSerializer):
     """Serializer for the user object"""
-    
+
     class Meta:
         model = User
         fields = ("avatar", "name", "is_active")
-
 
     def to_representation(self, instance: User):
         data = super().to_representation(instance)
@@ -20,7 +19,7 @@ class AuthUserSerializer(serializers.ModelSerializer):
         if profile:
             data.update({"profile": profile_name})
         if hasattr(profile, "public_id"):
-            data.update({ "public_id": profile.public_id})
+            data.update({"public_id": profile.public_id})
 
         if instance.is_staff:
             data.update({"is_staff": True})

@@ -21,7 +21,7 @@ class JobsSearchAPIView(ListAPIView):
         query = search_params.get("query")
         skills = search_params.get("skills")
         category = search_params.get("category")
-        location = search_params.get("location")
+        address = search_params.get("location")
         duration = search_params.get("duration")
         budget_rate = search_params.get("budget")
         order_by = search_params.get("order", "-created_at")
@@ -38,8 +38,8 @@ class JobsSearchAPIView(ListAPIView):
             self.filter_by_duration(duration)
         if category:
             self.filter_by_category(category)
-        if location:
-            self.filter_by_location(location)
+        if address:
+            self.filter_by_address(address)
         if skills:
             self.filter_by_skills(skills)
         if query:
@@ -77,25 +77,26 @@ class JobsSearchAPIView(ListAPIView):
             Q(title__icontains=query)
             | Q(description__icontains=query)
             | Q(required_skills__icontains=query)
-            | Q(location__icontains=query)
+            | Q(address__icontains=query)
+            | Q(country__name__icontains=query)
             | Q(category__name__icontains=query)
             | Q(category__slug__icontains=query)
         )
         self.queryset = self.queryset.filter(query_filters)
 
-    # Filters queryset by location
-    def filter_by_location(self, country: str):
-        country = country.lower()
+    # Filters queryset by address
+    def filter_by_address(self, location: str):
+        location = location.lower()
 
-        qs = self.queryset.filter(location__icontains=country)
+        qs = self.queryset.filter(Q(address__icontains=location) | Q(country__name__icontains=location))
 
         if not qs.exists():
-            first_3 = country[:3]
-            the_rest = country[3:]
+            first_3 = location[:3]
+            the_rest = location[3:]
 
-            sub_query_filters = Q(location__icontains=first_3)
+            sub_query_filters = Q(address__icontains=first_3)
             if the_rest:
-                sub_query_filters |= Q(location__icontains=the_rest)
+                sub_query_filters |= Q(address__icontains=the_rest)
 
             qs = self.queryset.filter(sub_query_filters)
         self.queryset = qs
@@ -150,7 +151,7 @@ class JobsSearchAPIView(ListAPIView):
 
     # Filters queryset by duration
     def filter_by_duration(self, duration: str):
-        qs = self.queryset.filter(duration__icontains=duration.strip())
+        qs = self.queryset.filter(application_duration__icontains=duration.strip())
         if qs.exists():
             # Apply the filters only if there is at least one result
             self.queryset = qs

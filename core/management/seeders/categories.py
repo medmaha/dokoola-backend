@@ -117,18 +117,22 @@ categories = [
     },
 ]
 
+category_slugs = lambda: [c["slugs"] for c in categories]
+
 
 def categories_seeding():
     """Seed categories."""
 
-    for category in categories:
-        # Check if the category already exists
-        slug = category.pop("slug")
-        existing = Category.objects.filter(slug=slug).update(**category)
+    slugs = category_slugs()
 
-        # Skip if the category already exists
-        if existing != 0:
-            continue
+    existing_categories = (
+        Category.objects.only("slug")
+        .filter(slug__in=slugs)
+        .values_list("slug", flat=True)
+        .distinct()
+    )
 
-        # Create the category
-        Category.objects.create(**category)
+    filtered_categories = [c for c in categories if c["slug"] not in existing_categories]
+
+    if len(filtered_categories) > 0:
+        Category.objects.bulk_create({Category(**c) for c in filtered_categories})

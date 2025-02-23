@@ -28,7 +28,6 @@ class UserProfileAPIView(RetrieveAPIView):
             return ClientRetrieveSerializer
 
         return TalentProfileDetailSerializer
-    
 
     def get_user(self, username: str):
         try:
@@ -49,7 +48,7 @@ class UserProfileAPIView(RetrieveAPIView):
 
         except User.DoesNotExist:
             return None
-        
+
     def get_client(self, public_id: str):
         try:
             self.is_client = True
@@ -57,7 +56,7 @@ class UserProfileAPIView(RetrieveAPIView):
             return Client.objects.get(public_id=public_id)
         except Client.DoesNotExist:
             return None
-        
+
     def get_talent(self, public_id: str):
         try:
             self.is_talent = True
@@ -65,7 +64,7 @@ class UserProfileAPIView(RetrieveAPIView):
             return Talent.objects.get(public_id=public_id)
         except Talent.DoesNotExist:
             return None
-        
+
     def get_staff(self, username: str):
         try:
             self.is_staff = True
@@ -73,14 +72,19 @@ class UserProfileAPIView(RetrieveAPIView):
             return Staff.objects.get(username=username)
         except Staff.DoesNotExist:
             return None
-        
+
     def get_user_by_public_id(self, public_id: str):
         try:
-            user = self.get_user(public_id) or self.get_talent(public_id) or self.get_client(public_id) or self.get_staff(public_id)
+            user = (
+                self.get_user(public_id)
+                or self.get_talent(public_id)
+                or self.get_client(public_id)
+                or self.get_staff(public_id)
+            )
 
             if not user:
                 return None
-            
+
             self.profile = user
             return user
         except:
@@ -103,7 +107,9 @@ class UserProfileAPIView(RetrieveAPIView):
                 status=404,
             )
 
-        serializer = self.get_serializer(instance=self.profile, context={"request": request})
+        serializer = self.get_serializer(
+            instance=self.profile, context={"request": request}
+        )
 
         data = serializer.data
         data["is_client"] = self.is_client

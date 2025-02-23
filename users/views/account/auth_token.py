@@ -6,13 +6,13 @@ from ...serializer import AuthUserSerializer
 
 
 class GenerateToken(TokenObtainPairSerializer):
-    def get_token(self, user:User, **kwargs):
-        
+    def get_token(self, user: User, **kwargs):
+
         token = self.token_class.for_user(user)
         serialized_data = AuthUserSerializer(user, **kwargs).data
 
         token["user"] = {}
-        
+
         for key, val in serialized_data.items():
             token["user"][str(key)] = val
 

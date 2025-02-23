@@ -21,17 +21,13 @@ class TalentEducationAPIView(GenericAPIView):
             user: User = request.user
 
             if user.username == username:
-                educations = (
-                    Education.objects
-                    .filter(talent__user__username=username)
-                    .order_by("-start_date", "end_date", "published")
-                )
+                educations = Education.objects.filter(
+                    talent__user__username=username
+                ).order_by("-start_date", "end_date", "published")
             else:
-                educations = (
-                    Education.objects
-                    .filter(talent__user__username=username, published=True)
-                    .order_by("-start_date")
-                )
+                educations = Education.objects.filter(
+                    talent__user__username=username, published=True
+                ).order_by("-start_date")
 
             serializer = self.get_serializer(educations, many=True)
             return Response(serializer.data, status=200)

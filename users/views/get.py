@@ -46,9 +46,7 @@ class UserDetailAPIView(RetrieveAPIView):
         if queryset:
             serializer = self.get_serializer(self.get_queryset())
             return Response(serializer.data, status=200)
-        return Response({
-            "message": "User not found"
-        }, status=404)
+        return Response({"message": "User not found"}, status=404)
 
 
 class UserAuthAPIView(RetrieveAPIView):
@@ -56,7 +54,7 @@ class UserAuthAPIView(RetrieveAPIView):
 
     def get_queryset(self):
         return self.request.user
-    
+
     def get(self, request, *args, **kwargs):
         user = self.get_queryset()
         serializer = self.get_serializer(user)
