@@ -1,8 +1,8 @@
-name: Dokoola Backend Dockerizing CI/CD
+name: Dockerize CI/CD
 
 on:
   workflow_run:
-    workflows: ["Dokoola Backend Scaffolding CI/CD"]
+    workflows: ["Scaffolding CI/CD"]
     types:
       - completed
     branches: ["main"]
@@ -11,6 +11,7 @@ jobs:
   docker-image:
     name: Dockerize
     runs-on: ubuntu-latest
+
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
