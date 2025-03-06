@@ -1,4 +1,4 @@
-from ast import Set
+from datetime import datetime
 from typing import List, Optional
 from bs4 import BeautifulSoup
 from agent.scrapper.base import JobScraper, JobParser, ScrapedJob
@@ -73,11 +73,23 @@ class GamJobParser(JobParser):
 
     def _get_created_at(self):
         date_elem = self.job_detail.find("span", class_="job-date__posted")
-        return date_elem.text.strip() if date_elem else "N/A"
+
+        if not date_elem:
+            return None
+
+        # Sample "- March 14, 2025"
+        _date = str(date_elem.text.strip()).replace("- ", "")
+        return datetime.strptime(_date, "%B %d, %Y")
 
     def _get_application_deadline(self):
         date_elem = self.job_detail.find("span", class_="job-date__closing")
-        return date_elem.text.strip() if date_elem else "N/A"
+
+        if not date_elem:
+            return None
+
+        # Sample "- March 14, 2025"
+        _date = str(date_elem.text.strip()).replace("- ", "")
+        return datetime.strptime(_date, "%B %d, %Y")
 
     def _get_categories(self):
         categories = []
@@ -150,27 +162,25 @@ class GamJobScraper(JobScraper):
             soup = BeautifulSoup(job.description, "html.parser")
 
             description = ""
+            relevant_tags = ["p", "li", "div", "span"]
+            content_containers = soup.find_all(lambda tag: tag.name in relevant_tags and len(tag.get_text(strip=True)) > 30)
 
-            # Find all tags with text content greater than 30 characters
-            items = soup.find_all(lambda tag: len(tag.get_text(strip=True)) > 30)
+            seen_content = set()
+            for container in content_containers:
+                text = container.get_text(strip=True)
+                
+                if text in seen_content or len(text) < 30:
+                    continue
+                
+                seen_content.add(text)
+                
+                description += text + "\n\n"
 
-            # Remove duplicate items
-            unique_items = list(set([item.text.strip() for item in items]))
-
-            for paragraph in unique_items:
-
-                text = paragraph.strip()
-                if len(text) > 10:
-                    description += text + "\n"
-
-                if len(description) > 300:
+                if len(description) > 1000:  
                     break
 
-            _s = BeautifulSoup(description, "html.parser")
-
-            # strips html tags
-            description = _s.get_text(strip=True)
-
+            description = description.strip()
+            
             job.third_party_metadata["description"] = description
 
         return jobs
