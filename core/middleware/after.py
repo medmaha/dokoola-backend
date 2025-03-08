@@ -1,4 +1,4 @@
-from typing import Any, Callable, Optional
+from typing import Callable
 
 from django.http import HttpRequest, HttpResponse
 from django.template.response import SimpleTemplateResponse
@@ -12,6 +12,9 @@ class DokoolaAfterMiddleware:
     def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]):
         """Initialize the middleware with response handler"""
         self.get_response = get_response
+
+    def __call__(self, request: HttpRequest) -> HttpResponse:
+        """Process the request and return response"""
 
     def __call__(self, request: HttpRequest) -> HttpResponse:
         """Process the request and return response"""
@@ -33,6 +36,11 @@ class DokoolaAfterMiddleware:
     ) -> None:
         """Hook called before view execution"""
         return None
+
+    def process_exception(self, request: HttpRequest, exception: Exception) -> None:
+        """Handle exceptions during request processing"""
+        # Execute after-response tasks even on exceptions
+        AfterResponseService.execute()
 
     def process_exception(self, request: HttpRequest, exception: Exception) -> None:
         """Handle exceptions during request processing"""

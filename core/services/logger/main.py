@@ -1,8 +1,8 @@
 from typing import Any, Dict, Optional
 
 from core.services.after.main import AfterResponseService
-
 from src.settings.shared import LOG_CONFIG
+
 
 class DokoolaLoggerService:
     """Enhanced logging class with structured logging support"""

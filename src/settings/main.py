@@ -5,14 +5,22 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
 from src.settings.shared import APPLICATION_NAME, DEBUG
+
+from .api import *
+from .cors import *
+from .db import *
+from .email import *
+from .jwt import *
+from .logger import *
+from .unfold import *
+from .whitenoice import *
 
 ALLOWED_HOSTS = list(
     set(
         [
-            host if host != "" else "localhost"
-            for host in os.environ.get("ALLOWED_HOSTS", "").split(",")
+            host.strip() if host != "" else "localhost"
+            for host in os.getenv("ALLOWED_HOSTS", "").split(",")
         ]
     )
 )
@@ -107,7 +115,9 @@ WSGI_APPLICATION = "src.wsgi.application"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": (
+            "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        )
     },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
@@ -139,12 +149,3 @@ MEDIA_ROOT = BASE_DIR / "media"
 STATIC_ROOT = BASE_DIR / "static"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-from .api import *
-from .cors import *
-from .db import *
-from .email import *
-from .jwt import *
-from .logger import *
-from .unfold import *
-from .whitenoice import *

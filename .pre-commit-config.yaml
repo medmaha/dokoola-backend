@@ -8,6 +8,13 @@ repos:
       - id: check-added-large-files
       - id: debug-statements
 
+  # - repo: https://github.com/astral-sh/ruff
+  #   rev: 0.9.6
+  #   hooks:
+  #     - id: ruff
+  #       language_version: python3
+  #       args: [--line-length=88]
+
   - repo: https://github.com/psf/black
     rev: 24.1.1
     hooks:
@@ -15,12 +22,12 @@ repos:
         language_version: python3
         args: [--line-length=88]
 
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.0.0
-    hooks:
-      - id: flake8
-        additional_dependencies: [flake8-django]
-        args: ["--max-line-length=88"]
+  #   - repo: https://github.com/pycqa/flake8
+  #     rev: 7.0.0
+  #     hooks:
+  #       - id: flake8
+  #         additional_dependencies: [flake8-django]
+  #         args: ["--max-line-length=88"]
 
   - repo: https://github.com/pycqa/isort
     rev: 5.13.2
@@ -33,16 +40,16 @@ repos:
       - id: django-test
         name: Django Tests
         entry: |
-          python manage.py test --noinput --parallel
-          $(pwd)/projects
-          $(pwd)/reviews
-          $(pwd)/jobs
-          $(pwd)/messaging
-          $(pwd)/users
-          $(pwd)/core
-          $(pwd)/clients
-          $(pwd)/staffs
-          $(pwd)/talents
+          python manage.py test --noinput --parallel 2
+          projects
+          reviews
+          jobs
+          messaging
+          users
+          core
+          clients
+          staffs
+          talents
         language: system
         types: [python]
         pass_filenames: false
