@@ -1,5 +1,5 @@
-from datetime import datetime
 import re
+from datetime import datetime
 from types import FunctionType
 
 from django.conf import settings
@@ -8,9 +8,9 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
 from core.processors.base import email_environment
-from src.settings.logger import DokoolaLogger
-from src.settings.email import EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
 from core.services.after.main import AfterResponseService
+from core.services.logger import DokoolaLoggerService
+from src.settings.email import EMAIL_HOST_PASSWORD, EMAIL_HOST_USER
 
 
 def execute_send_mail(
@@ -38,7 +38,7 @@ def execute_send_mail(
             "from_email": from_email,
             "html_message": html_message,
         }
-        DokoolaLogger.error(log_data, extra=log_data)
+        DokoolaLoggerService.error(log_data, extra=log_data)
         return
 
     try:
@@ -62,7 +62,7 @@ def execute_send_mail(
             "content": text,
             "sent": bool(response),
         }
-        DokoolaLogger.info(log_data, extra=log_data)
+        DokoolaLoggerService.info(log_data, extra=log_data)
         return
 
     except Exception as error:
@@ -76,7 +76,7 @@ def execute_send_mail(
             "html_message": html_message,
             "error": error,
         }
-        DokoolaLogger.critical(log_data, extra=log_data)
+        DokoolaLoggerService.critical(log_data, extra=log_data)
         return
 
 

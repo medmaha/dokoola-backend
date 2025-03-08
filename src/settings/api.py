@@ -13,9 +13,9 @@ REST_FRAMEWORK = {
     ],
 }
 
-from django.conf import settings
+from src.settings.shared import DEBUG
 
-if settings.DEBUG:
+if DEBUG:
     REST_FRAMEWORK.update(
         {
             "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",

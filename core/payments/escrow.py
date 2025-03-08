@@ -1,8 +1,8 @@
 import os
 
-from django.conf import settings
+from src.settings.debug import DEBUG
 
-if settings.DEBUG:
+if DEBUG:
     ESCROW_API_URL = os.environ.get("ESCROW_SANDBOX_URL")
 else:
     ESCROW_API_URL = os.environ.get("ESCROW_API_KEY")

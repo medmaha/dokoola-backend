@@ -1,22 +1,116 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+bin/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+
+# Virtual Environment
+.env
 .venv/
+venv/
+ENV/
+env/
+.python-version
+
+# IDE
 .idea/
 .vscode/
+*.swp
+*.swo
+.DS_Store
+*.sublime-workspace
+*.sublime-project
+
+# Django
+*.log
+*.pot
+*.pyc
 .logs/
-.env
+db.sqlite3
+db.sqlite3-journal
+media/
+static/
+!staticfiles/
+local_settings.py
 
-.git/
-.seeds/
-.github/
+# Testing
+.coverage
+.tox/
+.pytest_cache/
+htmlcov/
+.coverage.*
+coverage.xml
+*.cover
 
-venv/
-migrations/
-*/migrations/
-__pycache__/
-*/__pycache__/
-
-core/management/
-
-push.sh
-build.sh
-manage.sh
+# Development
+.git
+.gitignore
+.pre-commit-config.yaml
 README.md
+CHANGELOG.md
+docs/
+tests/
+*.sh
+!entrypoint.sh
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.docker/
+
+# Dependencies
+node_modules/
+bower_components/
+
+# Temporary files
+*.swp
+*.bak
+*.tmp
+*~
+
+# Local development settings
+.env.local
+.env.development
+.env.test
+requirements.dev.txt
+
+# Documentation
+*.md
+LICENSE
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+
+# Debug files
+*.debug
+debug.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Deployment files
+deploy/
+kubernetes/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# Cache
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/

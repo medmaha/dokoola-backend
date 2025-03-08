@@ -1,8 +1,9 @@
 import os
 
-from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
+
+from src.settings.shared import DEBUG
 
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "")
 
@@ -26,7 +27,7 @@ urlpatterns = [
 ]
 
 
-if settings.DEBUG:
+if DEBUG:
     from drf_spectacular.views import (
         SpectacularAPIView,
         SpectacularRedocView,

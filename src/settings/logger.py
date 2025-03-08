@@ -2,109 +2,88 @@ import logging
 import logging.config
 import os
 
-from logtail import LogtailHandler
 
-from core.services.after.main import AfterResponseService
-
-LOGGING_CONFIG = None
-
-logging.config.dictConfig(
-    {
+class LogConfig:
+    LOGGING_CONFIG = {
         "version": 1,
         "disable_existing_loggers": False,
+        "formatters": {
+            "standard": {"format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"},
+            "detailed": {
+                "format": "%(asctime)s [%(levelname)s] %(name)s:%(lineno)d: %(message)s"
+            },
+        },
         "handlers": {},
         "loggers": {},
     }
-)
 
-logger = logging.getLogger(__file__)
+    def __init__(self):
+        self.logger = logging.getLogger("dokoola")
+        self.runtime_environment = os.getenv("ENVIRONMENT", "development").lower()
+        self.console_log_allowed = bool(int(os.getenv("DKL-CONSOLE-LOG", "0")))
+        self.app_id = os.getenv("APP_ID", "DEFAULT")
+        LogConfig._setup_logging(self)
+    @classmethod
+    def _setup_logging(cls, self:"LogConfig") -> None:
+        """Configure logging based on environment"""
+        logging.config.dictConfig(self.LOGGING_CONFIG)
 
-runtime_environment = os.environ.get("ENVIRONMENT", "development")
-console_log_allowed = bool(int(os.environ.get("CONSOLE_LOG", "0")))
+        self._setup_console_logging()
 
-APP_ID = os.environ.get("APP_ID", "DEFAULT")
+        if self.runtime_environment == "development":
+            self._setup_development_logging()
+        else:
+            self._setup_production_logging()
 
-DEVELOPMENT_MODE = runtime_environment.lower() == "development"
+        self.logger.setLevel(logging.DEBUG)
 
+        logging.info(
+            "Server up and running",
+            extra={"Env": self.runtime_environment, "App": self.app_id},
+        )
 
-if DEVELOPMENT_MODE and console_log_allowed:
-    stream_handler = logging.StreamHandler()
-    stream_handler.setLevel(logging.INFO)
-    logger.addHandler(stream_handler)
-
-if not DEVELOPMENT_MODE:
-
-    logtail_handler = LogtailHandler(
-        source_token=os.getenv("BETTER_STACK_SOURCE_TOKEN")
-    )
-    logtail_handler.setLevel(logging.INFO)
-    logger.addHandler(logtail_handler)
-
-
-if DEVELOPMENT_MODE:
-
-    if not os.path.exists(".logs"):
-        os.makedirs(".logs")
-
-    file_handler = logging.FileHandler(".logs/dokoola.log")
-    file_handler.setLevel(logging.INFO)
-    logger.addHandler(file_handler)
-
-logger.setLevel(logging.DEBUG)
-
-
-def execute_log(log_attr, message, extras):
-    try:
-        logger.__getattribute__(log_attr)(message, extra=extras)
-        if extras:
-            extras["APP_ID"] = APP_ID
-            extras["ENVIRONMENT"] = runtime_environment
-
-            try:
-                message["APP_ID"] = APP_ID
-                message["ENVIRONMENT"] = runtime_environment
-            except:
-                pass
-
-            if isinstance(extras, dict):
-                extras = extras
-            logging.getLogger("logtail").__getattribute__(log_attr)(
-                message, extra=extras
+    def _setup_console_logging(self) -> None:
+        """Setup console logging"""
+        if self.console_log_allowed:
+            stream_handler = logging.StreamHandler()
+            stream_handler.setFormatter(
+                logging.Formatter(
+                    self.LOGGING_CONFIG["formatters"]["detailed"]["format"]
+                )
             )
+            stream_handler.setLevel(logging.INFO)
+            self.logger.addHandler(stream_handler)
 
-    except:
-        pass
+    def _setup_development_logging(self) -> None:
+        """Setup development environment logging"""
 
+        log_dir = ".logs"
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
 
-class DokoolaLogger:
+        file_handler = logging.FileHandler(os.path.join(log_dir, "dokoola.log"))
+        file_handler.setFormatter(
+            logging.Formatter(self.LOGGING_CONFIG["formatters"]["detailed"]["format"])
+        )
+        file_handler.setLevel(logging.INFO)
+        self.logger.addHandler(file_handler)
 
-    @classmethod
-    def __log(cls, log_attr, message, extras):
-        is_dict = isinstance(message, dict)
-        if is_dict and not extras:
-            extras = message
+    def _setup_production_logging(self) -> None:
+        """Setup production environment logging"""
 
-        AfterResponseService.register(execute_log, log_attr, message, extras)
+        from logtail import LogtailHandler
 
-    @classmethod
-    def debug(cls, message, extra: dict | None = None):
-        return cls.__log("debug", message, extra)
-
-    @classmethod
-    def info(cls, message, extra: dict | None = None):
-        return cls.__log("info", message, extra)
-
-    @classmethod
-    def warn(cls, message, extra: dict | None = None):
-        return cls.__log("warn", message, extra)
-
-    @classmethod
-    def error(cls, message, extra: dict | None = None):
-        return cls.__log("error", message, extra)
-
-    @classmethod
-    def critical(cls, message, extra: dict | None = None):
-        return cls.__log("critical", message, extra)
+        source_token = os.getenv("BETTER_STACK_SOURCE_TOKEN")
+        if source_token:
+            logtail_handler = LogtailHandler(source_token=source_token)
+            logtail_handler.setFormatter(
+                logging.Formatter(
+                    self.LOGGING_CONFIG["formatters"]["standard"]["format"]
+                )
+            )
+            logtail_handler.setLevel(logging.INFO)
+            self.logger.addHandler(logtail_handler)
 
 
-__all__ = ["DokoolaLogger", "LOGGING_CONFIG"]
+
+__all__ = ["LogConfig"]

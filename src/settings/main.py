@@ -5,11 +5,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DEBUG = bool(int(os.environ.get("DEBUG", 0)))
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-
-SECRET_KEY = os.environ.get("SECRET_KEY")
+from src.settings.shared import APPLICATION_NAME, DEBUG
 
 ALLOWED_HOSTS = list(
     set(
@@ -20,6 +17,9 @@ ALLOWED_HOSTS = list(
     )
 )
 
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 AUTH_USER_MODEL = "users.User"
 
@@ -148,6 +148,3 @@ from .jwt import *
 from .logger import *
 from .unfold import *
 from .whitenoice import *
-
-
-APPLICATION_NAME = "Dokoola PLatform"

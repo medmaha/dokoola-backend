@@ -6,9 +6,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 # Install dependencies
-COPY requirements.txt .
+COPY requirements.prod.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.prod.txt
 
 # Copy environment-specific files
 COPY .env.prod ./.env
@@ -16,8 +16,8 @@ COPY .env.prod ./.env
 # Copy the rest of the app
 COPY . .
 
-ENV PORT=8000
+RUN python manage.py collectstatic --noinput
 
-EXPOSE ${PORT}
+EXPOSE 8000
 
-CMD gunicorn src.wsgi:application --bind 0.0.0.0:${PORT}
+CMD ["gunicorn", "src.wsgi:application", "--bind", "0.0.0.0:8000"]

@@ -1,104 +1,117 @@
 import json
 import os
 from datetime import datetime
+from typing import Any
 
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from rest_framework.utils.serializer_helpers import ReturnDict
 
-from core.services.after.main import AfterResponseService
-from src.settings.logger import DokoolaLogger
+# from core.services.after.main import AfterResponseService
+from core.services.logger import DokoolaLoggerService
 
 
 class DokoolaLoggerMiddleware:
+    SLOW_QUERY_THRESHOLD = 0.1  # 100ms
+    STATUS_CODE_MAPPINGS = {
+        (200, 201, 204, 304, 307): ("INFO", DokoolaLoggerService.info),
+        (401, 404): ("WARN", DokoolaLoggerService.warning),
+        (500, 503): ("CRITICAL", DokoolaLoggerService.critical),
+    }
 
     def __init__(self, get_response):
         self.get_response = get_response
 
-    def get_response_message(self, response):
-        if hasattr(response, "data"):
-            data = response.data
-        elif hasattr(response, "content"):
-            data = response.content
+    def _extract_message_from_response(self, response: HttpResponse, data: Any) -> str:
+        """Extract message from response data based on content type"""
+        content_type = response.get("content-type", "")
 
-        content_type = response.get("content-type")
-
-        try:
-
-            if content_type == "application/json":
-                if isinstance(data, str):
+        if content_type == "application/json":
+            if isinstance(data, str):
+                try:
                     return json.loads(data).get("message", response.reason_phrase)
-
-                if isinstance(data, QuerySet):
-                    # message = data.get("message")
-                    # return message or response.reason_phrase
+                except json.JSONDecodeError:
                     return response.reason_phrase
 
-                if isinstance(data, ReturnDict):
-                    message = data.get("message")
-                    return message or response.reason_phrase
+            if isinstance(data, (ReturnDict, dict)):
+                return data.get("message") or response.reason_phrase
 
-                if isinstance(data, dict):
-                    message = data.get("message")
-                    return message or response.reason_phrase
+            if isinstance(data, QuerySet):
+                return response.reason_phrase
 
-            if content_type == "text/plain":
-                return str(data)[:45]
+        if content_type == "text/plain":
+            return str(data)[:45]
 
-            return response.reason_phrase
+        return response.reason_phrase
 
+    def get_response_message(self, response: HttpResponse) -> str:
+        """Get formatted message from response"""
+        try:
+            data = getattr(response, "data", None) or getattr(response, "content", None)
+            return self._extract_message_from_response(response, data)
         except Exception:
             return "Something went wrong"
 
-    def get_readable_from_user_agent(self, user_agent: str):
-        # Get the human friendly version for request user-agent
-
+    def get_readable_from_user_agent(self, user_agent: str) -> str:
+        """Get human-friendly version of user agent string"""
         agent = user_agent.lower()
-        platform = "Unknown"
-        device = "Unknown Device"
 
-        list_devices = [
-            "iphone",
-            "ipad",
-            "android",
-            "windows",
-            "linux",
-            "mac",
-        ]
-        list_platforms = [
-            "edge",
-            "edg",
-            "firefox",
-            "opera",
-            "edge",
-            "curl",
-            "postman",
-            "chrome",
-            "safari",
-        ]
+        DEVICE_MAPPINGS = {
+            "iphone": "iPhone",
+            "ipad": "iPad",
+            "android": "Android",
+            "windows": "Windows",
+            "linux": "Linux",
+            "mac": "Mac",
+        }
 
-        for _platform in list_platforms:
-            if _platform in agent:
-                platform = "Edge" if _platform == "edg" else _platform.capitalize()
+        PLATFORM_MAPPINGS = {
+            "edge": "Edge",
+            "edg": "Edge",
+            "firefox": "Firefox",
+            "opera": "Opera",
+            "curl": "cURL",
+            "postman": "Postman",
+            "chrome": "Chrome",
+            "safari": "Safari",
+        }
 
-        for _device in list_devices:
-            if _device in agent:
-                device = _device.capitalize()
-                break
+        device = next(
+            (DEVICE_MAPPINGS[key] for key in DEVICE_MAPPINGS if key in agent),
+            "Unknown Device",
+        )
+        platform = next(
+            (PLATFORM_MAPPINGS[key] for key in PLATFORM_MAPPINGS if key in agent),
+            "Unknown",
+        )
 
-        return f"{device.capitalize()}/{platform}"
+        return f"{device}/{platform}"
 
-    def __call__(self, request: HttpRequest):
+    def _get_log_level(self, status_code: int) -> tuple[str, callable]:
+        """Get appropriate log level based on status code"""
+        for codes, level_info in self.STATUS_CODE_MAPPINGS.items():
+            if status_code in codes:
+                return level_info
+        return "ERROR", DokoolaLoggerService.error
+
+    def __call__(self, request: HttpRequest) -> HttpResponse:
+        """Process the request and log relevant information"""
         from django.db import connection
 
         start_time = datetime.now()
-        response: HttpResponse = self.get_response(request)
+        response = self.get_response(request)
         end_time = datetime.now()
 
-        # Log slow queries (>100ms)
+        # Skip logging if explicitly ignored
+        if getattr(response, "ignore_logs", False) or getattr(
+            request, "ignore_logs", False
+        ):
+            return response
+
+        # Log slow queries
         for query in connection.queries:
-            if float(query["time"]) > 0.1:
-                DokoolaLogger.warn(
+            if float(query["time"]) > self.SLOW_QUERY_THRESHOLD:
+                DokoolaLoggerService.warning(
                     {
                         "event": "slow_query",
                         "query": query["sql"],
@@ -107,67 +120,46 @@ class DokoolaLoggerMiddleware:
                     }
                 )
 
-        if hasattr(response, "ignore_logs") and request.ignore_logs:  # type: ignore
-            return response
-
+        # Prepare log data
         service_name = request.headers.get(
-            os.environ.get("SERVICE_HTTP_HEADER", ""), "UNKNOWN-SERVICE"
-        )
-        user_agent = self.get_readable_from_user_agent(
-            request.META.get("HTTP_USER_AGENT", "")
+            os.environ.get("DKL-SERVICE-NAME", ""), "UNKNOWN-SERVICE"
         )
 
-        def log_dict(level):
-            return {
-                "level": level,
-                "status": response.status_code,
-                "path": request.path,
-                "method": request.method,
-                # "absolute_path": request.build_absolute_uri(),
-                "duration": self.get_duration(end_time, start_time),
-                "timestamp": self.get_timestamp(start_time),
-                "status_message": self.get_response_message(response),
-                "user_id": request.user.pk,
-                "host": request.META.get("HTTP_HOST"),
-                "ip_addr": request.META.get("REMOTE_ADDR"),
-                "service_name": service_name,
-                "user_agent": user_agent,
-            }
+        log_data = {
+            "path": request.path,
+            "method": request.method,
+            "duration": self._format_duration(end_time, start_time),
+            "timestamp": self._format_timestamp(start_time),
+            "status": response.status_code,
+            "status_message": self.get_response_message(response),
+            "user_id": str(request.user.pk),
+            "host": request.META.get("HTTP_HOST"),
+            "ip_addr": request.META.get("REMOTE_ADDR"),
+            "service_name": service_name,
+            "consumer_id": request.headers.get("DKL-CONSUMER-ID", None),
+            "user_agent": self.get_readable_from_user_agent(
+                request.META.get("HTTP_USER_AGENT", "")
+            ),
+        }
 
-        log_content = None
-        if response.status_code in [200, 204, 304, 307]:
-            log_content = log_dict("INFO")
-            DokoolaLogger.info(log_content)
-        elif response.status_code in [401, 404]:
-            log_content = log_dict("WARN")
-            DokoolaLogger.warn(log_content)
-        elif response.status_code in [
-            500,
-        ]:
-            log_content = log_dict("CRITICAL")
-            DokoolaLogger.warn(log_content)
-        else:
-            log_content = log_dict("ERROR")
-            DokoolaLogger.error(log_content)
+        # Log with appropriate level based on status code
+        level, log_func = self._get_log_level(response.status_code)
+        log_data["level"] = level
+        log_func(log_data)
 
         return response
 
-    def get_duration(self, end_time: datetime, start_time: datetime):
-
+    def _format_duration(self, end_time: datetime, start_time: datetime) -> str:
+        """Format request duration in a human-readable format"""
         minutes = end_time.minute - start_time.minute
-        seconds = str(end_time.microsecond - start_time.microsecond / 1000)[:3]
+        milliseconds = str((end_time.microsecond - start_time.microsecond) / 1000)[:3]
+        return f"{minutes}:{milliseconds}s" if minutes else f"{milliseconds}ms"
 
-        if minutes:
-            return f"{minutes}:{seconds}s"
-        else:
-            return f"{seconds}ms"
+    def _format_timestamp(self, timestamp: datetime) -> str:
+        """Format timestamp in a consistent format"""
+        return f"{timestamp.date()} {str(timestamp.time()).split('.')[0]}"
 
-    def get_timestamp(self, start_time: datetime):
-        return f"{start_time.date()} {str(start_time.time()).split(".")[0]}"
-
-    def process_template_response(self, request, response):
-        """
-        Called just after the view has finished executing.
-        """
-        AfterResponseService.execute()
-        return response
+        # def process_template_response(self, request: HttpRequest, response: HttpResponse) -> HttpResponse:
+        """Process template response and execute after-response tasks"""
+        # AfterResponseService.execute()
+        # return response

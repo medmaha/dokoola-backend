@@ -1,4 +1,5 @@
 import datetime
+
 from django.db import transaction
 from django.db.models import Q
 from rest_framework.generics import (
@@ -12,10 +13,10 @@ from rest_framework.response import Response
 
 from core.constants import DokoolaConstants
 from core.services.after.main import AfterResponseService
+from core.services.logger import DokoolaLoggerService
 from jobs.models import Job
 from jobs.models.activities import Activities
 from jobs.models.job import JobStatusChoices
-from src.settings.logger import DokoolaLogger
 from talents.models import Talent  # Updated import
 from users.models import User
 from utilities.generator import get_serializer_error_message
@@ -195,15 +196,15 @@ class ProposalUpdateAPIView(GenericAPIView):
                         proposal.status = ProposalStatusChoices.ACCEPTED
                         proposal.save()
 
-                        AfterResponseService.register(
+                        AfterResponseService.schedule_email(
                             proposal.notify_talent, ProposalStatusChoices.ACCEPTED
                         )
-                        AfterResponseService.register(
+                        AfterResponseService.schedule_email(
                             proposal.job.notify_client,
                             JobStatusChoices.IN_PROGRESS,
                             proposal,
                         )
-                        AfterResponseService.register(
+                        AfterResponseService.schedule_email(
                             proposal.job.update_status_and_withdraw_proposals,
                             job_status=JobStatusChoices.IN_PROGRESS,
                         )
@@ -220,7 +221,7 @@ class ProposalUpdateAPIView(GenericAPIView):
 
                         proposal.status = ProposalStatusChoices.DECLINED
                         proposal.save()
-                        AfterResponseService.register(
+                        AfterResponseService.schedule_email(
                             proposal.notify_talent, ProposalStatusChoices.DECLINED
                         )
 
@@ -236,7 +237,7 @@ class ProposalUpdateAPIView(GenericAPIView):
 
                         proposal.status = ProposalStatusChoices.TERMINATED
                         proposal.save()
-                        AfterResponseService.register(
+                        AfterResponseService.schedule_email(
                             proposal.notify_talent, ProposalStatusChoices.TERMINATED
                         )
 
@@ -384,7 +385,7 @@ class ProposalCreateAPIView(CreateAPIView):
                     service_fee=DokoolaConstants.get_service_fee(),
                 )
 
-                AfterResponseService.register(after_response, proposal)
+                AfterResponseService.schedule_email(after_response, proposal)
 
                 return Response(
                     {
