@@ -32,7 +32,17 @@ repos:
     hooks:
     -   id: django-test
         name: Django Tests
-        entry: python manage.py test
+        entry: |
+          python manage.py test --noinput --parallel
+          $(pwd)/projects
+          $(pwd)/reviews
+          $(pwd)/jobs
+          $(pwd)/messaging
+          $(pwd)/users
+          $(pwd)/core
+          $(pwd)/clients
+          $(pwd)/staffs
+          $(pwd)/talents
         language: system
         types: [python]
         pass_filenames: false
