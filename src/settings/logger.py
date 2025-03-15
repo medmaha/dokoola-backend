@@ -8,10 +8,8 @@ class LogConfig:
         "version": 1,
         "disable_existing_loggers": False,
         "formatters": {
-            "standard": {"format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"},
-            "detailed": {
-                "format": "%(asctime)s [%(levelname)s] %(name)s:%(lineno)d: %(message)s"
-            },
+            "standard": {"format": "%(asctime)s [%(levelname)s]: %(message)s"},
+            "detailed": {"format": "%(asctime)s [%(levelname)s] %(message)s"},
         },
         "handlers": {},
         "loggers": {},
@@ -23,8 +21,18 @@ class LogConfig:
         self.console_log_allowed = bool(int(os.getenv("DKL-CONSOLE-LOG", "0")))
         self.app_id = os.getenv("APP_ID", "DEFAULT")
         LogConfig._setup_logging(self)
+
+        logging.info(
+            "Server up and running",
+            extra={
+                "Env": self.runtime_environment,
+                "App": self.app_id,
+                "Console-LOG": self.console_log_allowed,
+            },
+        )
+
     @classmethod
-    def _setup_logging(cls, self:"LogConfig") -> None:
+    def _setup_logging(cls, self: "LogConfig") -> None:
         """Configure logging based on environment"""
         logging.config.dictConfig(self.LOGGING_CONFIG)
 
@@ -36,11 +44,6 @@ class LogConfig:
             self._setup_production_logging()
 
         self.logger.setLevel(logging.DEBUG)
-
-        logging.info(
-            "Server up and running",
-            extra={"Env": self.runtime_environment, "App": self.app_id},
-        )
 
     def _setup_console_logging(self) -> None:
         """Setup console logging"""
@@ -83,7 +86,6 @@ class LogConfig:
             )
             logtail_handler.setLevel(logging.INFO)
             self.logger.addHandler(logtail_handler)
-
 
 
 __all__ = ["LogConfig"]
