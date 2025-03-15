@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin bash
 
 # Build the backend image
 docker build -t dokoola-backend .

@@ -5,10 +5,11 @@ __pycache__/
 
 # Ignore environment files
 .env
-.env.prod
+# .env.prod
 
 # Ignore version control files
 .git/
+.github/
 .gitignore
 
 # Ignore Docker-related files
@@ -40,7 +41,7 @@ ruff.toml
 
 # Ignore dependency files
 requirements.dev.txt
-requirements.prod.txt
+# requirements.prod.txt
 uv.lock
 
 # Ignore documentation files
@@ -48,3 +49,7 @@ README.md
 
 # Ignore seeds directory
 .seeds/
+
+# Ignore venv directories
+.venv/
+venv/
