@@ -1,116 +1,50 @@
-# Python
+# Ignore Python cache files
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-*.egg
-*.egg-info/
-dist/
-build/
-eggs/
-parts/
-bin/
-var/
-sdist/
-develop-eggs/
-.installed.cfg
-lib/
-lib64/
+*.pyc
+*.pyo
 
-# Virtual Environment
+# Ignore environment files
 .env
-.venv/
-venv/
-ENV/
-env/
-.python-version
+.env.prod
 
-# IDE
-.idea/
+# Ignore version control files
+.git/
+.gitignore
+
+# Ignore Docker-related files
+.dockerignore
+Dockerfile
+docker-compose.yaml
+
+# Ignore IDE/editor files
 .vscode/
 *.swp
-*.swo
-.DS_Store
-*.sublime-workspace
-*.sublime-project
 
-# Django
-*.log
-*.pot
-*.pyc
+# Ignore backup and log filesd
+.backups/
 .logs/
-db.sqlite3
-db.sqlite3-journal
-media/
-static/
-!staticfiles/
-local_settings.py
+backup.ps1
+restore.ps1
 
-# Testing
-.coverage
-.tox/
-.pytest_cache/
-htmlcov/
-.coverage.*
-coverage.xml
-*.cover
+# Ignore build scripts
+build.sh
+manage.sh
+push.sh
+run.sh
 
-# Development
-.git
-.gitignore
+# Ignore configuration files
 .pre-commit-config.yaml
-README.md
-CHANGELOG.md
-docs/
-tests/
-*.sh
-!entrypoint.sh
+.prettierignore
+.python-version
+ruff.toml
 
-# Docker
-Dockerfile*
-docker-compose*.yml
-.docker/
-
-# Dependencies
-node_modules/
-bower_components/
-
-# Temporary files
-*.swp
-*.bak
-*.tmp
-*~
-
-# Local development settings
-.env.local
-.env.development
-.env.test
+# Ignore dependency files
 requirements.dev.txt
+requirements.prod.txt
+uv.lock
 
-# Documentation
-*.md
-LICENSE
-CONTRIBUTING.md
-CODE_OF_CONDUCT.md
+# Ignore documentation files
+README.md
 
-# Debug files
-*.debug
-debug.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Deployment files
-deploy/
-kubernetes/
-.gitlab-ci.yml
-.travis.yml
-.circleci/
-
-# Cache
-.mypy_cache/
-.dmypy.json
-dmypy.json
-.pyre/
-.pytype/
+# Ignore seeds directory
+.seeds/
