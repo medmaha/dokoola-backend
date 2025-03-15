@@ -23,8 +23,9 @@ class Command(BaseCommand):
         avatar = os.getenv("SUPER_ADMIN_AVATAR")
 
         try:
-            user = User.objects.get(email=email)
-            return
+            user = User.objects.filter(email=email)
+            if user.exists():
+                return
         except User.DoesNotExist:
             user = User()
             user.is_staff = True
