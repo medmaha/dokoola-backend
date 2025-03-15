@@ -1,5 +1,5 @@
-from functools import partial
 import random
+from functools import partial
 from typing import List
 
 from django.core.serializers.json import DjangoJSONEncoder
@@ -10,9 +10,9 @@ from clients.models import Client
 from core.models import Category
 from core.services.email.main import EmailService
 from utilities.generator import (
+    default_pid_generator,
     primary_key_generator,
     public_id_generator,
-    default_pid_generator,
 )
 
 
@@ -20,8 +20,9 @@ class JobStatusChoices(models.TextChoices):
     CLOSED = "CLOSED"
     PUBLISHED = "PUBLISHED"
     SUSPENDED = "SUSPENDED"
-    IN_PROGRESS = "IN_PROGRESS"
     COMPLETED = "COMPLETED"
+    IN_PROGRESS = "IN_PROGRESS"
+    DELETED = "DELETED"
 
     @classmethod
     def verify_status(cls, status: str):
@@ -73,6 +74,7 @@ class Job(models.Model):
     )
 
     is_valid = models.BooleanField(default=True, blank=True)
+    is_deleted = models.BooleanField(default=True, blank=True)
     is_third_party = models.BooleanField(default=False, blank=True)
     third_party_address = models.URLField(blank=True, null=True)
     third_party_metadata = models.JSONField(
@@ -263,7 +265,7 @@ class JobAgentProxy(Job):
                 status=JobStatusChoices.PUBLISHED,
                 required_skills=job.required_skills,
                 application_deadline=job.application_deadline,
-                third_party_metadata=job.third_party_metadata
+                third_party_metadata=job.third_party_metadata,
             )
 
             try:

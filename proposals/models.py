@@ -1,13 +1,14 @@
 from functools import partial
+
 from django.db import models
 
 from core.services.email.main import EmailService
 from jobs.models import Job
 from talents.models import Talent  # Updated import
 from utilities.generator import (
+    default_pid_generator,
     primary_key_generator,
     public_id_generator,
-    default_pid_generator,
 )
 
 
@@ -52,6 +53,19 @@ class Proposal(models.Model):
 
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @classmethod
+    def _active_statuses(cls):
+        return [
+            ProposalStatusChoices.REVIEW,
+            ProposalStatusChoices.PENDING,
+            ProposalStatusChoices.ACCEPTED,
+        ]
+
+    def _terminate(self, reason=None, commit_save=True):
+        self.status = ProposalStatusChoices.TERMINATED
+        self.client_comment = reason
+        self.save(commit=commit_save)
 
     def notify_talent(self, status: ProposalStatusChoices, is_after_response=True):
         """

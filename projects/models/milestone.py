@@ -7,6 +7,7 @@ class MilestoneStatusChoices(models.TextChoices):
     PENDING = "PENDING"
     COMPLETED = "COMPLETED"
     CANCELLED = "CANCELLED"
+    DECLIEND = "DECLIEND"
     ACCEPTED = "ACCEPTED"
     ACTIVE = "ACTIVE"
 
@@ -37,9 +38,20 @@ class Milestone(models.Model):
         default=MilestoneStatusChoices.ACTIVE,
     )
 
+    client_comment = models.CharField(max_length=255, null=True, blank=True)
+
     def get_project(self):
         project = self.project  # type: ignore
         return project
+
+    @classmethod
+    def _active_statuses(cls):
+        return [MilestoneStatusChoices.ACCEPTED, MilestoneStatusChoices.PENDING]
+
+    def _terminate(self, reason=None, commit_save=True):
+        self.status = MilestoneStatusChoices.CANCELLED
+        self.client_comment = reason
+        self.save(commit=commit_save)
 
     class Meta:
         ordering = ["due_date"]

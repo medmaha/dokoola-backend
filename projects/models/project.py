@@ -60,3 +60,18 @@ class Project(models.Model):
     @property
     def job(self):
         return self.contract.job
+
+    @classmethod
+    def _active_statuses(cls):
+        return [ProjectStatusChoices.ACCEPTED, ProjectStatusChoices.PENDING]
+
+    def _terminate(self, reason=None, commit_save=True):
+        self.status = ProjectStatusChoices.TERMINATED
+        self.termination_comment = reason
+        self.save(commit=commit_save)
+
+    def milestones(self):
+        from .milestone import Milestone
+
+        _milestones = Milestone.objects.filter(project_pk=self.pk)
+        return _milestones

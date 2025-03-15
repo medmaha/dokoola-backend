@@ -15,6 +15,7 @@ class ContractStatusChoices(models.TextChoices):
     PENDING = "PENDING"
     ACCEPTED = "ACCEPTED"
     REJECTED = "REJECTED"
+    TERMINATED = "TERMINATED"
 
 
 class NegotiationStatusChoices(models.TextChoices):
@@ -86,8 +87,21 @@ class Contract(models.Model):
         default="PENDING",
     )
 
+    client_comment = models.CharField(
+        max_length=200, choices=ContractStatusChoices.choices, blank=True, null=True
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
         return f"Contract: {self.job.title}"
+
+    @classmethod
+    def _active_statuses(cls):
+        return [ContractStatusChoices.ACCEPTED, ContractStatusChoices.PENDING]
+
+    def _terminate(self, reason=None, commit_save=True):
+        self.status = ContractStatusChoices.TERMINATED
+        self.client_comment = reason
+        self.save(commit=commit_save)

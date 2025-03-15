@@ -8,6 +8,12 @@ urlpatterns = [
     path("create/", views.JobCreateAPIView.as_view(), name="job_create"),
     path("search/", views.JobsSearchAPIView.as_view(), name="job_searching"),
     path("<public_id>/", views.JobRetrieveAPIView.as_view(), name="job_detail"),
+    path("<public_id>/delete/", views.JobDeleteAPIView.as_view(), name="job_delete"),
+    path(
+        "<public_id>/third-party/",
+        views.ThirdPartyJobAPIView.as_view(),
+        name="job_third_party",
+    ),
     path("<public_id>/edit/", views.JobUpdateAPIView.as_view(), name="job_update"),
     path(
         "<public_id>/activities/",
