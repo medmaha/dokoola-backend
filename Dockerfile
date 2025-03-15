@@ -12,7 +12,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
-COPY requirements.prod.txt .env.prod ./
+COPY requirements.prod.txt ./
+COPY .env.prod ./.env
+
 RUN pip install --no-cache-dir -r requirements.prod.txt
 
 # Copy the rest of the app
