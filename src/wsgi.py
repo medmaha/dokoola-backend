@@ -25,4 +25,4 @@ if not DEBUG:
         application,
         root=settings.STATIC_ROOT,
     )
-    application.add_files(settings.BASE_DIR / "public", prefix="staticfile/")
+    application.add_files(settings.BASE_DIR / "static", prefix="public/")
