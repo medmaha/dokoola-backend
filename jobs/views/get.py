@@ -1,10 +1,6 @@
 from django.db.models import Q
 from django.utils import timezone
-from rest_framework.generics import (
-    GenericAPIView,
-    ListAPIView,
-    RetrieveAPIView,
-)
+from rest_framework.generics import GenericAPIView, ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
 
 from core.services.after.main import AfterResponseService
@@ -16,7 +12,20 @@ from jobs.serializers import (
     JobRetrieveSerializer,
 )
 from users.models.user import User
-from utilities.generator import public_id_generator
+
+active_statues = [
+    JobStatusChoices.PUBLISHED,
+    JobStatusChoices.COMPLETED,
+    JobStatusChoices.IN_PROGRESS,
+    # JobStatusChoices.SUSPENDED,
+    # JobStatusChoices.CLOSED,
+    # JobStatusChoices.DELETED
+]
+
+valid_job_query = Q(is_valid=True, status__in=active_statues)
+client_job_query = lambda user_id: Q(
+    client__user__pk=user_id, status__in=active_statues
+)
 
 
 class JobListAPIView(ListAPIView):
@@ -26,12 +35,9 @@ class JobListAPIView(ListAPIView):
     def get_queryset(self):
         user_id = self.request.user.pk
         if user_id:
+            query = valid_job_query | client_job_query(user_id)
             queryset = (
-                Job.objects.filter(
-                    # Q(is_valid=True, status=JobStatusChoices.PUBLISHED)
-                    Q(is_valid=True)
-                    | Q(client__user__pk=user_id)
-                )
+                Job.objects.filter(query)
                 .select_related("client", "category")
                 .order_by("-created_at", "published")
             )
@@ -81,11 +87,11 @@ class JobRetrieveAPIView(RetrieveAPIView):
 
     def get_queryset(self, public_id: str):
         try:
-            print("Job ID:",public_id)
-            # Job.objects.filter(is_third_party=True).update(status=JobStatusChoices.PUBLISHED)
-            return Job.objects.get(public_id=public_id)
+            user_id = self.request.user.pk
+            query = valid_job_query | client_job_query(user_id)
+            return Job.objects.get(query, public_id=public_id)
+
         except Exception as e:
-            print("Error:",e)
             return None
 
     def update_last_visit(self, job: Job):
