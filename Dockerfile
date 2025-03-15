@@ -38,7 +38,6 @@ COPY --from=builder /app /app
 COPY requirements.prod.txt .
 RUN pip install --no-cache-dir -r requirements.prod.txt && \
     pip uninstall -y pip && \
-    apt-get purge -y --auto-remove build-essential && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
