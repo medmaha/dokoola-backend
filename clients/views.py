@@ -2,16 +2,13 @@ import uuid
 
 from django.db import transaction
 from django.db.models import Q
-
 from django.utils import timezone
-from rest_framework.generics import (
-    GenericAPIView,
-    ListAPIView,
-    RetrieveAPIView,
-)
+from rest_framework.generics import GenericAPIView, ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
 
-from jobs.models import Job
+from core.services.logger.main import DokoolaLoggerService
+from jobs.models.job import Job, JobStatusChoices
+from src.features.paginator import DokoolaPaginator
 from users.models.user import User
 from users.serializer import UserUpdateSerializer
 from utilities.generator import get_serializer_error_message
@@ -21,21 +18,18 @@ from .serializer import (
     ClientCreateSerializer,
     ClientJobDetailSerializer,
     ClientJobPostingSerializer,
-    #
     ClientListSerializer,
     ClientRetrieveSerializer,
     ClientUpdateDataSerializer,
     ClientUpdateSerializer,
     CompanyCreateSerializer,
-    CompanyListSerializer,
     CompanyUpdateSerializer,
 )
 
 
 def validate_uuid(_id):
     try:
-        uid = uuid.UUID(_id)
-        print("uuid:", uid)
+        uuid.UUID(_id)
         return True
     except ValueError:
         return False
@@ -136,30 +130,40 @@ class ClientGenericAPIView(GenericAPIView):
             return Response({"message": str(e)}, status=500)
 
     def put(self, request, client_id, *args, **kwargs):
-        data = request.data.copy()
-        user_data = data.pop("user", None)
-        company_data = data.pop("company", None)
-
-        user: User = request.user
-
-        if not user.is_authenticated:
-            return Response({"message": "Unauthenticated request"}, status=401)
-
-        if not user.is_client:
-            return Response(
-                {"message": "Forbidden! Only clients are allowed"},
-                status=403,
-            )
-
-        _client = None
-        _serializers = []
-
-        _valid_uuid = validate_uuid(client_id)
-
         try:
+            data = request.data.copy()
+            user_data = data.pop("user", None)
+            company_data = data.pop("company", None)
+
+            user: User = request.user
+
+            if not user.is_client:
+                msg = "Forbidden! only clients are allowed"
+                DokoolaLoggerService.lazy.warning(
+                    msg,
+                    extra={
+                        "type": "handler_error",
+                        "response.status": 403,
+                        "session.id": str(request.session),
+                        "error.message": msg,
+                        "client.public_id": client_id,
+                        "request.user_id": request.user.pk,
+                        "request.handler": self.__name__,
+                        "request.user_data": user_data,
+                        "request.company_data": company_data,
+                    },
+                )
+                return Response(
+                    {"message": msg},
+                    status=403,
+                )
+
+            _client = None
+            _serializers = []
+
+            _valid_uuid = validate_uuid(client_id)
+
             with transaction.atomic():
-                print("client_id:", client_id)
-                print("validate_uuid:", validate_uuid(client_id))
                 if _valid_uuid:
                     _client = Client.objects.get(public_id=client_id)
                 else:
@@ -191,6 +195,21 @@ class ClientGenericAPIView(GenericAPIView):
                         error_message = get_serializer_error_message(
                             serializer.errors, "This is a bad ass request"
                         )
+                        DokoolaLoggerService.lazy.warning(
+                            "Invalid updata-data passed",
+                            extra={
+                                "type": "handler_error",
+                                "response.status": 400,
+                                "session.id": str(request.session),
+                                "error.message": "Invalid updata-data passed",
+                                "client.public_id": client_id,
+                                "request.user_id": request.user.pk,
+                                "serializer": serializer.__name__,
+                                "error.type": "serializer.ValidationError",
+                                "request.handler": self.__name__,
+                                "request.data": serializer.initial_data,
+                            },
+                        )
                         return Response({"message": str(error_message)}, status=400)
 
                     obj = serializer.save()
@@ -208,7 +227,54 @@ class ClientGenericAPIView(GenericAPIView):
                 response_serializer = ClientListSerializer(instance=_client)
                 return Response(response_serializer.data, status=200)
 
+        except Client.DoesNotExist:
+            DokoolaLoggerService.lazy.warning(
+                "Invalid request parameters",
+                extra={
+                    "type": "handler_error",
+                    "response.status": 400,
+                    "session.id": str(request.session),
+                    "error.message": "Invalid request parameters",
+                    "client.public_id": client_id,
+                    "request.user_id": request.user.pk,
+                    "error.type": "Client.DoesNotExist",
+                    "request.handler": self.__name__,
+                },
+            )
+            return Response({"message": "Invalid request parameters"}, status=400)
+
+        except AssertionError as e:
+            msg = str(e)
+            DokoolaLoggerService.lazy.error(
+                msg,
+                extra={
+                    "type": "handler_error",
+                    "response.status": 403,
+                    "session.id": str(request.session),
+                    "error.message": msg,
+                    "client.public_id": client_id,
+                    "request.user_id": request.user.pk,
+                    "error.type": "AssertionError",
+                    "request.handler": self.__name__,
+                },
+            )
+            return Response({"message": str(e)}, status=403)
+
         except Exception as e:
+            msg = str(e)
+            DokoolaLoggerService.lazy.error(
+                msg,
+                extra={
+                    "type": "handler_error",
+                    "response.status": 500,
+                    "session.id": str(request.session),
+                    "error.message": msg,
+                    "client.public_id": client_id,
+                    "request.user_id": request.user.pk,
+                    "error.type": "Exception",
+                    "request.handler": self.__name__,
+                },
+            )
             return Response({"message": str(e)}, status=500)
 
     def delete(self, request, client_id, *args, **kwargs):
@@ -360,25 +426,67 @@ class ClientJobDetailView(RetrieveAPIView):
             )
 
 
+class ClientRecentJobPaginator(DokoolaPaginator):
+    page_size = 5
+
+
 class ClientJobPostingApiView(ListAPIView):
     """
     This view is used for the job posting view.
     Gets the recent jobs created by the client
     """
 
+    pagination_class = ClientRecentJobPaginator
     serializer_class = ClientJobPostingSerializer
 
     def list(self, request, username, *args, **kwargs):
         try:
-            clients = Job.objects.filter(client__user__username=username).order_by("-created_at")  # type: ignore
-            page = self.paginate_queryset(clients)
+            active_statues = [
+                JobStatusChoices.PUBLISHED,
+                JobStatusChoices.COMPLETED,
+                JobStatusChoices.IN_PROGRESS,
+                # JobStatusChoices.SUSPENDED,
+                # JobStatusChoices.CLOSED,
+                # JobStatusChoices.DELETED
+            ]
+
+            valid_job_query = Q(is_valid=True, status__in=active_statues)
+            client_job_query = Q(
+                client__user__username=username, status__in=active_statues
+            )
+
+            query = valid_job_query | client_job_query
+
+            identity_query = Q(client__public_id=username) | Q(
+                client__user__username=username
+            )
+            other_users_query = identity_query & Q(
+                is_valid=True,
+                published=True,
+                status__in=[
+                    JobStatusChoices.PUBLISHED,
+                    JobStatusChoices.IN_PROGRESS,
+                    JobStatusChoices.COMPLETED,
+                ],
+            )
+            owner_query = identity_query & Q(
+                is_valid=True,
+                status__in=[
+                    JobStatusChoices.PUBLISHED,
+                    JobStatusChoices.IN_PROGRESS,
+                    JobStatusChoices.COMPLETED,
+                ],
+            )
+
+            jobs = Job.objects.filter(query).order_by("published", "-created_at")  # type: ignore
+
+            page = self.paginate_queryset(jobs)
             serializer = self.get_serializer(
                 page, many=True, context={"request": request}
             )
             return self.get_paginated_response(serializer.data)
 
-        except Exception:
-
+        except Exception as e:
             return Response(
                 {"message": "The provided query, doesn't match our database"},
                 status=404,

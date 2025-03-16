@@ -46,17 +46,6 @@ class CompanyCreateSerializer(serializers.ModelSerializer):
         ]
 
 
-class CompanyListSerializer(serializers.ModelSerializer):
-    """
-    A serializer for the company list api view
-    Use to get the list of companies without much extra information
-    """
-
-    class Meta:
-        model = Company
-        fields = ["slug", "name", "industry", "logo_url"]
-
-
 class CompanyUpdateSerializer(UpdateSerializer, serializers.ModelSerializer):
     """
     A serializer for the company update view
@@ -75,18 +64,31 @@ class CompanyUpdateSerializer(UpdateSerializer, serializers.ModelSerializer):
         ]
 
 
-class CompanyDetailSerializer(serializers.ModelSerializer):
-    """
-    A serializer for the company detail api view \n
-    Securely serialize all the necessary information of this company
-    """
+# -------------------------- Client ------------------------------ #
 
+
+class ClientMiniSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
-        fields = "__all__"
+        fields = [
+            "id",
+            "country",
+            "public_id",
+        ]
 
+    def to_representation(self, instance: Client):
+        data = super().to_representation(instance)
 
-# -------------------------- Client ------------------------------ #
+        data["full_name"] = instance.name
+        data["avatar"] = instance.user.avatar
+
+        data["company"] = None
+        if instance.company:
+            data["company"] = {
+                "slug": instance.company.slug,
+                "name": instance.company.name,
+            }
+        return data
 
 
 class ClientCreateSerializer(serializers.ModelSerializer):
@@ -112,6 +114,7 @@ class ClientListSerializer(serializers.ModelSerializer):
             "id",
             "country",
             "address",
+            "public_id",
         ]
 
     def to_representation(self, instance: Client):
@@ -235,6 +238,7 @@ class ClientJobDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Client
+        # TODO: fix me the exposed fields
         fields = "__all__"
 
 
@@ -243,6 +247,8 @@ class ClientJobPostingSerializer(serializers.ModelSerializer):
     This serializer is used for the job detail view
     * The return data will vary depending on the requesting user
     """
+
+    client = ClientMiniSerializer()
 
     class Meta:
         model = Job

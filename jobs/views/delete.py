@@ -94,10 +94,6 @@ class JobDeleteAPIView(DestroyAPIView):
                 job.is_deleted = True
                 job.save()
 
-                print("-------------------------------------")
-                print(job.published)
-                print("-------------------------------------")
-
                 if milestones:
                     Milestone.objects.bulk_update(milestones)
 
@@ -112,7 +108,7 @@ class JobDeleteAPIView(DestroyAPIView):
 
             return Response(
                 {"message": "Job deleted successfully"},
-                status=200,
+                status=201,
             )
         except Job.DoesNotExist:
             DokoolaLoggerService.error(
