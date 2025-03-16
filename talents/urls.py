@@ -62,7 +62,7 @@ urlpatterns = [
         name="talent_search",
     ),
     path(
-        "<username>/update/",
+        "<public_id>/update/",
         views.TalentUpdateAPIView.as_view(),
         name="talent_update",
     ),

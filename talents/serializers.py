@@ -50,16 +50,12 @@ class TalentUpdateDataSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Talent
-        fields = ["public_id"]
+        fields = ["public_id", "bio", "pricing", "skills", "user"]
 
     def to_representation(self, instance: Talent):
         return {
-            **instance.user.get_personal_info(),
-            # Address Info
-            **instance.user.get_address(),
-            # Client Info
             "bio": instance.bio,
-            "email": instance.user.email,
+            "title": instance.title,
             "pricing": instance.pricing,
             "skills": instance.skills,
             # User Info
@@ -69,7 +65,9 @@ class TalentUpdateDataSerializer(serializers.ModelSerializer):
             "username": instance.user.username,
             "first_name": instance.user.first_name,
             "last_name": instance.user.last_name,
-            "date_joined": instance.user.date_joined,
+            **instance.user.get_personal_info(),
+            # Address Info
+            **instance.user.get_address(),
         }
 
 
@@ -82,9 +80,8 @@ class TalentUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Talent
         fields = (
-            "public_id",
-            "title",
             "bio",
+            "title",
             "skills",
             "pricing",
         )
