@@ -1,10 +1,8 @@
-
 import os
-
-from src.settings.logger import LogConfig
 
 APPLICATION_NAME = "Dokoola PLatform"
 
-DEBUG = bool(int(os.environ.get("DEBUG", 0)))
+RUNTIME_ENVIRONMENT = os.getenv("ENVIRONMENT", None)
+APPLICATION_IDENTIFIER = os.getenv("APPLICATION_ID", None)
 
-LOG_CONFIG = LogConfig()
+DEBUG = int(os.getenv("DEBUG", 0)) > 0

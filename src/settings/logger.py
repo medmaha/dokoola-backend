@@ -16,10 +16,12 @@ class LogConfig:
     }
 
     def __init__(self):
+        from src.settings.shared import APPLICATION_IDENTIFIER, RUNTIME_ENVIRONMENT
+
         self.logger = logging.getLogger("dokoola")
-        self.runtime_environment = os.getenv("ENVIRONMENT", "development").lower()
+        self.app_id = APPLICATION_IDENTIFIER
+        self.runtime_environment = RUNTIME_ENVIRONMENT
         self.console_log_allowed = bool(int(os.getenv("DKL-CONSOLE-LOG", "0")))
-        self.app_id = os.getenv("APP_ID", "DEFAULT")
         LogConfig._setup_logging(self)
 
         logging.info(
@@ -89,3 +91,6 @@ class LogConfig:
 
 
 __all__ = ["LogConfig"]
+
+
+LOG_CONFIG = LogConfig()
