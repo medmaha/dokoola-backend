@@ -150,7 +150,15 @@ class ClientUpdateSerializer(UpdateSerializer, serializers.ModelSerializer):
         ]
 
     def validate_country(self, value):
-        return json.loads(value)
+        if value is None:
+            return {}
+        try:
+            if isinstance(value, dict):
+                return value
+            return json.loads(value)
+
+        except Exception as e:
+            raise serializers.ValidationError("Country: {}".format(e))
 
 
 class ClientRetrieveSerializer(serializers.ModelSerializer):

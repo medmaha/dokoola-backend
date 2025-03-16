@@ -346,10 +346,10 @@ class ClientUpdateView(GenericAPIView):
     permission_classes = []
     serializer_class = ClientUpdateDataSerializer
 
-    def get(self, request, username, **kwargs):
+    def get(self, request, public_id, **kwargs):
         self.serializer_class = ClientUpdateDataSerializer
         try:
-            client = Client.objects.get(user__username=username)
+            client = Client.objects.get(public_id=public_id)
             client_serializer: ClientUpdateDataSerializer = self.get_serializer(
                 instance=client, context={"request": request}
             )
@@ -360,28 +360,31 @@ class ClientUpdateView(GenericAPIView):
                 status=404,
             )
 
-    def put(self, request, username, **kwargs):
+    def put(self, request, public_id, **kwargs):
         self.serializer_class = ClientUpdateSerializer
         try:
-            client = Client.objects.get(user__username=username)
-            client_serializer: ClientUpdateSerializer = self.get_serializer(
-                instance=client,
-                data=request.data,
-                context={"request": request},
-            )
+            with transaction.atomic():
+                client = Client.objects.get(public_id=public_id)
+                client_serializer: ClientUpdateSerializer = self.get_serializer(
+                    instance=client,
+                    data=request.data,
+                    context={"request": request},
+                )
 
-            if not client_serializer.is_valid():
-                # raised the same error as the serializer
-                return Response(str(client_serializer.errors), status=400)
-            client_serializer.save()
-            return Response(client_serializer.data, status=200)
+                if not client_serializer.is_valid():
+                    error_message = get_serializer_error_message(
+                        client_serializer.errors
+                    )
+                    return Response({"message": error_message}, status=400)
+                client_serializer.save()
+                return Response(client_serializer.data, status=200)
         except Client.DoesNotExist:
             return Response(
                 {"message": "Error: User doesn't exist!"},
                 status=404,
             )
-        except Exception:
-
+        except Exception as e:
+            # TODO: log error
             return Response(
                 {"message": "Error: Something went wrong!"},
                 status=500,
@@ -399,15 +402,15 @@ class ClientJobDetailView(RetrieveAPIView):
 
     def get_queryset(self, kwargs):
 
-        username = kwargs.get("usr")
+        public_id = kwargs.get("usr")
         job_slug = kwargs.get("slug")
 
-        if not (username and job_slug):
+        if not (public_id and job_slug):
             return None
 
         # job = Job.objects.get(slug=job_slug)
         job = None
-        client = Client.objects.get(user__username=username)
+        client = Client.objects.get(user__username=public_id)
 
         return client, job
 

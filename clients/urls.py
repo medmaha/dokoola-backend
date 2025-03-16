@@ -26,7 +26,7 @@ urlpatterns = [
         name="client_details",
     ),
     path(
-        "<username>/update/",
+        "<public_id>/update/",
         views.ClientUpdateView.as_view(),
         name="client_update",
     ),
