@@ -26,7 +26,7 @@ urlpatterns = [
     path(
         "<public_id>/portfolios/",
         views.TalentPortfolioAPIView.as_view(),
-        name="portfolio_route"
+        name="portfolio_route",
     ),
     # ----------------------------------------------------------------
     #
@@ -34,6 +34,7 @@ urlpatterns = [
     path(
         "<public_id>/certificates/",
         views.TalentCertificateAPIView.as_view(),
+        name="certificate_route"
     ),
     # ----------------------------------------------------------------
     #

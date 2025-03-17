@@ -163,18 +163,30 @@ class TalentPortfolioReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Portfolio
         fields = [
-            "name", "description", "image", "published", "url", "public_id", "created_at", "updated_at"
+            "name",
+            "description",
+            "image",
+            "published",
+            "url",
+            "public_id",
+            "created_at",
+            "updated_at",
         ]
+
 
 class TalentPortfolioWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Portfolio
         fields = [
-            "name", "description", "image", "url", "published",
-        ]  
+            "name",
+            "description",
+            "image",
+            "url",
+            "published",
+        ]
 
     @classmethod
-    def merge_serialize(cls, instance, validated_data, metadata:dict={}, **kwargs):
+    def merge_serialize(cls, instance, validated_data, metadata: dict = {}, **kwargs):
         data = dict()
         for field in cls.Meta.fields:
 
@@ -188,7 +200,6 @@ class TalentPortfolioWriteSerializer(serializers.ModelSerializer):
                 data[field] = getattr(instance, field)
         return cls(instance=instance, data=data, **kwargs)
 
-    
 
 # ===================== Certificate Serializers ===================== #
 class TalentCertificateSerializer(serializers.ModelSerializer):

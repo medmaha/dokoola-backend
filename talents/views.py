@@ -15,7 +15,7 @@ from .search import TalentsSearchAPIView
 from .serializers import (
     TalentRetrieveSerializer,
     TalentMiniInfoSerializer,
-    TalentPortfolioSerializer,
+    TalentPortfolioReadSerializer,
     TalentSerializer,
     TalentUpdateDataSerializer,
     TalentUpdateSerializer,
@@ -141,7 +141,7 @@ class TalentProjectsList(ListAPIView):
 
 
 class TalentPortfolioAPIView(GenericAPIView):
-    serializer_class = TalentPortfolioSerializer
+    serializer_class = TalentPortfolioReadSerializer
 
     def get(self, request, public_id: str, *args, **kwargs):
         try:
