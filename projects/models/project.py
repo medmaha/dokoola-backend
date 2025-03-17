@@ -68,7 +68,7 @@ class Project(models.Model):
     def _terminate(self, reason=None, commit_save=True):
         self.status = ProjectStatusChoices.TERMINATED
         self.termination_comment = reason
-        self.save(commit=commit_save)
+        self.save()
 
     def milestones(self):
         from .milestone import Milestone

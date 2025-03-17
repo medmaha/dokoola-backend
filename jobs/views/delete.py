@@ -77,6 +77,8 @@ class JobDeleteAPIView(DestroyAPIView):
 
                     if _projects.exists():
                         project = _projects.first()
+                        if not project:
+                            continue
                         project._terminate(
                             commit_save=False, reason=termination_message
                         )
@@ -95,7 +97,9 @@ class JobDeleteAPIView(DestroyAPIView):
                 job.save()
 
                 if milestones:
-                    Milestone.objects.bulk_update(milestones)
+                    Milestone.objects.bulk_update(
+                        milestones, fields=["status", "client_comment"]
+                    )
 
                 if projects:
                     Project.objects.bulk_update(projects)
@@ -116,7 +120,7 @@ class JobDeleteAPIView(DestroyAPIView):
                 {
                     "public_id": public_id,
                     "client_id": client_id,
-                    "user_id": request.user.id,
+                    "user_id": request.user.pk,
                     "view_handler": self.__class__.__name__,
                     "request_id": request.session.__str__(),
                 },
@@ -131,7 +135,7 @@ class JobDeleteAPIView(DestroyAPIView):
                 {
                     "public_id": public_id,
                     "client_id": client_id,
-                    "user_id": request.user.id,
+                    "user_id": request.user.pk,
                     "view_handler": self.__class__.__name__,
                     "request_id": request.session.__str__(),
                 },

@@ -20,18 +20,6 @@ class ReviewsGenericAPIView(GenericAPIView):
         if not public_id or not profile_type:
             raise Exception("Invalid request")
 
-        print("-------------------------------")
-        print("--------------public_id-----------------")
-        print(public_id)
-        print("-------------------------------")
-        print("-------------------------------")
-
-        print("-------------------------------")
-        print("--------------profile_type-----------------")
-        print(profile_type)
-        print("-------------------------------")
-        print("-------------------------------")
-
         try:
             if profile_type == "Client":
                 user = Client.objects.get(public_id=public_id)

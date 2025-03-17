@@ -2,7 +2,8 @@ import datetime
 from typing import Any, Dict, Optional
 
 from core.services.after.main import AfterResponseService
-from src.settings.logger import LOG_CONFIG
+
+# from src.settings.logger import LOG_CONFIG
 
 
 class DokoolaLoggerService:
@@ -16,8 +17,8 @@ class DokoolaLoggerService:
         enriched = extras or {}
         enriched.update(
             {
-                "APP_ID": LOG_CONFIG.app_id,
-                "ENVIRONMENT": LOG_CONFIG.runtime_environment,
+                # "APP_ID": LOG_CONFIG.app_id,
+                # "ENVIRONMENT": LOG_CONFIG.runtime_environment,
                 "timestamp": str(datetime.datetime.now()),
             }
         )
@@ -34,12 +35,12 @@ class DokoolaLoggerService:
             extras = extras or message
             enriched_extras.update(message)
 
-        AfterResponseService.schedule_log(
-            lambda: getattr(LOG_CONFIG.logger, log_attr)(
-                message if not isinstance(message, dict) else str(message),
-                extra=enriched_extras,
-            )
-        )
+        # AfterResponseService.schedule_log(
+        #     lambda: getattr(LOG_CONFIG.logger, log_attr)(
+        #         message if not isinstance(message, dict) else str(message),
+        #         extra=enriched_extras,
+        #     )
+        # )
 
     @classmethod
     def debug(cls, message: Any, extra: Optional[Dict[str, Any]] = None) -> None:
@@ -79,12 +80,12 @@ class DokoolaLazyLoggerService(DokoolaLoggerService):
             enriched_extras.update({"timestamp": str(datetime.datetime.now())})
             enriched_extras.update(message)
 
-        AfterResponseService.schedule_log(
-            lambda: getattr(LOG_CONFIG.logger, log_attr)(
-                message if not isinstance(message, dict) else str(message),
-                extra=enriched_extras,
-            )
-        )
+        # AfterResponseService.schedule_log(
+        #     lambda: getattr(LOG_CONFIG.logger, log_attr)(
+        #         message if not isinstance(message, dict) else str(message),
+        #         extra=enriched_extras,
+        #     )
+        # )
 
 
 DokoolaLoggerService.lazy = DokoolaLazyLoggerService()

@@ -65,7 +65,7 @@ class Proposal(models.Model):
     def _terminate(self, reason=None, commit_save=True):
         self.status = ProposalStatusChoices.TERMINATED
         self.client_comment = reason
-        self.save(commit=commit_save)
+        self.save()
 
     def notify_talent(self, status: ProposalStatusChoices, is_after_response=True):
         """
@@ -106,7 +106,7 @@ class Proposal(models.Model):
 
     def save(self, *args, **kwargs):
         if self._state.adding:
-            _id = self.id or primary_key_generator()
+            _id = self.pk or primary_key_generator()
             self.public_id = public_id_generator(_id, "PR")
         elif self.status == ProposalStatusChoices.REVIEW and self.is_reviewed == False:
             self.is_reviewed = True

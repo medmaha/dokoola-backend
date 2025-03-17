@@ -5,7 +5,7 @@ from users.serializer import UserUpdateSerializer
 from users.views.account.auth_token import GenerateToken
 from utilities.generator import get_serializer_error_message
 
-from ..models import Talent
+from ..models import Portfolio, Talent
 from ..serializers import TalentUpdateDataSerializer, TalentUpdateSerializer
 
 
@@ -35,6 +35,9 @@ class TalentUpdateAPIView(GenericAPIView):
     def put(self, request, public_id, **kwargs):
         try:
             talent = Talent.objects.get(public_id=public_id)
+
+            assert talent.user == request.user, "403 Unauthorized user"
+
             talent_serializer = TalentUpdateSerializer.merge_serialize(
                 talent, request.data, context={"request": request}
             )
@@ -50,11 +53,13 @@ class TalentUpdateAPIView(GenericAPIView):
                 talent.user,
                 request.data,
                 context={"request": request},
-                excluse=("email", "password"),
+                metadata={"exclude": ("email", "password")},
             )
 
             if not user_serializer.is_valid():
-                msg = get_serializer_error_message(user_serializer.errors, "Invalid user data")
+                msg = get_serializer_error_message(
+                    user_serializer.errors, "Invalid user data"
+                )
                 return Response({"message": msg}, status=400)
 
             current_username = request.user.username
@@ -71,6 +76,7 @@ class TalentUpdateAPIView(GenericAPIView):
                     },
                     status=200,
                 )
+
             return Response(talent_serializer.data, status=200)
         except Talent.DoesNotExist:
             # TODO: log error
@@ -78,7 +84,14 @@ class TalentUpdateAPIView(GenericAPIView):
                 {"message": "Error: User doesn't exist!"},
                 status=404,
             )
-        except Exception:
+
+        except AssertionError as e:
+            return Response(
+                {"message": str(e)},
+                status=403,
+            )
+
+        except Exception as e:
             # TODO: log error
             return Response(
                 {"message": "Error: Something went wrong!"},

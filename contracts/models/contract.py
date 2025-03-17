@@ -104,4 +104,4 @@ class Contract(models.Model):
     def _terminate(self, reason=None, commit_save=True):
         self.status = ContractStatusChoices.TERMINATED
         self.client_comment = reason
-        self.save(commit=commit_save)
+        self.save()

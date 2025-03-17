@@ -42,7 +42,7 @@ class JobTypeChoices(models.TextChoices):
 
 class Job(models.Model):
     id = models.UUIDField(
-        primary_key=True, default=primary_key_generator, editable=False
+        primary_key=True, default=primary_key_generator, editable=False  # type: ignore
     )
     public_id = models.CharField(
         max_length=50, db_index=True, default=partial(default_pid_generator, "Job")
@@ -123,7 +123,7 @@ class Job(models.Model):
         Update the job status and notify the client and talent about the status through email
         """
 
-        if JobStatusChoices.verify_status(job_status):
+        if JobStatusChoices.verify_status(job_status or ""):
             self.status = job_status
             self.save()
 
@@ -271,6 +271,7 @@ class JobAgentProxy(Job):
             try:
                 _lazy.full_clean()
             except Exception as e:
+                # TODO: log error
                 print(f"Error cleaning job {job.url}: {e}")
             _lazy_jobs.append(_lazy)
 

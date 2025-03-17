@@ -76,9 +76,14 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         )
 
     @classmethod
-    def merge_serialize(cls, instance, validated_data, **kwargs):
+    def merge_serialize(cls, instance, validated_data, metadata: dict = {}, **kwargs):
         data = dict()
         for field in cls.Meta.fields:
+
+            if field in metadata.get("exclude", []):
+                data[field] = getattr(instance, field)
+                continue
+
             if field in validated_data:
                 data[field] = validated_data[field]
             else:

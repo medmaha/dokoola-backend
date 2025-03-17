@@ -51,7 +51,7 @@ class Milestone(models.Model):
     def _terminate(self, reason=None, commit_save=True):
         self.status = MilestoneStatusChoices.CANCELLED
         self.client_comment = reason
-        self.save(commit=commit_save)
+        self.save()
 
     class Meta:
         ordering = ["due_date"]
