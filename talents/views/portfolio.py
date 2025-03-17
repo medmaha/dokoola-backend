@@ -13,17 +13,17 @@ from utilities.generator import get_serializer_error_message
 class TalentPortfolioAPIView(GenericAPIView):
     serializer_class = TalentPortfolioSerializer
 
-    def get(self, request, username: str, *args, **kwargs):
+    def get(self, request, public_id: str, *args, **kwargs):
         try:
             user = request.user
-
-            if user.username == username:
+            
+            if user.public_id == public_id:
                 portfolio = Portfolio.objects.filter(
-                    talent__user__username=username
+                    talent__public_id=public_id
                 ).order_by("published", "-updated_at")
             else:
                 portfolio = Portfolio.objects.filter(
-                    talent__user__username=username, published=True
+                    talent__public_id=public_id, published=True
                 ).order_by("-updated_at")
 
             serializer = self.get_serializer(portfolio, many=True)
@@ -36,7 +36,7 @@ class TalentPortfolioAPIView(GenericAPIView):
                 status=500,
             )
 
-    def post(self, request, username: str, *args, **kwargs):
+    def post(self, request, public_id: str, *args, **kwargs):
         user = request.user
         profile, profile_name = user.profile
 
@@ -46,7 +46,6 @@ class TalentPortfolioAPIView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
 
         if not serializer.is_valid():
-            print(serializer.errors)
             msg = get_serializer_error_message(serializer)
             return Response({"message": msg}, status=400)
 
@@ -62,16 +61,14 @@ class TalentPortfolioAPIView(GenericAPIView):
                 status=500,
             )
 
-    def put(self, request, username: str, *args, **kwargs):
+    def put(self, request, public_id: str, *args, **kwargs):
         try:
-            pid = request.data.get("pid")
-            portfolio = Portfolio.objects.get(id=pid, talent__user=request.user)
+            portfolio = Portfolio.objects.get(public_id=public_id, talent__user=request.user)
             serializer = self.get_serializer(instance=portfolio, data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=200)
 
-            print(serializer.errors)
             msg = get_serializer_error_message(serializer)
             raise Exception(msg)
         except Portfolio.DoesNotExist:
@@ -79,10 +76,9 @@ class TalentPortfolioAPIView(GenericAPIView):
         except Exception as e:
             return Response({"message": e}, status=400)
 
-    def delete(self, request, username: str, *args, **kwargs):
+    def delete(self, request, public_id: str, *args, **kwargs):
         try:
-            pid = request.data.get("pid")
-            portfolio = Portfolio.objects.get(id=pid, talent__user=request.user)
+            portfolio = Portfolio.objects.get(public_id=public_id, talent__user=request.user)
             portfolio.delete()
             return Response({"message": "Portfolio deleted"}, status=200)
         except Portfolio.DoesNotExist:

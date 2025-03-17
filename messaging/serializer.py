@@ -33,7 +33,7 @@ class ThreadListSerializer(serializers.ModelSerializer):
         return {
             "name": instance.recipient.name,
             "avatar": instance.recipient.avatar,
-            "username": instance.recipient.username,
+            "public_id": instance.recipient.public_id,
         }
 
     def get_messaging(self, instance: Thread):

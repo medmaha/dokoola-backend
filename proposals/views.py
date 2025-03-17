@@ -36,9 +36,9 @@ class ProposalListApiView(ListAPIView):
     serializer_class = ProposalListSerializer
 
     def get_queryset(self):
-        username = self.request.query_params.get("u")  # type: ignore
-        if username:
-            user = User.objects.filter(username=username).first()
+        public_id = self.request.query_params.get("pid")  # type: ignore
+        if public_id:
+            user = User.objects.filter(public_id=public_id).first()
             if user:
                 [profile, profile_name] = user.profile
 
@@ -351,7 +351,7 @@ class ProposalCreateAPIView(CreateAPIView):
                     "job_public_id": job_public_id,
                     "talent_public_id": talent.public_id,
                 }
-                DokoolaLogger.critical(log_data, extra=log_data)
+                DokoolaLoggerService.lazy.critical(log_data, extra=log_data)
                 return Response({"message": "An unexpected error occurred"}, status=400)
 
             # Get the attachment data of the request
@@ -428,9 +428,9 @@ class ProposalCheckAPIView(RetrieveAPIView):
 class ProposalPendingListView(ListAPIView):
     serializer_class = ProposalPendingListSerializer
 
-    def get_queryset(self, username: str):
+    def get_queryset(self, public_id: str):
         try:
-            user = User.objects.get(username=username)
+            user = User.objects.get(public_id=public_id)
             talent = Talent.objects.select_related().get(user_id=user.pk)
         except User.DoesNotExist:
             return None
@@ -445,8 +445,8 @@ class ProposalPendingListView(ListAPIView):
         )
         return proposals
 
-    def list(self, request, username, *args, **kwargs):
-        queryset = self.get_queryset(username)
+    def list(self, request, public_id, *args, **kwargs):
+        queryset = self.get_queryset(public_id)
 
         if queryset is None:
             return Response({"message": "This request is prohibited"}, status=403)

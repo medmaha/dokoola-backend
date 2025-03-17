@@ -10,7 +10,7 @@ urlpatterns = [
         name="client_generic_view",
     ),
     path(
-        "<client_id>/",
+        "<public_id>/",
         views.ClientGenericAPIView.as_view(),
         name="client_generic_view",
     ),
@@ -21,7 +21,7 @@ urlpatterns = [
         name="client_stats",
     ),
     path(
-        "<username>/",
+        "<public_id>/",
         views.ClientGenericAPIView.as_view(),
         name="client_details",
     ),
@@ -31,7 +31,7 @@ urlpatterns = [
         name="client_update",
     ),
     path(
-        "<username>/job-postings/",
+        "<public_id>/job-postings/",
         views.ClientJobPostingApiView.as_view(),
         name="client_job_postings",
     ),

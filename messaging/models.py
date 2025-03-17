@@ -41,7 +41,7 @@ class Thread(models.Model):
     unique_id = models.CharField(max_length=100, default="")
 
     def __str__(self) -> str:
-        return self.owner.username
+        return self.owner.__str__()
 
     class Meta:
         get_latest_by = "created_at"

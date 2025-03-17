@@ -30,7 +30,7 @@ class TalentsSearchAPIView(ListAPIView):
                 Q(skills__icontains=query)
                 | Q(user__first_name__icontains=query)
                 | Q(user__last_name__icontains=query)
-                | Q(user__username__icontains=query)
+                | Q(user__public_id__icontains=query)
                 | Q(title__icontains=query)
                 | Q(bio__icontains=query)
                 | Q(skills__icontains=query)

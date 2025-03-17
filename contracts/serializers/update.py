@@ -22,12 +22,11 @@ class ContractUpdateSerializer(serializers.ModelSerializer):
 def get_related_fields(instance: Proposal):
     data = {}
     data["job"] = {
-        "slug": instance.job.slug,
+        "public_id": instance.job.public_id,
         "title": instance.job.title,
         "description": instance.job.description[:400],
-        "location": instance.job.location,
-        "budget": instance.job.budget,
-        "payment_type": instance.job.payment_type,
+        "location": instance.job.address,
+        "budget": instance.budget,
         "duration": instance.duration,
     }
     data["proposal"] = {
@@ -38,17 +37,15 @@ def get_related_fields(instance: Proposal):
         "duration": instance.duration,
     }
     data["talent"] = {
-        "id": instance.talent.pk,
         "name": instance.talent.user.get_full_name(),
-        "username": instance.talent.user.username,
+        "public_id": instance.talent.public_id,
         "avatar": instance.talent.user.avatar,
         "rating": instance.talent.user.calculate_rating(),
     }
 
     data["client"] = {
-        "id": instance.job.client.pk,
         "name": instance.job.client.user.get_full_name(),
-        "username": instance.job.client.user.username,
+        "public_id": instance.job.client.public_id,
         "avatar": instance.job.client.user.avatar,
         "rating": instance.job.client.average_rating(),
     }

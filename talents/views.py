@@ -13,7 +13,7 @@ from .dashboard import TalentDashboardSerializer
 from .models import Portfolio, Talent
 from .search import TalentsSearchAPIView
 from .serializers import (
-    TalentDetailSerializer,
+    TalentRetrieveSerializer,
     TalentMiniInfoSerializer,
     TalentPortfolioSerializer,
     TalentSerializer,
@@ -46,10 +46,10 @@ class TalentUpdateAPIView(GenericAPIView):
 
     permission_classes = []
 
-    def get(self, request, username, **kwargs):
+    def get(self, request, public_id, **kwargs):
         self.serializer_class = TalentUpdateDataSerializer
         try:
-            talent = Talent.objects.get(user__username=username)
+            talent = Talent.objects.get(public_id=public_id)
             talent_serializer: TalentUpdateDataSerializer = self.get_serializer(
                 instance=talent, context={"request": request}
             )
@@ -61,10 +61,10 @@ class TalentUpdateAPIView(GenericAPIView):
                 status=404,
             )
 
-    def put(self, request, username, **kwargs):
+    def put(self, request, public_id, **kwargs):
         self.serializer_class = TalentUpdateSerializer
         try:
-            client = Talent.objects.get(user__username=username)
+            client = Talent.objects.get(public_id=public_id)
             client_serializer: TalentUpdateSerializer = self.get_serializer(
                 instance=client,
                 data=request.data,
@@ -93,8 +93,8 @@ class FreelanceMiniInfoView(RetrieveAPIView):
     permission_classes = []
     serializer_class = TalentMiniInfoSerializer
 
-    def retrieve(self, request, username, **kwargs):
-        talent = Talent.objects.filter(user__username=username).first()
+    def retrieve(self, request, public_id, **kwargs):
+        talent = Talent.objects.filter(public_id=public_id).first()
 
         if not talent:
             return Response({"message": "This request is prohibited"}, status=403)
@@ -105,11 +105,11 @@ class FreelanceMiniInfoView(RetrieveAPIView):
 
 
 class TalentetrieveAPIView(RetrieveAPIView):
-    serializer_class = TalentDetailSerializer
+    serializer_class = TalentRetrieveSerializer
 
     def retrieve(self, request, *args, **kwargs):
-        username = self.kwargs.get("username")
-        talent = Talent.objects.filter(user__username=username).first()
+        public_id = self.kwargs.get("public_id")
+        talent = Talent.objects.filter(public_id=public_id).first()
 
         if not talent:
             return Response({"message": "This request is prohibited"}, status=403)
@@ -122,16 +122,16 @@ class TalentetrieveAPIView(RetrieveAPIView):
 class TalentProjectsList(ListAPIView):
     serializer_class = ProposalPendingListSerializer
 
-    def get_queryset(self, username: str):
+    def get_queryset(self, public_id: str):
         try:
-            talent = Talent.objects.select_related().get(user__username=username)
+            talent = Talent.objects.select_related().get(public_id=public_id)
         except Talent.DoesNotExist:
             return None
         proposals = Proposal.objects.filter(job__is_valid=True, talent=talent)
         return proposals
 
-    def list(self, request, username, *args, **kwargs):
-        queryset = self.get_queryset(username)
+    def list(self, request, public_id, *args, **kwargs):
+        queryset = self.get_queryset(public_id)
         if not queryset:
             return Response({"message": "This request is prohibited"}, status=403)
         serializer = self.get_serializer(
@@ -143,10 +143,10 @@ class TalentProjectsList(ListAPIView):
 class TalentPortfolioAPIView(GenericAPIView):
     serializer_class = TalentPortfolioSerializer
 
-    def get(self, request, username: str, *args, **kwargs):
+    def get(self, request, public_id: str, *args, **kwargs):
         try:
             portfolio = (
-                Talent.objects.get(user__username=username)
+                Talent.objects.get(public_id=public_id)
                 .portfolio.filter()
                 .order_by("-updated_at")
             )
@@ -162,7 +162,7 @@ class TalentPortfolioAPIView(GenericAPIView):
                 status=500,
             )
 
-    def post(self, request, username: str, *args, **kwargs):
+    def post(self, request, public_id: str, *args, **kwargs):
         user = request.user
         profile, profile_name = user.profile
 
@@ -185,7 +185,7 @@ class TalentPortfolioAPIView(GenericAPIView):
                 status=500,
             )
 
-    def put(self, request, username: str, *args, **kwargs):
+    def put(self, request, public_id: str, *args, **kwargs):
         try:
             pid = request.data.get("pid")
             portfolio = Portfolio.objects.get(id=pid, talent__user=request.user)
@@ -199,7 +199,7 @@ class TalentPortfolioAPIView(GenericAPIView):
         except Exception as e:
             return Response({"message": str(e)}, status=400)
 
-    def delete(self, request, username: str, *args, **kwargs):
+    def delete(self, request, public_id: str, *args, **kwargs):
         try:
             pid = request.data.get("pid")
             portfolio = Portfolio.objects.get(id=pid, talent__user=request.user)

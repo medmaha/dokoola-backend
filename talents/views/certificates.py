@@ -16,17 +16,17 @@ MAX_CERTIFICATE_COUNT = 6
 class TalentCertificateAPIView(GenericAPIView):
     serializer_class = TalentCertificateSerializer
 
-    def get(self, request, username: str, *args, **kwargs):
+    def get(self, request, public_id: str, *args, **kwargs):
         try:
             user: User = request.user
 
-            if user.username == username:
+            if user.public_id == public_id:
                 certificates = Certificate.objects.filter(
-                    talent__user__username=username
+                    talent__public_id=public_id
                 ).order_by("-date_issued")
             else:
                 certificates = Certificate.objects.filter(
-                    talent__user__username=username, published=True
+                    talent_public_id=public_id, published=True
                 ).order_by("-date_issued")
 
             serializer = self.get_serializer(certificates, many=True)
@@ -41,7 +41,7 @@ class TalentCertificateAPIView(GenericAPIView):
                 status=500,
             )
 
-    def post(self, request, username: str, *args, **kwargs):
+    def post(self, request, public_id: str, *args, **kwargs):
         user: User = request.user
         profile, profile_type = user.profile
 
@@ -76,10 +76,10 @@ class TalentCertificateAPIView(GenericAPIView):
                 status=500,
             )
 
-    def put(self, request, username: str, *args, **kwargs):
+    def put(self, request, public_id: str, *args, **kwargs):
         try:
             certificate = Certificate.objects.get(
-                id=username, talent__user=request.user
+                public_id=public_id, talent__user=request.user
             )
             serializer = self.get_serializer(instance=certificate, data=request.data)
             if serializer.is_valid():
@@ -91,7 +91,7 @@ class TalentCertificateAPIView(GenericAPIView):
         except Exception as e:
             return Response({"message": str(e)}, status=400)
 
-    def delete(self, request, username: str, *args, **kwargs):
+    def delete(self, request, public_id: str, *args, **kwargs):
         try:
             user = request.user
             profile, profile_type = user.profile
@@ -99,7 +99,7 @@ class TalentCertificateAPIView(GenericAPIView):
             if profile_type.lower() != "talent":
                 return Response({"message": "This request is prohibited"}, status=403)
 
-            certificate = profile.certificates.filter(id=username).delete()
+            certificate = profile.certificates.filter(public_id=public_id).delete()
 
             if not certificate:
                 return Response({"message": "certificate not found"}, status=404)

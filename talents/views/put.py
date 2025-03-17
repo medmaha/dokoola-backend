@@ -41,7 +41,7 @@ class TalentUpdateAPIView(GenericAPIView):
 
             if not talent_serializer.is_valid():
                 msg = get_serializer_error_message(
-                    talent_serializer, "Invalid talent data"
+                    talent_serializer.errors, "Invalid talent data"
                 )
                 # raised the same error as the serializer
                 return Response({"message": msg}, status=400)
@@ -54,7 +54,7 @@ class TalentUpdateAPIView(GenericAPIView):
             )
 
             if not user_serializer.is_valid():
-                msg = get_serializer_error_message(user_serializer, "Invalid user data")
+                msg = get_serializer_error_message(user_serializer.errors, "Invalid user data")
                 return Response({"message": msg}, status=400)
 
             current_username = request.user.username

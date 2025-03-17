@@ -14,9 +14,8 @@ class TalentDashboardQuery(GenericAPIView):
     permission_classes = []
 
     def get_queryset(self, query: str):
-
         talents = (
-            Talent.objects.select_related()
+            Talent.objects.select_related("user")
             .filter(
                 Q(title__icontains=query)
                 | Q(bio__icontains=query)
@@ -27,12 +26,11 @@ class TalentDashboardQuery(GenericAPIView):
             )
             .annotate(
                 avatar=F("user__avatar"),
-                username=F("user__username"),
                 first_name=F("user__first_name"),
                 last_name=F("user__last_name"),
             )
             .order_by("-user__last_login")
-            .values("first_name", "last_name", "avatar", "username")
+            .values("first_name", "last_name", "avatar")
         )
 
         return talents
@@ -57,7 +55,7 @@ class TalentDashboardQuery(GenericAPIView):
 class TalentDashboardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Talent
-        fields = []
+        fields = ["public_id"]
 
     def __init__(self, instance, *args, **kwargs) -> None:
         super().__init__(instance, *args, **kwargs)
@@ -246,7 +244,6 @@ class TalentDashboardSerializer(serializers.ModelSerializer):
         # representation = super().to_representation(instance)
         super().to_representation(instance)
         data = {
-            "username": instance.user.username,
             "rating": instance.user.calculate_rating(),
             "total_earning": self.get_total_earning(instance),
             "client_reviews": self.get_client_reviews(instance),

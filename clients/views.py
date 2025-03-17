@@ -46,13 +46,12 @@ class ClientGenericAPIView(GenericAPIView):
         queryset = Client.objects.all()
         return queryset
 
-    def get(self, request, client_id=None, *args, **kwargs):
+    def get(self, request, public_id=None, *args, **kwargs):
 
         try:
-
-            if client_id:
+            if public_id:
                 queryset = Client.objects.get(
-                    Q(public_id=client_id) | Q(user__username=client_id)
+                    public_id=public_id
                 )
                 serializer = ClientRetrieveSerializer(
                     queryset, context={"request": request}
@@ -129,7 +128,7 @@ class ClientGenericAPIView(GenericAPIView):
         except Exception as e:
             return Response({"message": str(e)}, status=500)
 
-    def put(self, request, client_id, *args, **kwargs):
+    def put(self, request, public_id, *args, **kwargs):
         try:
             data = request.data.copy()
             user_data = data.pop("user", None)
@@ -146,9 +145,9 @@ class ClientGenericAPIView(GenericAPIView):
                         "response.status": 403,
                         "session.id": str(request.session),
                         "error.message": msg,
-                        "client.public_id": client_id,
+                        "client.public_id": public_id,
                         "request.user_id": request.user.pk,
-                        "request.handler": self.__name__,
+                        "request.handler": "ClientGenericAPIView",
                         "request.user_data": user_data,
                         "request.company_data": company_data,
                     },
@@ -161,13 +160,15 @@ class ClientGenericAPIView(GenericAPIView):
             _client = None
             _serializers = []
 
-            _valid_uuid = validate_uuid(client_id)
+            _valid_uuid = validate_uuid(public_id)
+
+            if not _valid_uuid:
+                return Response({
+                    "message": "Forbiddeb request parameters",
+                }, status=403)
 
             with transaction.atomic():
-                if _valid_uuid:
-                    _client = Client.objects.get(public_id=client_id)
-                else:
-                    _client = Client.objects.get(user__username=client_id)
+                _client = Client.objects.get(public_id=public_id)
 
                 assert user.pk == _client.user.pk, "Forbidden request"
 
@@ -202,11 +203,11 @@ class ClientGenericAPIView(GenericAPIView):
                                 "response.status": 400,
                                 "session.id": str(request.session),
                                 "error.message": "Invalid updata-data passed",
-                                "client.public_id": client_id,
+                                "client.public_id": public_id,
                                 "request.user_id": request.user.pk,
                                 "serializer": serializer.__name__,
                                 "error.type": "serializer.ValidationError",
-                                "request.handler": self.__name__,
+                                "request.handler": "ClientGenericAPIView",
                                 "request.data": serializer.initial_data,
                             },
                         )
@@ -219,10 +220,7 @@ class ClientGenericAPIView(GenericAPIView):
                         _client.company = obj
                         _client.save()
 
-                if _valid_uuid:
-                    _client = Client.objects.get(pk=client_id)
-                else:
-                    _client = Client.objects.get(user__username=client_id)
+                _client = Client.objects.get(public_id=public_id)
 
                 response_serializer = ClientListSerializer(instance=_client)
                 return Response(response_serializer.data, status=200)
@@ -235,10 +233,10 @@ class ClientGenericAPIView(GenericAPIView):
                     "response.status": 400,
                     "session.id": str(request.session),
                     "error.message": "Invalid request parameters",
-                    "client.public_id": client_id,
+                    "client.public_id": public_id,
                     "request.user_id": request.user.pk,
                     "error.type": "Client.DoesNotExist",
-                    "request.handler": self.__name__,
+                    "request.handler": "ClientGenericAPIView",
                 },
             )
             return Response({"message": "Invalid request parameters"}, status=400)
@@ -252,10 +250,10 @@ class ClientGenericAPIView(GenericAPIView):
                     "response.status": 403,
                     "session.id": str(request.session),
                     "error.message": msg,
-                    "client.public_id": client_id,
+                    "client.public_id": public_id,
                     "request.user_id": request.user.pk,
                     "error.type": "AssertionError",
-                    "request.handler": self.__name__,
+                    "request.handler": "ClientGenericAPIView",
                 },
             )
             return Response({"message": str(e)}, status=403)
@@ -269,15 +267,15 @@ class ClientGenericAPIView(GenericAPIView):
                     "response.status": 500,
                     "session.id": str(request.session),
                     "error.message": msg,
-                    "client.public_id": client_id,
+                    "client.public_id": public_id,
                     "request.user_id": request.user.pk,
                     "error.type": "Exception",
-                    "request.handler": self.__name__,
+                    "request.handler": 'ClientGenericAPIView',
                 },
             )
             return Response({"message": str(e)}, status=500)
 
-    def delete(self, request, client_id, *args, **kwargs):
+    def delete(self, request, public_id, *args, **kwargs):
         try:
             user: User = request.user
 
@@ -290,7 +288,7 @@ class ClientGenericAPIView(GenericAPIView):
                     status=403,
                 )
 
-            client = Client.objects.get(pk=client_id)
+            client = Client.objects.get(pk=public_id)
 
             assert user.pk == client.user.pk, "Forbidden request"
 
@@ -410,7 +408,7 @@ class ClientJobDetailView(RetrieveAPIView):
 
         # job = Job.objects.get(slug=job_slug)
         job = None
-        client = Client.objects.get(user__username=public_id)
+        client = Client.objects.get(public_id=public_id)
 
         return client, job
 
@@ -442,7 +440,7 @@ class ClientJobPostingApiView(ListAPIView):
     pagination_class = ClientRecentJobPaginator
     serializer_class = ClientJobPostingSerializer
 
-    def list(self, request, username, *args, **kwargs):
+    def list(self, request, public_id, *args, **kwargs):
         try:
             active_statues = [
                 JobStatusChoices.PUBLISHED,
@@ -455,14 +453,13 @@ class ClientJobPostingApiView(ListAPIView):
 
             valid_job_query = Q(is_valid=True, status__in=active_statues)
             client_job_query = Q(
-                client__user__username=username, status__in=active_statues
+                public_id=public_id, status__in=active_statues
             )
 
             query = valid_job_query | client_job_query
 
-            identity_query = Q(client__public_id=username) | Q(
-                client__user__username=username
-            )
+            identity_query = Q(public_id=public_id)
+
             other_users_query = identity_query & Q(
                 is_valid=True,
                 published=True,

@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from ..models import Talent
 from ..search import TalentsSearchAPIView
 from ..serializers import (
-    TalentDetailSerializer,
+    TalentRetrieveSerializer,
     TalentMiniInfoSerializer,
     TalentSerializer,
 )
@@ -33,8 +33,8 @@ class TalentMiniInfoView(RetrieveAPIView):
     permission_classes = []
     serializer_class = TalentMiniInfoSerializer
 
-    def retrieve(self, request, username, **kwargs):
-        talent = Talent.objects.filter(user__username=username).first()
+    def retrieve(self, request, public_id, **kwargs):
+        talent = Talent.objects.filter(public_id=public_id).first()
 
         if not talent:
             return Response({"message": "This request is prohibited"}, status=403)
@@ -45,13 +45,12 @@ class TalentMiniInfoView(RetrieveAPIView):
 
 
 class TalentRetrieveAPIView(RetrieveAPIView):
-    serializer_class = TalentDetailSerializer
+    serializer_class = TalentRetrieveSerializer
 
-    def retrieve(self, request, *args, **kwargs):
-        username = self.kwargs.get("username")
+    def retrieve(self, request, public_id, **kwargs):
         talent = (
             Talent.objects.prefetch_related("user")
-            .filter(user__username=username)
+            .filter(public_id=public_id)
             .first()
         )
 

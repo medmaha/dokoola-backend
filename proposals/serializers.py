@@ -147,8 +147,8 @@ def get_job(instance: Proposal):
         "client": (
             {
                 "avatar": instance.job.client.user.avatar,
-                "username": instance.job.client.user.username,
-                "name": instance.job.client.user.name,
+                "public_id": instance.job.client.public_id,
+                "name": instance.job.client.name,
             }
             if instance.job.client
             else None
@@ -158,8 +158,8 @@ def get_job(instance: Proposal):
 
 def get_talent(instance: Proposal):
     return {
-        "name": instance.talent.user.name,
-        "username": instance.talent.user.username,
+        "name": instance.talent.name,
+        "public_id": instance.talent.public_id,
         "avatar": instance.talent.user.avatar,
         "rating": instance.talent.user.calculate_rating(),
     }

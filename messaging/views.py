@@ -80,7 +80,7 @@ class ThreadSearchAPIView(ListAPIView):
 
         if query:
             queryset = Thread.objects.filter(
-                Q(recipient__username__icontains=query)
+                Q(recipient__public_id__icontains=query)
                 | Q(recipient__first_name__icontains=query)
                 | Q(recipient__last_name__icontains=query),
                 owner=user,
@@ -132,8 +132,8 @@ class messagingCreateAPIView(CreateAPIView):
     serializer_class = messagingCreateSerializer
 
     def create(self, request, *args, **kwargs):
-        recipient_username = request.data.get("recipient")
-        recipient = User.objects.filter(username=recipient_username).first()
+        recipient_public_id = request.data.get("recipient")
+        recipient = User.objects.filter(public_id=recipient_public_id).first()
 
         invalid_msg = "This request is invalid"
 
@@ -149,7 +149,7 @@ class messagingCreateAPIView(CreateAPIView):
             owner=recipient, recipient=user
         )[0]
 
-        unique_id = user.username + "__" + recipient.username
+        unique_id = user.public_id + "__" + recipient.public_id
 
         if not user_thread.unique_id:
             user_thread.unique_id = unique_id

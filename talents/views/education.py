@@ -16,17 +16,18 @@ MAX_EDUCATION_COUNT = 3
 class TalentEducationAPIView(GenericAPIView):
     serializer_class = TalentEducationSerializer
 
-    def get(self, request, username: str, *args, **kwargs):
+    def get(self, request, public_id: str, *args, **kwargs):
         try:
             user: User = request.user
+            profile, _ = user.profile
 
-            if user.username == username:
+            if profile and profile.public_id == public_id:
                 educations = Education.objects.filter(
-                    talent__user__username=username
+                    talent__public_id=public_id
                 ).order_by("-start_date", "end_date", "published")
             else:
                 educations = Education.objects.filter(
-                    talent__user__username=username, published=True
+                    talent__public_id=public_id, published=True
                 ).order_by("-start_date")
 
             serializer = self.get_serializer(educations, many=True)
@@ -41,7 +42,7 @@ class TalentEducationAPIView(GenericAPIView):
                 status=500,
             )
 
-    def post(self, request, username: str, *args, **kwargs):
+    def post(self, request, public_id: str, *args, **kwargs):
         user: User = request.user
         profile, profile_type = user.profile
 
@@ -78,9 +79,9 @@ class TalentEducationAPIView(GenericAPIView):
                 status=500,
             )
 
-    def put(self, request, username: str, *args, **kwargs):
+    def put(self, request, public_id: str, *args, **kwargs):
         try:
-            education = Education.objects.get(id=username, talent__user=request.user)
+            education = Education.objects.get(id=public_id, talent__user=request.user)
             serializer = self.get_serializer(instance=education, data=request.data)
             if serializer.is_valid():
                 serializer.save()
@@ -91,7 +92,7 @@ class TalentEducationAPIView(GenericAPIView):
         except Exception as e:
             return Response({"message": str(e)}, status=400)
 
-    def delete(self, request, username: str, *args, **kwargs):
+    def delete(self, request, public_id: str, *args, **kwargs):
         try:
             user = request.user
             profile, profile_type = user.profile
@@ -99,7 +100,7 @@ class TalentEducationAPIView(GenericAPIView):
             if profile_type.lower() != "talent":
                 return Response({"message": "This request is prohibited"}, status=403)
 
-            education = profile.education.filter(id=username).delete()
+            education = profile.education.filter(id=public_id).delete()
 
             if not education:
                 return Response({"message": "education not found"}, status=404)

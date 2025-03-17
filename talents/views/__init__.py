@@ -23,16 +23,16 @@ from .put import (
 class TalentProjectsList(ListAPIView):
     serializer_class = ProposalPendingListSerializer
 
-    def get_queryset(self, username: str):
+    def get_queryset(self, public_id: str):
         try:
-            talent = Talent.objects.select_related().get(user__username=username)
+            talent = Talent.objects.select_related().get(public_id=public_id)
         except Talent.DoesNotExist:
             return None
         proposals = Proposal.objects.filter(job__is_valid=True, talent=talent)
         return proposals
 
-    def list(self, request, username, *args, **kwargs):
-        queryset = self.get_queryset(username)
+    def list(self, request, public_id, *args, **kwargs):
+        queryset = self.get_queryset(public_id)
         if not queryset:
             return Response({"message": "This request is prohibited"}, status=403)
         serializer = self.get_serializer(

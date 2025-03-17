@@ -17,7 +17,7 @@ class TalentMiniSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance: Talent):
         return {
-            "username": instance.user.username,
+            "public_id": instance.public_id,
             "avatar": instance.user.avatar,
             "name": instance.user.name,
             "rating": instance.user.calculate_rating(),
@@ -62,7 +62,6 @@ class TalentUpdateDataSerializer(serializers.ModelSerializer):
             "name": instance.user.name,
             "avatar": instance.user.avatar,
             "gender": instance.user.gender,
-            "username": instance.user.username,
             "first_name": instance.user.first_name,
             "last_name": instance.user.last_name,
             **instance.user.get_personal_info(),
@@ -116,7 +115,7 @@ class TalentMiniInfoSerializer(serializers.ModelSerializer):
         return data
 
 
-class TalentDetailSerializer(serializers.ModelSerializer):
+class TalentRetrieveSerializer(serializers.ModelSerializer):
     """
     An API View for the talent data statistics
     """
@@ -407,7 +406,6 @@ class TalentDashboardSerializer(serializers.ModelSerializer):
         # representation = super().to_representation(instance)
         super().to_representation(instance)
         data = {
-            "username": instance.user.username,
             "rating": instance.user.calculate_rating(),
             "total_earning": self.get_total_earning(instance),
             "client_reviews": self.get_client_reviews(instance),

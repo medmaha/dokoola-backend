@@ -48,12 +48,8 @@ class User(AbstractUser):
     city = models.CharField(default="", blank=True, max_length=100, null=True)
     zip_code = models.CharField(max_length=20, default="00000", blank=True, null=True)
 
-    public_id = models.CharField(
-        max_length=50, db_index=True, default=partial(default_pid_generator, "Usr")
-    )
-
     def __str__(self):
-        return self.username
+        return self.email
 
     @property
     def name(self):
@@ -111,10 +107,14 @@ class User(AbstractUser):
     def calculate_rating(self):
         return self.reviews.aggregate(models.Avg("rating")).get("avg_rating", 0.0)
 
-    def save(self, *args, **kwargs):
-        if self._state.adding:
-            self.public_id = public_id_generator(self.id, "Usr")
-        return super().save(*args, **kwargs)
+    @property
+    def public_id(self) -> str | None:
+        profile, _ = self.profile
+
+        if hasattr(profile, "public_id"):
+            return profile.public_id
+        
+        return None
 
     # from clients.models import Client
     # from staffs.models import Staff

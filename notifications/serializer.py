@@ -12,7 +12,7 @@ class NotificationSerializer(serializers.ModelSerializer):
         if instance.sender:
             return {
                 "name": instance.sender.name,
-                "username": instance.sender.username,
+                "public_id": instance.sender.public_id,
                 "avatar": instance.sender.avatar,
             }
         else:

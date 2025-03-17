@@ -24,32 +24,32 @@ urlpatterns = [
         views.TalentPortfolioAPIView.as_view(),
     ),
     path(
-        "<username>/portfolios/",
+        "<public_id>/portfolios/",
         views.TalentPortfolioAPIView.as_view(),
     ),
     # ----------------------------------------------------------------
     #
     # Talent Certificate APIView
     path(
-        "<username>/certificates/",
+        "<public_id>/certificates/",
         views.TalentCertificateAPIView.as_view(),
     ),
     # ----------------------------------------------------------------
     #
     # Talent Education APIView
     path(
-        "<username>/educations/",
+        "<public_id>/educations/",
         views.TalentEducationAPIView.as_view(),
     ),
     # ----------------------------------------------------------------
     # Talent Projects APIView
     path(
-        "<username>/projects/",
+        "<public_id>/projects/",
         views.TalentProjectsList.as_view(),
         name="talent_retrieve",
     ),
     path(
-        "<username>/projects/pending",
+        "<public_id>/projects/pending",
         views.TalentProjectsList.as_view(),
         name="talent_retrieve",
     ),
@@ -67,12 +67,12 @@ urlpatterns = [
         name="talent_update",
     ),
     path(
-        "<username>/",
+        "<public_id>/",
         views.TalentRetrieveAPIView.as_view(),
         name="talent_retrieve",
     ),
     path(
-        "<username>/mini/",
+        "<public_id>/mini/",
         views.TalentMiniInfoView.as_view(),
         name="talent_statistics",
     ),

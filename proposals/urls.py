@@ -20,7 +20,7 @@ urlpatterns = [
         name="proposals_list",
     ),
     path(
-        "<username>/pending/",
+        "<public_id>/pending/",
         views.ProposalPendingListView.as_view(),
         name="proposals_pending",
     ),

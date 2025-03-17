@@ -206,6 +206,7 @@ class ClientRetrieveSerializer(serializers.ModelSerializer):
         data["gender"] = instance.user.gender
         data["avg_rating"] = instance.average_rating()
         data["profile_type"] = "Client"
+
         return data
 
 
@@ -229,7 +230,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         data["author"] = (
             {
-                "username": instance.author.username,
+                "public_id": instance.author.public_id,
                 "avatar": instance.author.avatar,
                 "name": instance.author.name,
             }

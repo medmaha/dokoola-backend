@@ -13,7 +13,7 @@ class ProjectListSerializer(serializers.ModelSerializer):
 
     def get_job(self, instance: Project):
         return {
-            "slug": instance.contract.job.slug,
+            "public_id": instance.contract.job.public_id,
             "title": instance.contract.job.title,
         }
 
@@ -21,7 +21,7 @@ class ProjectListSerializer(serializers.ModelSerializer):
         return {
             "name": instance.contract.client.user.name,
             "avatar": instance.contract.client.user.avatar,
-            "username": instance.contract.client.user.username,
+            "public_id": instance.contract.client.user.public_id,
             "rating": instance.contract.client.user.calculate_rating(),
         }
 
@@ -29,7 +29,7 @@ class ProjectListSerializer(serializers.ModelSerializer):
         return {
             "name": instance.contract.talent.user.name,
             "avatar": instance.contract.talent.user.avatar,
-            "username": instance.contract.talent.user.username,
+            "public_id": instance.contract.talent.user.public_id,
             "rating": instance.contract.talent.user.calculate_rating(),
         }
 
@@ -53,7 +53,7 @@ class ProjectRetrieveSerializer(serializers.ModelSerializer):
 
     def get_job(self, instance: Project):
         return {
-            "slug": instance.contract.job.slug,
+            "public_id": instance.contract.job.public_id,
             "title": instance.contract.job.title,
         }
 
@@ -61,7 +61,7 @@ class ProjectRetrieveSerializer(serializers.ModelSerializer):
         return {
             "name": instance.contract.client.user.name,
             "avatar": instance.contract.client.user.avatar,
-            "username": instance.contract.client.user.username,
+            "public_id": instance.contract.client.user.public_id,
             "rating": instance.contract.client.user.calculate_rating(),
         }
 
@@ -69,7 +69,7 @@ class ProjectRetrieveSerializer(serializers.ModelSerializer):
         return {
             "name": instance.contract.talent.user.name,
             "avatar": instance.contract.talent.user.avatar,
-            "username": instance.contract.talent.user.username,
+            "public_id": instance.contract.talent.user.public_id,
             "rating": instance.contract.talent.user.calculate_rating(),
         }
 
