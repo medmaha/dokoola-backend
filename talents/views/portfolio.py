@@ -2,21 +2,20 @@ from django.db import transaction
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
-from ..models import Portfolio, Talent
-from ..serializers import (
-    TalentPortfolioSerializer,
-)
-
+from users.models.user import User
 from utilities.generator import get_serializer_error_message
+
+from ..models import Portfolio
+from ..serializers import TalentPortfolioReadSerializer, TalentPortfolioWriteSerializer
 
 
 class TalentPortfolioAPIView(GenericAPIView):
-    serializer_class = TalentPortfolioSerializer
 
-    def get(self, request, public_id: str, *args, **kwargs):
+    def get(self, request, public_id: str):
+        self.serializer_class = TalentPortfolioReadSerializer
+
         try:
             user = request.user
-            
             if user.public_id == public_id:
                 portfolio = Portfolio.objects.filter(
                     talent__public_id=public_id
@@ -30,57 +29,93 @@ class TalentPortfolioAPIView(GenericAPIView):
             return Response(serializer.data, status=200)
 
         except Exception as e:
-
+            # TODO: log error
             return Response(
                 {"message": "Error: Something went wrong!"},
                 status=500,
             )
 
-    def post(self, request, public_id: str, *args, **kwargs):
-        user = request.user
-        profile, profile_name = user.profile
+    def post(
+        self,
+        request,
+        public_id,
+    ):
+        self.serializer_class = TalentPortfolioWriteSerializer
 
-        if profile_name.lower() != "talent":
-            return Response({"message": "This request is prohibited"}, status=403)
+        try:
+            user: User = request.user
+            profile, profile_name = user.profile
 
-        serializer = self.get_serializer(data=request.data)
+            with transaction.atomic():
 
-        if not serializer.is_valid():
-            msg = get_serializer_error_message(serializer)
-            return Response({"message": msg}, status=400)
+                if profile_name.lower() != "talent":
+                    return Response(
+                        {"message": "This request is prohibited"}, status=403
+                    )
+
+                serializer = self.get_serializer(data=request.data)
+
+                if not serializer.is_valid():
+                    msg = get_serializer_error_message(serializer.errors)
+                    return Response({"message": msg}, status=400)
+
+                _portfolio = serializer.save()
+                _serializer = TalentPortfolioReadSerializer(_portfolio)
+                profile.portfolio.add(_portfolio)
+                return Response(_serializer.data, status=201)
+
+        except AssertionError as e:
+            return Response({"message": str(e)}, status=403)
+
+        except Exception as e:
+            # TODO: log error
+            return Response({"message": str(e)}, status=500)
+
+    def put(self, request, public_id: str):
+        self.serializer_class = TalentPortfolioWriteSerializer
 
         try:
             with transaction.atomic():
-                portfolio = serializer.save()
-                profile.portfolio.add(portfolio)
-                return Response(serializer.data, status=200)
+                portfolio_public_id = request.data.get("public_id")
+                portfolio = Portfolio.objects.get(
+                    public_id=portfolio_public_id,
+                    talent__user=request.user,
+                    talent__public_id=public_id,
+                )
 
-        except:
-            return Response(
-                {"message": "Error: Something went wrong!"},
-                status=500,
-            )
+                serializer = TalentPortfolioWriteSerializer.merge_serialize(
+                    portfolio, request.data
+                )
+                if serializer.is_valid():
+                    _portfolio = serializer.save()
+                    _serializer = TalentPortfolioReadSerializer(instance=_portfolio)
+                    return Response(_serializer.data, status=200)
 
-    def put(self, request, public_id: str, *args, **kwargs):
-        try:
-            portfolio = Portfolio.objects.get(public_id=public_id, talent__user=request.user)
-            serializer = self.get_serializer(instance=portfolio, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=200)
+                msg = get_serializer_error_message(serializer.errors)
+                return Response({"message": msg}, status=400)
 
-            msg = get_serializer_error_message(serializer)
-            raise Exception(msg)
         except Portfolio.DoesNotExist:
+            # TODO: log error
             return Response({"message": "This request is prohibited"}, status=403)
-        except Exception as e:
-            return Response({"message": e}, status=400)
 
-    def delete(self, request, public_id: str, *args, **kwargs):
+        except AssertionError as e:
+            # TODO: log error
+            return Response({"message": str(e)}, status=403)
+
+        except Exception as e:
+            # TODO: log error
+            return Response({"message": str(e)}, status=500)
+
+    def delete(self, request, public_id: str):
         try:
-            portfolio = Portfolio.objects.get(public_id=public_id, talent__user=request.user)
+            portfolio_public_id = request.data.get("public_id", None)
+            portfolio = Portfolio.objects.get(
+                public_id=portfolio_public_id,
+                talent__user=request.user,
+                talent__public_id=public_id,
+            )
             portfolio.delete()
-            return Response({"message": "Portfolio deleted"}, status=200)
+            return Response({"message": "Portfolio deleted"}, status=204)
         except Portfolio.DoesNotExist:
             return Response({"message": "This request is prohibited"}, status=403)
         except:

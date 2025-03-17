@@ -51,12 +51,12 @@ class Portfolio(models.Model):
     public_id = models.CharField(
         max_length=50,
         db_index=True,
-        default=partial(default_pid_generator, "Portfolio"),
+        blank=True,
     )
 
     def save(self, *args, **kwargs):
-        if self._state.adding:
-            _id = primary_key_generator()
+        if self._state.adding or not self.public_id:
+            _id = self.pk or primary_key_generator()
             self.public_id = public_id_generator(_id, "Portfolio")
         return super().save(*args, **kwargs)
 

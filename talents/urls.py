@@ -26,6 +26,7 @@ urlpatterns = [
     path(
         "<public_id>/portfolios/",
         views.TalentPortfolioAPIView.as_view(),
+        name="portfolio_route"
     ),
     # ----------------------------------------------------------------
     #

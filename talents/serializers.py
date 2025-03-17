@@ -86,11 +86,11 @@ class TalentUpdateSerializer(serializers.ModelSerializer):
         )
 
     @classmethod
-    def merge_serialize(cls, instance, validated_data, **kwargs):
+    def merge_serialize(cls, instance, data, **kwargs):
         data = dict()
         for field in cls.Meta.fields:
-            if field in validated_data:
-                data[field] = validated_data[field]
+            if field in data:
+                data[field] = data[field]
             else:
                 data[field] = getattr(instance, field)
         return cls(instance=instance, data=data, **kwargs)
@@ -131,6 +131,7 @@ class TalentRetrieveSerializer(serializers.ModelSerializer):
         return {**user, **data}
 
 
+# ===================== Portfolio Serializers ===================== #
 class TalentProfileDetailSerializer(serializers.ModelSerializer):
     """
     An serializer class for the talent profile page
@@ -158,20 +159,36 @@ class TalentProfileDetailSerializer(serializers.ModelSerializer):
         return data
 
 
-class TalentPortfolioSerializer(serializers.ModelSerializer):
+class TalentPortfolioReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Portfolio
-        fields = "__all__"
+        fields = [
+            "name", "description", "image", "published", "url", "public_id", "created_at", "updated_at"
+        ]
 
-    def is_valid(self, *, raise_exception=False):
-        self.initial_data = {
-            "url": self.initial_data.get("url"),
-            "name": self.initial_data.get("name"),
-            "image": self.initial_data.get("image"),
-            "description": self.initial_data.get("description"),
-        }
-        return super().is_valid(raise_exception=raise_exception)
+class TalentPortfolioWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Portfolio
+        fields = [
+            "name", "description", "image", "url", "published",
+        ]  
 
+    @classmethod
+    def merge_serialize(cls, instance, validated_data, metadata:dict={}, **kwargs):
+        data = dict()
+        for field in cls.Meta.fields:
+
+            if field in metadata.get("exclude", []):
+                data[field] = getattr(instance, field)
+                continue
+
+            if field in validated_data:
+                data[field] = validated_data[field]
+            else:
+                data[field] = getattr(instance, field)
+        return cls(instance=instance, data=data, **kwargs)
+
+    
 
 # ===================== Certificate Serializers ===================== #
 class TalentCertificateSerializer(serializers.ModelSerializer):
