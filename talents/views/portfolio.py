@@ -10,10 +10,9 @@ from ..serializers import TalentPortfolioReadSerializer, TalentPortfolioWriteSer
 
 
 class TalentPortfolioAPIView(GenericAPIView):
+    serializer_class = TalentPortfolioReadSerializer
 
     def get(self, request, public_id: str):
-        self.serializer_class = TalentPortfolioReadSerializer
-
         try:
             user = request.user
             if user.public_id == public_id:
@@ -40,8 +39,6 @@ class TalentPortfolioAPIView(GenericAPIView):
         request,
         public_id,
     ):
-        self.serializer_class = TalentPortfolioWriteSerializer
-
         try:
             user: User = request.user
             profile, profile_name = user.profile
@@ -53,14 +50,14 @@ class TalentPortfolioAPIView(GenericAPIView):
                         {"message": "This request is prohibited"}, status=403
                     )
 
-                serializer = self.get_serializer(data=request.data)
+                serializer = TalentPortfolioWriteSerializer(data=request.data)
 
                 if not serializer.is_valid():
                     msg = get_serializer_error_message(serializer.errors)
                     return Response({"message": msg}, status=400)
 
                 _portfolio = serializer.save()
-                _serializer = TalentPortfolioReadSerializer(_portfolio)
+                _serializer = self.get_serializer(_portfolio)
                 profile.portfolio.add(_portfolio)
                 return Response(_serializer.data, status=201)
 
@@ -72,8 +69,6 @@ class TalentPortfolioAPIView(GenericAPIView):
             return Response({"message": str(e)}, status=500)
 
     def put(self, request, public_id: str):
-        self.serializer_class = TalentPortfolioWriteSerializer
-
         try:
             with transaction.atomic():
                 portfolio_public_id = request.data.get("public_id")
@@ -88,7 +83,7 @@ class TalentPortfolioAPIView(GenericAPIView):
                 )
                 if serializer.is_valid():
                     _portfolio = serializer.save()
-                    _serializer = TalentPortfolioReadSerializer(instance=_portfolio)
+                    _serializer = self.get_serializer(instance=_portfolio)
                     return Response(_serializer.data, status=200)
 
                 msg = get_serializer_error_message(serializer.errors)
@@ -115,7 +110,7 @@ class TalentPortfolioAPIView(GenericAPIView):
                 talent__public_id=public_id,
             )
             portfolio.delete()
-            return Response({"message": "Portfolio deleted"}, status=204)
+            return Response(status=204)
         except Portfolio.DoesNotExist:
             return Response({"message": "This request is prohibited"}, status=403)
         except:

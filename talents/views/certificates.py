@@ -7,14 +7,15 @@ from utilities.generator import get_serializer_error_message
 
 from ..models import Certificate, Talent
 from ..serializers import (
-    TalentCertificateSerializer,
+    TalentCertificateReadSerializer,
+    TalentCertificateWriteSerializer,
 )
 
 MAX_CERTIFICATE_COUNT = 6
 
 
 class TalentCertificateAPIView(GenericAPIView):
-    serializer_class = TalentCertificateSerializer
+    serializer_class = TalentCertificateReadSerializer
 
     def get(self, request, public_id: str, *args, **kwargs):
         try:
@@ -26,31 +27,28 @@ class TalentCertificateAPIView(GenericAPIView):
                 ).order_by("-date_issued")
             else:
                 certificates = Certificate.objects.filter(
-                    talent_public_id=public_id, published=True
+                    talent__public_id=public_id, published=True
                 ).order_by("-date_issued")
 
             serializer = self.get_serializer(certificates, many=True)
             return Response(serializer.data, status=200)
 
-        except Talent.DoesNotExist:
-            return Response({"message": "This request is prohibited"}, status=403)
-
-        except Exception:
+        except Exception as e:
             return Response(
                 {"message": "Error: Something went wrong!"},
                 status=500,
             )
 
     def post(self, request, public_id: str, *args, **kwargs):
-        user: User = request.user
-        profile, profile_type = user.profile
-
-        if profile_type.lower() != "talent":
-            return Response({"message": "This request is prohibited"}, status=403)
-
-        serializer = self.get_serializer(data=request.data)
-
         try:
+            user: User = request.user
+            profile, profile_type = user.profile
+
+            if profile_type.lower() != "talent":
+                return Response({"message": "This request is prohibited"}, status=403)
+
+            serializer = TalentCertificateWriteSerializer(data=request.data)
+
             with transaction.atomic():
                 certificates_count = profile.certificates.select_for_update().count()
 
@@ -63,14 +61,15 @@ class TalentCertificateAPIView(GenericAPIView):
                 if serializer.is_valid():
                     certificate = serializer.save()
                     profile.certificates.add(certificate)
-                    return Response(serializer.data, status=200)
+                    _serializer = self.get_serializer(certificate)
+                    return Response(_serializer.data, status=201)
 
                 error_message = get_serializer_error_message(
                     serializer.errors, "ERROR! bad request attempted"
                 )
                 return Response({"message": error_message}, status=400)
-        except Exception:
 
+        except Exception:
             return Response(
                 {"message": "Error: Something went wrong!"},
                 status=500,
@@ -78,34 +77,47 @@ class TalentCertificateAPIView(GenericAPIView):
 
     def put(self, request, public_id: str, *args, **kwargs):
         try:
-            certificate = Certificate.objects.get(
-                public_id=public_id, talent__user=request.user
-            )
-            serializer = self.get_serializer(instance=certificate, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=200)
-            raise Exception(str(serializer.errors))
+            with transaction.atomic():
+                certificate_public_id = request.data.get("public_id")
+                certificate = Certificate.objects.select_for_update().get(
+                    talent__user=request.user,
+                    talent__public_id=public_id,
+                    public_id=certificate_public_id,
+                )
+
+                serializer = TalentCertificateWriteSerializer.merge_serialize(
+                    certificate, request.data
+                )
+                if serializer.is_valid():
+                    _cert = serializer.save()
+                    _serializer = self.get_serializer(_cert)
+                    return Response(_serializer.data, status=200)
+
+                msg = get_serializer_error_message(serializer.errors)
+                return Response({"message": msg}, status=400)
+
         except Certificate.DoesNotExist:
-            return Response({"message": "This request is prohibited"}, status=403)
+            return Response({"message": "Certificate does not exists"}, status=404)
+
         except Exception as e:
             return Response({"message": str(e)}, status=400)
 
     def delete(self, request, public_id: str, *args, **kwargs):
         try:
-            user = request.user
-            profile, profile_type = user.profile
+            with transaction.atomic():
+                certificate_public_id = request.data.get("public_id", None)
+                certificate = Certificate.objects.get(
+                    talent__user=request.user,
+                    talent__public_id=public_id,
+                    public_id=certificate_public_id,
+                )
+                certificate.delete()
+                return Response(status=204)
 
-            if profile_type.lower() != "talent":
-                return Response({"message": "This request is prohibited"}, status=403)
-
-            certificate = profile.certificates.filter(public_id=public_id).delete()
-
-            if not certificate:
-                return Response({"message": "certificate not found"}, status=404)
-            return Response({"message": "certificate deleted"}, status=200)
         except Certificate.DoesNotExist:
-            return Response({"message": "This request is prohibited"}, status=403)
-        except:
+            # TODO: log error
+            return Response({"message": "Certificate does not exists"}, status=404)
 
+        except Exception as e:
+            # TODO: log error
             return Response({"message": "Bad request attempted"}, status=400)

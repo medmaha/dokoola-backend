@@ -1,6 +1,8 @@
-from django.db import models
 from functools import partial
 
+from django.db import models
+
+from reviews.models import Review
 from users.models import User
 from utilities.generator import (
     default_pid_generator,
@@ -12,7 +14,7 @@ from utilities.generator import (
 class Staff(models.Model):
     "The client model. Which is also a subclass of Base User."
 
-    id = models.UUIDField(
+    id = models.CharField(
         primary_key=True,
         default=primary_key_generator,
         editable=False,
@@ -24,6 +26,7 @@ class Staff(models.Model):
     public_id = models.CharField(
         max_length=50, db_index=True, default=partial(default_pid_generator, "STAFF")
     )
+    reviews = models.ManyToManyField(Review, blank=True, related_name="staff_reviews")
 
     def __str__(self) -> str:
         return self.user.email  # type: ignore

@@ -1,17 +1,17 @@
 from django.db.models import Q
 from rest_framework.generics import ListAPIView
 
-from .models import Talent
-from .serializers import TalentReadSerializer
+from ..models import Talent
+from ..serializers import TalentReadSerializer
 
 
-class TalentsSearchAPIView(ListAPIView):
+class TalentSearchAPIView(ListAPIView):
     permission_classes = []
     serializer_class = TalentReadSerializer
 
     @classmethod
     def make_query(cls, request):
-        search_params = request.query_params
+        search_params = request.search_params
         category = search_params.get("category")
         location = search_params.get("location")
         badge = search_params.get("badge")

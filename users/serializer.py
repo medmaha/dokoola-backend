@@ -23,18 +23,17 @@ class UserSerializer(serializers.ModelSerializer):
 class UserWriteSerializer(MergeSerializer, serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = (
+        fields = [
             "email",
             "username",
-            "password",
             "first_name",
-            "last_namt",
+            "last_name",
             "is_client",
             "is_talent",
-        )
+        ]
 
 
-class UserUpdateSerializer(serializers.ModelSerializer):
+class UserUpdateSerializer(MergeSerializer, serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
@@ -47,18 +46,3 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             "zip_code",
             "email",
         )
-
-    @classmethod
-    def merge_serialize(cls, instance, validated_data, metadata: dict = {}, **kwargs):
-        data = dict()
-        for field in cls.Meta.fields:
-
-            if field in metadata.get("exclude", []):
-                data[field] = getattr(instance, field)
-                continue
-
-            if field in validated_data:
-                data[field] = validated_data[field]
-            else:
-                data[field] = getattr(instance, field)
-        return cls(instance=instance, data=data, **kwargs)

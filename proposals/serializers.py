@@ -1,9 +1,7 @@
 from rest_framework import serializers
 
 from jobs.serializers import JobListSerializer
-from talents.serializers import (
-    TalentSerializer,
-)
+from talents.serializers import TalentReadSerializer
 
 from .models import Attachment, Proposal
 
@@ -46,7 +44,7 @@ class ProposalListSerializer(serializers.ModelSerializer):
 
 class ProposalDetailSerializer(serializers.ModelSerializer):
     job = JobListSerializer()
-    talent = TalentSerializer()
+    # talent = TalentReadSerializer(context={"mini":True})
     attachments = AttachmentSerializer(many=True)
 
     class Meta:
@@ -117,6 +115,8 @@ class ProposalPendingListSerializer(serializers.ModelSerializer):
     This is a serializer for the list of pending proposals for the request user (talent)
     """
 
+    talent = TalentReadSerializer()
+
     class Meta:
         model = Proposal
         fields = [
@@ -132,7 +132,6 @@ class ProposalPendingListSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
 
         data.update({"job": get_job(instance)})
-        data.update({"talent": get_talent(instance)})
         data["cover_letter"] = instance.cover_letter[:150]
 
         return data
