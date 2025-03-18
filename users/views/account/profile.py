@@ -3,11 +3,11 @@
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.response import Response
 
-from staffs.models import Staff
 from clients.models import Client
-from talents.models import Talent
 from clients.serializer import ClientRetrieveSerializer
-from talents.serializers import TalentProfileDetailSerializer
+from staffs.models import Staff
+from talents.models import Talent
+from talents.serializers.talent import TalentReadSerializer
 from users.models import User
 
 
@@ -22,12 +22,12 @@ class UserProfileAPIView(RetrieveAPIView):
     def get_serializer_class(self):
 
         if self.profile_type.lower() == "talent":
-            return TalentProfileDetailSerializer
+            return TalentReadSerializer
 
         if self.profile_type.lower() == "client":
             return ClientRetrieveSerializer
 
-        return TalentProfileDetailSerializer
+        return TalentReadSerializer
 
     def get_user(self, username: str):
         try:
@@ -108,7 +108,7 @@ class UserProfileAPIView(RetrieveAPIView):
             )
 
         serializer = self.get_serializer(
-            instance=self.profile, context={"request": request}
+            instance=self.profile, context={"request": request, "retrieve": True}
         )
 
         data = serializer.data

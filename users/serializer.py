@@ -1,35 +1,9 @@
 # create a u serializer class
 from rest_framework import serializers
 
+from talents.serializers.base import MergeSerializer
+
 from .models import User
-
-
-class AuthUserSerializer(serializers.ModelSerializer):
-    """Serializer for the user object"""
-
-    class Meta:
-        model = User
-        fields = ("avatar", "name", "is_active")
-
-    def to_representation(self, instance: User):
-        data = super().to_representation(instance)
-
-        profile, profile_name = instance.profile
-
-        if profile:
-            data.update({"profile": profile_name})
-        if hasattr(profile, "public_id"):
-            data.update({"public_id": profile.public_id})
-
-        if instance.is_staff:
-            data.update({"is_staff": True})
-        if instance.is_client:
-            data.update({"is_client": True})
-        if instance.is_talent:
-            data.update({"is_talent": True})
-
-        data.update({"is_authenticated": True})
-        return data
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -46,7 +20,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ("avatar", "name", "username", "profile")
 
 
-class UserCreateSerializer(serializers.ModelSerializer):
+class UserWriteSerializer(MergeSerializer, serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
@@ -54,8 +28,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
             "username",
             "password",
             "first_name",
-            "last_name",
-            "is_active",
+            "last_namt",
             "is_client",
             "is_talent",
         )

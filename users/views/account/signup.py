@@ -2,21 +2,21 @@ import random
 import re
 
 from django.db import transaction
-from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
+from rest_framework.response import Response
 
 from clients.models import Client
 from staffs.models import Staff
 from talents.models import Talent
 from users.models import User
-from users.serializer import UserCreateSerializer
+from users.serializer import UserWriteSerializer
 
 from .auth_token import GenerateToken
 
 
 class SignupAPIView(GenericAPIView):
     permission_classes = ()
-    serializer_class = UserCreateSerializer
+    serializer_class = UserWriteSerializer
 
     def username_suffix(self, _suffix):
         suffix = random.randrange(10, 999)
@@ -42,7 +42,7 @@ class SignupAPIView(GenericAPIView):
                     break
 
             data["username"] = username
-            serializer = UserCreateSerializer(data=data)
+            serializer = UserWriteSerializer(data=data)
 
             if serializer.is_valid():
                 user: User = serializer.save()  # type: ignore

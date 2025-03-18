@@ -6,7 +6,6 @@ from . import (
     profile,
     signup,
     signup_check_email,
-    signup_extra_info,
     signup_resend_ott,
     signup_verify_ott,
 )
@@ -35,11 +34,6 @@ urlpatterns = [
         "signup/mail-verify/",
         signup_verify_ott.VerifyOttAPIView.as_view(),
         name="verify_code",
-    ),
-    path(
-        "info/",
-        signup_extra_info.UserProfileUpdateAPIView.as_view(),
-        name="signup-info",
     ),
     path(
         "at/<public_id>/",

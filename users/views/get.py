@@ -3,8 +3,9 @@ from rest_framework.decorators import api_view
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
 
+from users.auth.serializer import AuthUserSerializer
 from users.models import User
-from users.serializer import AuthUserSerializer, UserSerializer
+from users.serializer import UserSerializer
 from utilities.text import get_url_search_params
 
 

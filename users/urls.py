@@ -1,5 +1,7 @@
 from django.urls import path
 
+from users import auth
+
 from . import views
 from .search import UserProfileAPIQueryView
 
@@ -16,6 +18,6 @@ urlpatterns = [
         UserProfileAPIQueryView.as_view(),
         name="dashboard",
     ),
-    path("auth/", views.UserAuthAPIView.as_view(), name="user_auth"),
+    path("auth/", auth.AuthUserAPIView.as_view(), name="auth_user"),
     path("<pk>/", views.UserDetailAPIView.as_view(), name="user_details"),
 ]

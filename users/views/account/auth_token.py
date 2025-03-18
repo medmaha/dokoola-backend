@@ -1,8 +1,8 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 
+from users.auth.serializer import AuthUserSerializer
 from users.models import User
-
-from ...serializer import AuthUserSerializer
 
 
 class GenerateToken(TokenObtainPairSerializer):
