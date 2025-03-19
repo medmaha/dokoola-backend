@@ -1,8 +1,7 @@
 from rest_framework import serializers
 
+from core.serializers import MergeSerializer
 from talents.models import Certificate
-
-from .base import MergeSerializer
 
 
 class TalentCertificateReadSerializer(serializers.ModelSerializer):

@@ -1,8 +1,7 @@
 from rest_framework import serializers
 
+from core.serializers import MergeSerializer
 from talents.models import Talent
-
-from .base import MergeSerializer
 
 
 class TalentWriteSerializer(MergeSerializer, serializers.ModelSerializer):
@@ -29,7 +28,7 @@ class TalentReadSerializer(serializers.ModelSerializer):
         model = Talent
         fields = []
 
-    def common_values(self, instance: Talent):
+    def mini_representation(self, instance: Talent):
         return {
             "public_id": instance.public_id,
             "avatar": instance.user.avatar,
@@ -37,17 +36,22 @@ class TalentReadSerializer(serializers.ModelSerializer):
             "title": instance.title,
         }
 
-    def mini_representation(self, instance: Talent):
-        # re-populate the data
+    def common_values(self, instance: Talent):
+        return {
+            "badge": instance.badge,
+            "rating": instance.rating,
+            "skills": instance.skills,
+            "pricing": instance.pricing,
+            "public_id": instance.public_id,
+            "avatar": instance.user.avatar,
+            "name": instance.name,
+            "title": instance.title,
+            "bio": instance.bio[:300],
+        }
 
-        return {**self.common_values(instance), "badge": instance.badge}
-
-    def detailed_representation(self, instance: Talent):
-        data = super().to_representation(instance)
-        data.update(self.common_values(instance))
-
+    def detailed_representation(self, instance: Talent, is_edit=False):
+        data = self.common_values(instance)
         user_fields = (
-            # "avatar",
             # "username",
             "date_joined",
         )
@@ -57,9 +61,6 @@ class TalentReadSerializer(serializers.ModelSerializer):
         talents_fields = (
             "bits",
             "bio",
-            "badge",
-            "skills",
-            "pricing",
             "jobs_completed",
             "deleted_at",
             "updated_at",
@@ -68,18 +69,24 @@ class TalentReadSerializer(serializers.ModelSerializer):
         for field in talents_fields:
             data[field] = getattr(instance, field)
 
-        data["rating"] = instance.average_rating()
+        if is_edit:
+            data["username"] = instance.user.username
+
         data["location"] = instance.user.get_location()
 
         return data
 
     def to_representation(self, instance: Talent):
+        s_type_list = ("mini", "detail", "common")
+        s_type = str(self.context.get("r_type", "")).lower()
 
-        serializer_type = self.context.get("s_type") if self.context else None
+        if s_type not in s_type_list:
+            return self.common_values(instance)
 
-        if serializer_type == "mini":
+        if s_type == "mini":
             return self.mini_representation(instance)
-        if serializer_type == "detail":
+
+        if s_type == "detail":
             return self.detailed_representation(instance)
 
         return self.common_values(instance)

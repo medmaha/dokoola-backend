@@ -35,6 +35,7 @@ class Talent(models.Model):
         Certificate, related_name="talent", blank=True
     )
 
+    rating = models.IntegerField(default=3.5, blank=True)
     jobs_completed = models.IntegerField(default=0)
     badge = models.CharField(max_length=200, default="basic")
     bits = models.IntegerField(default=60, blank=True)

@@ -1,8 +1,7 @@
 from rest_framework import serializers
 
+from core.serializers import MergeSerializer
 from talents.models import Portfolio
-
-from .base import MergeSerializer
 
 
 class TalentPortfolioReadSerializer(serializers.ModelSerializer):

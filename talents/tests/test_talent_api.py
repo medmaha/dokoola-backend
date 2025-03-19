@@ -36,7 +36,6 @@ class TalentAPITest(APITestCase):
         def process_response(response):
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.data["title"], self.talent.title)
-            self.assertIn("badge", response.data)
             self.assertIn("avatar", response.data)
             self.assertNotIn("id", response.data)
             self.assertNotIn("password", response.data)
@@ -45,12 +44,16 @@ class TalentAPITest(APITestCase):
         url = reverse("talent_route", kwargs={"public_id": self.talent.public_id})
         response = self.client.get(url)
         process_response(response)
+        self.assertIn("badge", response.data)
 
-        mini_response = self.client.get(f"{url}?s_type=mini")
+        mini_response = self.client.get(f"{url}?r_type=mini")
         process_response(mini_response)
+        self.assertNotIn("badge", mini_response.data)
+        self.assertNotIn("date_joined", mini_response.data)
 
-        detail_response = self.client.get(f"{url}?s_type=detail")
+        detail_response = self.client.get(f"{url}?r_type=detail")
         process_response(detail_response)
+        self.assertIn("badge", response.data)
         self.assertIn("updated_at", detail_response.data)
         self.assertIn("date_joined", detail_response.data)
 
@@ -85,7 +88,7 @@ class TalentAPITest(APITestCase):
             "title": "Updated Developer",
             "skills": "Python, Django, React, Javascript",
         }
-        response = self.client.put(f"{url}?s_type=detail", data, format="json")
+        response = self.client.put(f"{url}?r_type=detail", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.talent.refresh_from_db()
         self.assertEqual(self.talent.title, data["title"])

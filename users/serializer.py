@@ -1,7 +1,7 @@
 # create a u serializer class
 from rest_framework import serializers
 
-from talents.serializers.base import MergeSerializer
+from core.serializers import MergeSerializer
 
 from .models import User
 

@@ -19,11 +19,11 @@ class TalentAPIView(GenericAPIView):
 
     def get_serializer(self, *args, **kwargs):
         context = kwargs.get("context", {})
-        s_type = context.get("s_type")
+        r_type = context.get("r_type")
 
-        if not s_type:
-            s_type = self.request.query_params.get("s_type")
-            context["s_type"] = s_type
+        if not r_type:
+            r_type = self.request.query_params.get("r_type")
+            context["r_type"] = str(r_type)
             kwargs["context"] = context
 
         return super().get_serializer(*args, **kwargs)
@@ -38,11 +38,9 @@ class TalentAPIView(GenericAPIView):
                     models.Q(public_id=public_id) | models.Q(user__username=public_id)
                 )
 
-                s_type = request.query_params.get("s_type") or "mini"
+                r_type = request.query_params.get("r_type") or "common"
 
-                serializer = self.get_serializer(
-                    talent, context={"s_type": str(s_type).lower()}
-                )
+                serializer = self.get_serializer(talent, context={"r_type": r_type})
                 return Response(serializer.data, status=200)
 
             queryset = TalentsSearchAPIView.make_query(request).order_by("badge")
@@ -89,7 +87,7 @@ class TalentAPIView(GenericAPIView):
                 # _user.set_password(_password)
                 # _user.save()
 
-                _serializer = self.get_serializer(_talent, context={"s_type": "detail"})
+                _serializer = self.get_serializer(_talent, context={"r_type": "detail"})
                 return Response(_serializer.data, status=201)
 
         except Exception as e:
@@ -130,7 +128,7 @@ class TalentAPIView(GenericAPIView):
             updated_talent: Talent = talent_serializer.save()
 
             _serializer = TalentReadSerializer(
-                updated_talent, context={"s_type": "detail"}
+                updated_talent, context={"r_type": "detail"}
             )
 
             # Check to see of username of this user was updated

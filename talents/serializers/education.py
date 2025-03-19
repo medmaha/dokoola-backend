@@ -3,9 +3,8 @@ from typing import Any
 
 from rest_framework import serializers
 
+from core.serializers import MergeSerializer
 from talents.models.education import Education
-
-from .base import MergeSerializer
 
 
 class TalentEducationReadSerializer(serializers.ModelSerializer):
