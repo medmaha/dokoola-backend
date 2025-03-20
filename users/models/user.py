@@ -7,8 +7,6 @@ from django.utils.translation import gettext_lazy as _
 
 from utilities.generator import default_pid_generator, public_id_generator
 
-from reviews.models import Review
-
 
 class User(AbstractUser):
     "The base User model of this application"
@@ -30,8 +28,6 @@ class User(AbstractUser):
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
-
-    reviews = models.ManyToManyField(Review, blank=True, related_name="reviews")
 
     # Personal info
     phone = models.CharField(max_length=50, default="", blank=True)
@@ -104,16 +100,13 @@ class User(AbstractUser):
             "zip_code": self.zip_code,
         }
 
-    def calculate_rating(self):
-        return self.reviews.aggregate(models.Avg("rating")).get("avg_rating", 0.0)
-
     @property
     def public_id(self) -> str | None:
         profile, _ = self.profile
 
         if hasattr(profile, "public_id"):
             return profile.public_id
-        
+
         return None
 
     # from clients.models import Client

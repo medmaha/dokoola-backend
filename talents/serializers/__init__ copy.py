@@ -42,7 +42,7 @@ class TalentMiniSerializer(serializers.ModelSerializer):
             "public_id": instance.public_id,
             "avatar": instance.user.avatar,
             "name": instance.user.name,
-            "rating": instance.user.calculate_rating(),
+            "rating": instance.average_rating(),
         }
 
 
@@ -60,7 +60,7 @@ class TalentSerializer(serializers.ModelSerializer):
         return {
             **user,
             **data,
-            "rating": instance.user.calculate_rating(),
+            "rating": instance.average_rating(),
             "location": instance.user.get_location(),
         }
 
@@ -175,7 +175,7 @@ class TalentProfileDetailSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         user: dict = UserSerializer(instance=instance.user).data  # type: ignore
         data.update(user)
-        data.update({"rating": instance.user.calculate_rating()})
+        data.update({"rating": instance.average_rating()})
         data.update({"address": instance.user.get_address()})
         data.update({"profile_type": "Talent"})
         return data
@@ -489,7 +489,7 @@ class TalentDashboardSerializer(serializers.ModelSerializer):
         # representation = super().to_representation(instance)
         super().to_representation(instance)
         data = {
-            "rating": instance.user.calculate_rating(),
+            "rating": instance.average_rating(),
             "total_earning": self.get_total_earning(instance),
             "client_reviews": self.get_client_reviews(instance),
             "completed_projects": self.get_completed_projects(instance),

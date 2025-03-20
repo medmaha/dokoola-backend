@@ -160,5 +160,5 @@ def get_talent(instance: Proposal):
         "name": instance.talent.name,
         "public_id": instance.talent.public_id,
         "avatar": instance.talent.user.avatar,
-        "rating": instance.talent.user.calculate_rating(),
+        "rating": instance.talent.calculate_rating(),
     }

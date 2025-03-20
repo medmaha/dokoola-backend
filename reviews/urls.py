@@ -2,4 +2,6 @@ from django.urls import path
 
 from . import views
 
-urlpatterns = [path("", views.ReviewsGenericAPIView.as_view(), name="reviews")]
+urlpatterns = [
+    path("<str:public_id>/", views.ReviewsGenericAPIView.as_view(), name=""),
+]

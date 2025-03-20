@@ -244,7 +244,7 @@ class TalentDashboardSerializer(serializers.ModelSerializer):
         # representation = super().to_representation(instance)
         super().to_representation(instance)
         data = {
-            "rating": instance.user.calculate_rating(),
+            "rating": instance.average_rating(),
             "total_earning": self.get_total_earning(instance),
             "client_reviews": self.get_client_reviews(instance),
             "completed_projects": self.get_completed_projects(instance),

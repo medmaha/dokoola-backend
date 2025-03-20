@@ -22,7 +22,7 @@ class ProjectListSerializer(serializers.ModelSerializer):
             "name": instance.contract.client.user.name,
             "avatar": instance.contract.client.user.avatar,
             "public_id": instance.contract.client.user.public_id,
-            "rating": instance.contract.client.user.calculate_rating(),
+            "rating": instance.contract.client.average_rating(),
         }
 
     def get_talent(self, instance: Project):
@@ -30,7 +30,7 @@ class ProjectListSerializer(serializers.ModelSerializer):
             "name": instance.contract.talent.user.name,
             "avatar": instance.contract.talent.user.avatar,
             "public_id": instance.contract.talent.user.public_id,
-            "rating": instance.contract.talent.user.calculate_rating(),
+            "rating": instance.contract.talent.average_rating(),
         }
 
     def to_representation(self, instance: Project):
@@ -62,7 +62,7 @@ class ProjectRetrieveSerializer(serializers.ModelSerializer):
             "name": instance.contract.client.user.name,
             "avatar": instance.contract.client.user.avatar,
             "public_id": instance.contract.client.user.public_id,
-            "rating": instance.contract.client.user.calculate_rating(),
+            "rating": instance.contract.client.average_rating(),
         }
 
     def get_talent(self, instance: Project):
@@ -70,7 +70,7 @@ class ProjectRetrieveSerializer(serializers.ModelSerializer):
             "name": instance.contract.talent.user.name,
             "avatar": instance.contract.talent.user.avatar,
             "public_id": instance.contract.talent.user.public_id,
-            "rating": instance.contract.talent.user.calculate_rating(),
+            "rating": instance.contract.talent.average_rating(),
         }
 
     def to_representation(self, instance: Project):

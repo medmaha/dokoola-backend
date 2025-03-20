@@ -1,14 +1,11 @@
-# create a review model serializer
-
 from rest_framework.serializers import ModelSerializer
 
-from users.serializer import UserSerializer
+from core.serializers import MergeSerializer
 
 from .models import Review
 
 
-class ReviewListSerializer(ModelSerializer):
-    author = UserSerializer()
+class ReviewReadSerializer(ModelSerializer):
 
     class Meta:
         model = Review
@@ -20,8 +17,19 @@ class ReviewListSerializer(ModelSerializer):
             "created_at",
         ]
 
+    def to_representation(self, instance: Review):
+        data = super().to_representation(instance)
+        return {
+            **data,
+            "author": {
+                "name": instance.author.name,
+                "avatar": instance.author.avatar,
+                "public_id": instance.author.public_id,
+            },
+        }
 
-class ReviewCreateSerializer(ModelSerializer):
+
+class ReviewWriteSerializer(MergeSerializer, ModelSerializer):
 
     class Meta:
         model = Review

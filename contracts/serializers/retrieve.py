@@ -56,7 +56,7 @@ def get_related_fields(instance: Proposal):
         "name": instance.talent.user.get_full_name(),
         "public_id": instance.talent.public_id,
         "avatar": instance.talent.user.avatar,
-        "rating": instance.talent.user.calculate_rating(),
+        "rating": instance.talent.average_rating(),
     }
 
     data["client"] = {
