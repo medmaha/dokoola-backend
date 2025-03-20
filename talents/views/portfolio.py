@@ -21,7 +21,7 @@ class TalentPortfolioAPIView(GenericAPIView):
                 ).order_by("published", "-updated_at")
             else:
                 portfolio = Portfolio.objects.filter(
-                    talent__public_id=public_id, published=True
+                    published=True, talent__public_id=public_id
                 ).order_by("-updated_at")
 
             serializer = self.get_serializer(portfolio, many=True)
@@ -43,6 +43,8 @@ class TalentPortfolioAPIView(GenericAPIView):
             user: User = request.user
             profile, profile_name = user.profile
 
+            assert profile.public_id == public_id, "Forbidden request params"
+
             with transaction.atomic():
 
                 if profile_name.lower() != "talent":
@@ -56,7 +58,7 @@ class TalentPortfolioAPIView(GenericAPIView):
                     msg = get_serializer_error_message(serializer.errors)
                     return Response({"message": msg}, status=400)
 
-                _portfolio = serializer.save()
+                _portfolio = serializer.save(published=True)
                 _serializer = self.get_serializer(_portfolio)
                 profile.portfolio.add(_portfolio)
                 return Response(_serializer.data, status=201)

@@ -72,10 +72,6 @@ class TalentEducationAPIView(GenericAPIView):
 
         except Exception as e:
             # TODO: log error
-            print()
-            print("=====================================================")
-            print(e)
-            print("=====================================================")
             return Response(
                 {"message": "Error: Something went wrong!"},
                 status=500,
@@ -83,25 +79,26 @@ class TalentEducationAPIView(GenericAPIView):
 
     def put(self, request, public_id: str, *args, **kwargs):
         try:
-            education_public_id = request.data.get("public_id")
-            education = Education.objects.select_for_update().get(
-                talent__user=request.user,
-                talent__public_id=public_id,
-                public_id=education_public_id,
-            )
-            serializer = TalentEducationWriteSerializer.merge_serialize(
-                education, request.data
-            )
+            with transaction.atomic():
+                education_public_id = request.data.get("public_id")
+                education = Education.objects.select_for_update().get(
+                    talent__user=request.user,
+                    talent__public_id=public_id,
+                    public_id=education_public_id,
+                )
+                serializer = TalentEducationWriteSerializer.merge_serialize(
+                    education, request.data
+                )
 
-            if serializer.is_valid():
-                _education = serializer.save()
-                _serializer = self.get_serializer(_education)
-                return Response(_serializer.data, status=200)
+                if serializer.is_valid():
+                    _education = serializer.save()
+                    _serializer = self.get_serializer(_education)
+                    return Response(_serializer.data, status=200)
 
-            error_message = get_serializer_error_message(
-                serializer.errors, "ERROR! bad request attempted"
-            )
-            return Response({"message": error_message}, status=400)
+                error_message = get_serializer_error_message(
+                    serializer.errors, "ERROR! bad request attempted"
+                )
+                return Response({"message": error_message}, status=400)
 
         except Education.DoesNotExist:
             # TODO: log error

@@ -38,12 +38,12 @@ class TalentAPIView(GenericAPIView):
                     models.Q(public_id=public_id) | models.Q(user__username=public_id)
                 )
 
-                r_type = request.query_params.get("r_type") or "common"
+                r_type = request.query_params.get("r_type") or "detail"
 
                 serializer = self.get_serializer(talent, context={"r_type": r_type})
                 return Response(serializer.data, status=200)
 
-            queryset = TalentsSearchAPIView.make_query(request).order_by("badge")
+            queryset = TalentsSearchAPIView.make_query(request).order_by("rating")
             page = self.paginate_queryset(queryset)
             serializer = self.get_serializer(
                 page, many=True, context={"retrieve": public_id is not None}
@@ -56,7 +56,7 @@ class TalentAPIView(GenericAPIView):
 
         except Exception as e:
             # TODO: log error
-            return Response({"message": "Invalid request"}, status=500)
+            return Response({"message": "Invalid Server Error"}, status=500)
 
     def post(self, request, public_id=None):
         try:
@@ -87,15 +87,16 @@ class TalentAPIView(GenericAPIView):
                 # _user.set_password(_password)
                 # _user.save()
 
-                _serializer = self.get_serializer(_talent, context={"r_type": "detail"})
-                return Response(_serializer.data, status=201)
+                _talent_read_serializer = self.get_serializer(
+                    _talent, context={"r_type": "detail"}
+                )
+                return Response(_talent_read_serializer.data, status=201)
 
         except Exception as e:
             # TODO: log error
-            print("Error:", e)
             return Response({"message": "Invalid request"}, status=500)
 
-    def put(self, request, public_id):
+    def put(self, request, public_id=None):
         try:
             talent = Talent.objects.get(public_id=public_id)
 
@@ -123,11 +124,10 @@ class TalentAPIView(GenericAPIView):
                 return Response({"message": msg}, status=400)
 
             current_username = request.user.username
-
             updated_user: User = user_serializer.save()
             updated_talent: Talent = talent_serializer.save()
 
-            _serializer = TalentReadSerializer(
+            _talent_read_serializer = TalentReadSerializer(
                 updated_talent, context={"r_type": "detail"}
             )
 
@@ -139,12 +139,11 @@ class TalentAPIView(GenericAPIView):
                     {
                         "tokens": token,
                         "message": "User updated successfully",
-                        **_serializer.data,
+                        **_talent_read_serializer.data,
                     },
                     status=200,
                 )
-
-            return Response(talent_serializer.data, status=200)
+            return Response(_talent_read_serializer.data, status=200)
 
         except Talent.DoesNotExist:
             # TODO: log error
@@ -154,6 +153,7 @@ class TalentAPIView(GenericAPIView):
             )
 
         except AssertionError as e:
+            # TODO: log error
             return Response(
                 {"message": str(e)},
                 status=403,
@@ -162,7 +162,7 @@ class TalentAPIView(GenericAPIView):
         except Exception as e:
             # TODO: log error
             return Response(
-                {"message": "Error: Something went wrong!"},
+                {"message": "Internal Server Error"},
                 status=500,
             )
 

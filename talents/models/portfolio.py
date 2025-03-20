@@ -22,12 +22,6 @@ class Portfolio(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    public_id = models.CharField(
-        max_length=50,
-        db_index=True,
-        blank=True,
-    )
-
     public_id = models.CharField(max_length=50, db_index=True, blank=True)
 
     def save(self, *args, **kwargs):

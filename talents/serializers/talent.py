@@ -52,7 +52,8 @@ class TalentReadSerializer(serializers.ModelSerializer):
     def detailed_representation(self, instance: Talent, is_edit=False):
         data = self.common_values(instance)
         user_fields = (
-            # "username",
+            "username",
+            "email",
             "date_joined",
         )
         for field in user_fields:
@@ -73,7 +74,6 @@ class TalentReadSerializer(serializers.ModelSerializer):
             data["username"] = instance.user.username
 
         data["location"] = instance.user.get_location()
-
         return data
 
     def to_representation(self, instance: Talent):

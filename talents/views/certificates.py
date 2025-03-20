@@ -100,7 +100,8 @@ class TalentCertificateAPIView(GenericAPIView):
             return Response({"message": "Certificate does not exists"}, status=404)
 
         except Exception as e:
-            return Response({"message": str(e)}, status=400)
+            # TODO: log error
+            return Response({"message": str(e)}, status=500)
 
     def delete(self, request, public_id: str, *args, **kwargs):
         try:
