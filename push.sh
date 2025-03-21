@@ -1,13 +1,12 @@
 #!/bin/bash
 
-
 get_seven_chars_hash() {
     chars=$1
     echo $chars | cut -c 1-7
 }
 
 commit_hash=$(get_seven_chars_hash $1)
-remote_image_tag="intrasoft0/dokoola:backend-$commit_hash"
+remote_image_tag="intrasoft0/dokoola-backend:$commit_hash"
 
 echo "Pushing image to $remote_image_tag"
 
