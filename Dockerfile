@@ -17,11 +17,12 @@ COPY .env.prod ./.env
 COPY . .
 
 # Collect static files
-
 RUN python manage.py collectstatic --noinput
 
+# Remove the unused env file
 RUN rm -rf .env.prod
 
+# Application port
 EXPOSE 8000
 
 CMD ["gunicorn", "src.wsgi:application", "--bind", "0.0.0.0:8000"]
