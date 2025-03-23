@@ -39,16 +39,16 @@ class Command(BaseCommand):
         # Create Dokoola Agent
         argv = ["manage.py", "create_agent"]
         execute_from_command_line(argv)
-        sys.stdout.write("✅ The Dokoola Agent account created successfully\n")
+        sys.stdout.write("✅ The Dokoola Agent created successfully\n")
 
         # Collect static files
         if not "-no-static" in sys.argv:
             argv = ["manage.py", "collectstatic", "--noinput"]
             execute_from_command_line(argv)
-            sys.stdout.write("✅ Static files collected and saved successfully\n\n")
+            sys.stdout.write("✅ Static files collected and saved successfully\n")
 
         sys.stdout.write(
             self.style.SUCCESS(
-                "------------------------------- Done Scaffolding Application -------------------------------\n"
+                "\n------------------------------- Done Scaffolding Application -------------------------------\n\n"
             )
         )
