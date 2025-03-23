@@ -2,6 +2,7 @@
 
 env_file=.env.prod
 image=dokoola-backend
+container_name=dokoola-backend
 
 
 # check if container exists
@@ -13,5 +14,5 @@ fi
 
 docker run -d \
     -p 8000:8000 \
-    --name $image \
+    --name $container_name \
     $image
