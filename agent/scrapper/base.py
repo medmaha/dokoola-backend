@@ -1,13 +1,14 @@
-from abc import abstractmethod
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import datetime
+import logging
 import random
 import threading
-import logging
-from typing import List, Optional, Dict, Iterator, Tuple, ClassVar, final
+from abc import abstractmethod
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass
+from typing import ClassVar, Dict, Iterator, List, Optional, Tuple, final
+
 import requests
 from bs4 import BeautifulSoup
-from dataclasses import dataclass
 from ratelimit import limits, sleep_and_retry
 
 
@@ -153,13 +154,20 @@ class JobParser:
         """Extract job categories"""
         pass
 
-    def _get_job_pricing(self, job_description: Optional[str] = None) -> dict[str, str|int]:
+    @abstractmethod
+    def _required_skills(self):
+        """Extract job categories"""
+        pass
+
+    def _get_job_pricing(
+        self, job_description: Optional[str] = None
+    ) -> dict[str, str | int]:
         return {}
-    
+
     def _get_job_benefits(self, job_description: Optional[str] = None) -> list:
         return []
-    
-    def _get_site_name(self)->str:
+
+    def _get_site_name(self) -> str:
         return ""
 
     @final
@@ -188,6 +196,7 @@ class JobParser:
             location_info = self._get_location_info()
             job_type = self._get_job_type()
             categories = self._get_categories()
+            required_skills = self._required_skills()
             created_at = self._get_created_at()
             application_deadline = self._get_application_deadline()
 
@@ -210,7 +219,7 @@ class JobParser:
                 address=location_info["address"],
                 application_deadline=application_deadline,
                 third_party_metadata=third_party_metadata,
-                required_skills=categories,
+                required_skills=required_skills,
                 pricing=self._get_job_pricing(),
                 benefits=self._get_job_benefits(),
                 job_type_other=job_type_other,
@@ -254,19 +263,22 @@ class JobScraper:
                     thread.join(timeout=1.0)
                 except Exception:
                     pass
-    
+
     @final
     def __get_job_links_raw(self, soup: BeautifulSoup, pathname: str) -> List[str]:
         """
-            Get job links from the main page hard core
-            Retrieve any link that has a href attribute of {base_url}/{pathname}/{*}
-            The as any other path/subpath
+        Get job links from the main page hard core
+        Retrieve any link that has a href attribute of {base_url}/{pathname}/{*}
+        The as any other path/subpath
         """
         import re
 
-        return [link["href"] for link in soup.find_all("a", href=re.compile(f"{self._base_url}/{pathname}/.*"))]
-
-
+        return [
+            link["href"]
+            for link in soup.find_all(
+                "a", href=re.compile(f"{self._base_url}/{pathname}/.*")
+            )
+        ]
 
     @final
     def __links(self, pathname: str, link_class: str) -> List[str]:
@@ -369,11 +381,9 @@ class JobScraper:
             logger.info(f"Successfully scraped {len(jobs)} jobs")
 
             self.__kill_zombie_threads()
-            
+
             return jobs
 
         except Exception as e:
             logger.error(f"Error in scrape process: {str(e)}")
             return jobs
-
-    

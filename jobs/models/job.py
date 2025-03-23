@@ -275,5 +275,4 @@ class JobAgentProxy(Job):
                 print(f"Error cleaning job {job.url}: {e}")
             _lazy_jobs.append(_lazy)
 
-        print(_lazy_jobs)
         Job.objects.bulk_create(_lazy_jobs)

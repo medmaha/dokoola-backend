@@ -26,10 +26,11 @@ class Proposal(models.Model):
         max_length=50, db_index=True, default=partial(default_pid_generator, "PR")
     )
 
-    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="proposals")
-
+    job = models.ForeignKey(
+        Job, on_delete=models.CASCADE, db_index=True, related_name="proposals"
+    )
     talent = models.ForeignKey(  # Renamed from talent to talent
-        Talent, on_delete=models.CASCADE, related_name="proposals"
+        Talent, on_delete=models.CASCADE, db_index=True, related_name="proposals"
     )
 
     duration = models.CharField(max_length=100, null=True, blank=True)

@@ -54,9 +54,7 @@ class JobActivitiesSerializer(serializers.ModelSerializer):
     def get_applicant_ids(self, instance: Activities):
         return [
             p.talent.user.public_id
-            for p in Proposal.objects.only("talent__user__public_id").filter(
-                job=instance.job
-            )
+            for p in Proposal.objects.only("talent__public_id").filter(job=instance.job)
         ]
 
 

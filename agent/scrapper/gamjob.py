@@ -1,7 +1,10 @@
 from datetime import datetime
 from typing import List, Optional
+
 from bs4 import BeautifulSoup
-from agent.scrapper.base import JobScraper, JobParser, ScrapedJob
+from django.utils import timezone
+
+from agent.scrapper.base import JobParser, JobScraper, ScrapedJob
 
 
 class GamJobParser(JobParser):
@@ -79,7 +82,7 @@ class GamJobParser(JobParser):
 
         # Sample "- March 14, 2025"
         _date = str(date_elem.text.strip()).replace("- ", "")
-        return datetime.strptime(_date, "%B %d, %Y")
+        return timezone.datetime.strptime(_date, "%B %d, %Y")
 
     def _get_application_deadline(self):
         date_elem = self.job_detail.find("span", class_="job-date__closing")
@@ -91,7 +94,7 @@ class GamJobParser(JobParser):
         _date = str(date_elem.text.strip()).replace("- ", "")
         return datetime.strptime(_date, "%B %d, %Y")
 
-    def _get_categories(self):
+    def _required_skills(self):
         categories = []
         categories_elm = self.job_detail.select("span.job-category a")
         if categories_elm:
@@ -99,6 +102,16 @@ class GamJobParser(JobParser):
                 _v = anchor.text.strip()
                 if _v:
                     categories.append(_v)
+        return categories
+
+    def _get_categories(self):
+        categories = []
+        # categories_elm = self.job_detail.select("span.job-category a")
+        # if categories_elm:
+        #     for anchor in categories_elm:
+        #         _v = anchor.text.strip()
+        #         if _v:
+        #             categories.append(_v)
         return categories
 
 
@@ -128,9 +141,7 @@ class GamJobScraper(JobScraper):
 
     _BASE_URL = "https://gamjobs.com"
 
-    def __init__(
-        self, max_workers: int = 3, base_url: str = _BASE_URL, to_json=False
-    ):
+    def __init__(self, max_workers: int = 3, base_url: str = _BASE_URL, to_json=False):
         super().__init__(
             max_workers=max_workers,
             base_url=base_url,
@@ -163,24 +174,27 @@ class GamJobScraper(JobScraper):
 
             description = ""
             relevant_tags = ["p", "li", "div", "span"]
-            content_containers = soup.find_all(lambda tag: tag.name in relevant_tags and len(tag.get_text(strip=True)) > 30)
+            content_containers = soup.find_all(
+                lambda tag: tag.name in relevant_tags
+                and len(tag.get_text(strip=True)) > 30
+            )
 
             seen_content = set()
             for container in content_containers:
                 text = container.get_text(strip=True)
-                
+
                 if text in seen_content or len(text) < 30:
                     continue
-                
+
                 seen_content.add(text)
-                
+
                 description += text + "\n\n"
 
-                if len(description) > 1000:  
+                if len(description) > 1000:
                     break
 
             description = description.strip()
-            
+
             job.third_party_metadata["description"] = description
 
         return jobs

@@ -16,9 +16,11 @@ class UserProfileAPIView(RetrieveAPIView):
     metadata = {}
 
     def get_serializer_class(self):
-        if self.profile_type.lower() == "talent":
+        profile_type = self.metadata.get("profile_type")
+
+        if profile_type.lower() == "talent":
             return TalentReadSerializer
-        if self.profile_type.lower() == "client":
+        if profile_type.lower() == "client":
             return ClientRetrieveSerializer
         return TalentReadSerializer
 

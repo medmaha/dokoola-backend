@@ -45,9 +45,14 @@ class ProposalListApiView(ListAPIView):
                 # Check if the user is a client or a talent
                 if profile_name.lower() == "client":
                     # Gets all proposals for jobs that the client has posted
-                    queryset = Proposal.objects.filter(job__client=profile).order_by(
-                        "-updated_at"
+                    queryset = (
+                        Proposal.objects.select_related(
+                            "job__client__user", "talent__user"
+                        )
+                        .prefetch_related("attachments")
+                        .order_by("-updated_at")
                     )
+
                 # Gets all proposals for jobs that the talent has applied to
                 elif profile_name.lower() == "talent":
                     queryset = Proposal.objects.filter(talent=profile).order_by(

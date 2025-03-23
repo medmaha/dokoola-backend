@@ -10,8 +10,11 @@ from utilities.generator import get_serializer_error_message
 class CategoryAPIView(GenericAPIView):
     permission_classes = []
 
-    def get_serializer_class(self):
+    def get_queryset(self):
+        categories = Category.objects.filter(disabled=False)
+        return categories
 
+    def get_serializer_class(self):
         class Serializer(serializers.ModelSerializer):
             class Meta:
                 model = Category
@@ -20,7 +23,6 @@ class CategoryAPIView(GenericAPIView):
         return Serializer
 
     def get(self, request):
-
         # ids = set()
         # slugs = set()
         # for _c in Category.objects.all():
@@ -29,8 +31,7 @@ class CategoryAPIView(GenericAPIView):
         #         slugs.add(_c.name)
         # Category.objects.exclude(id__in=ids).delete()
 
-        categories = Category.objects.filter(disabled=False)
-
+        categories = self.get_queryset()
         serializers = self.get_serializer(categories, many=True)
         categories = serializers.data
 
