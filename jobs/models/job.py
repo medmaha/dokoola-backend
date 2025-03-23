@@ -4,6 +4,7 @@ from typing import List
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
+from django.utils import timezone
 
 from agent.scrapper.base import ScrapedJob
 from clients.models import Client
@@ -44,9 +45,7 @@ class Job(models.Model):
     id = models.UUIDField(
         primary_key=True, default=primary_key_generator, editable=False  # type: ignore
     )
-    public_id = models.CharField(
-        max_length=50, db_index=True, default=partial(default_pid_generator, "Job")
-    )
+    public_id = models.CharField(max_length=50, db_index=True, blank=True)
 
     title = models.CharField(max_length=200, db_index=True)
     description = models.TextField()
@@ -99,7 +98,7 @@ class Job(models.Model):
 
     bits_amount = models.IntegerField(default=16)
     updated_at = models.DateTimeField(auto_now=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return self.title[:50]
@@ -110,10 +109,9 @@ class Job(models.Model):
     def save(self, *args, **kwargs):
         if self.third_party_address:
             self.is_third_party = True
-        if self._state.adding:
-            _id = self.id or primary_key_generator()
+        if self._state.adding or not self.public_id:
+            _id = self.pk or primary_key_generator()
             self.public_id = public_id_generator(_id, "Job")
-
         return super().save(*args, **kwargs)
 
     def update_status_and_withdraw_proposals(
@@ -229,8 +227,8 @@ class JobAgentProxy(Job):
         if len(_jobs) == 0:
             return
 
-        client = Client.objects.filter(is_agent=True).first()
-        category = Category.objects.filter(is_agent=True).first()
+        client = Client.objects.get(is_agent=True)
+        category = Category.objects.get(is_agent=True)
 
         if not client or not category:
             return
@@ -243,32 +241,34 @@ class JobAgentProxy(Job):
         )
 
         _jobs = [job for job in _jobs if job.url not in existing_jobs]
-
         _lazy_jobs = []
 
         for job in _jobs:
-            _lazy = Job(
-                published=True,
-                client=client,
-                title=job.title,
-                category=category,
-                pricing=job.pricing,
-                address=job.address,
-                country=job.country,
-                is_third_party=True,
-                benefits=job.benefits,
-                job_type=job.job_type,
-                created_at=job.created_at,
-                description=job.description,
-                third_party_address=job.url,
-                job_type_other=job.job_type_other,
-                status=JobStatusChoices.PUBLISHED,
-                required_skills=job.required_skills,
-                application_deadline=job.application_deadline,
-                third_party_metadata=job.third_party_metadata,
-            )
-
             try:
+                _id = primary_key_generator()
+                public_id = public_id_generator(_id, "Job")
+                _lazy = Job(
+                    id=_id,
+                    public_id=public_id,
+                    published=True,
+                    client=client,
+                    title=job.title,
+                    category=category,
+                    pricing=job.pricing,
+                    address=job.address,
+                    country=job.country,
+                    is_third_party=True,
+                    benefits=job.benefits,
+                    job_type=job.job_type,
+                    created_at=job.created_at,
+                    description=job.description,
+                    third_party_address=job.url,
+                    job_type_other=job.job_type_other,
+                    status=JobStatusChoices.PUBLISHED,
+                    required_skills=job.required_skills,
+                    application_deadline=job.application_deadline,
+                    third_party_metadata=job.third_party_metadata,
+                )
                 _lazy.full_clean()
             except Exception as e:
                 # TODO: log error

@@ -355,9 +355,6 @@ class JobScraper:
                 return jobs
 
             soups = self.__soups(links)
-
-            logger.info(f"Soups: {soups}")
-
             self._session.close()
 
             with ThreadPoolExecutor(max_workers=self._max_workers) as executor:
@@ -369,7 +366,6 @@ class JobScraper:
                 for future in as_completed(future_to_soup):
                     try:
                         job = future.result()
-                        logger.info(f"Job: {job}")
                         if job:
                             if self._to_json:
                                 jobs.append(job.to_json())
@@ -378,10 +374,7 @@ class JobScraper:
                     except Exception as e:
                         logger.error(f"Error parsing job (JobScraper): {str(e)}")
 
-            logger.info(f"Successfully scraped {len(jobs)} jobs")
-
             self.__kill_zombie_threads()
-
             return jobs
 
         except Exception as e:

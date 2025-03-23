@@ -23,29 +23,35 @@ class Command(BaseCommand):
         avatar = os.getenv("SUPER_ADMIN_AVATAR")
 
         try:
-            user = User.objects.filter(email=email)
-            if user.exists():
+            user = User.objects.filter(email=email).first()
+            if user:
+                user.first_name = first_name
+                user.last_name = last_name
+                user.avatar = avatar
+                user.is_staff = True
+                user.is_active = True
+                user.is_superuser = True
+                user.password = password
+                user.save()
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        self.style.SUCCESS("Superadmin updated successfully")
+                    )
+                )
+
                 return
-        except User.DoesNotExist:
+
             user = User()
             user.is_staff = True
             user.is_active = True
             user.is_superuser = True
             user.email = email
+            user.avatar = avatar
             user.first_name = first_name
             user.last_name = last_name
             user.gender = gender
-
-            try:
-                User.objects.get(username="super-admin")
-                user.username = "super-admin" + str(random.randint(10000, 99999))
-            except User.DoesNotExist:
-                user.username = "super-admin"
-
-            if avatar:
-                user.avatar = avatar
-
-            user.set_password(password)
+            user.username = "super-admin" + str(random.randint(10000, 99999))
+            user.password = password
             user.save()
 
         except Exception as e:

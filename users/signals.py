@@ -1,3 +1,5 @@
+import re
+
 from django.contrib.auth.hashers import is_password_usable, make_password
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
@@ -14,11 +16,10 @@ def activate_superuser(sender, instance: User, created, **kwargs):
 
 @receiver(pre_save, sender=User)
 def encrypt_passwords(sender, instance: User, **kwargs):
-    # if not instance.is_superuser and not instance.password.startswith("pbkdf2"):
-    # instance.set_password(instance.password)
-    # Check if the password is already hashed
-    if instance.password and not is_password_usable(instance.password):
-        # Replace the plain-text password with an encrypted version
+
+    password_hash_pattern = r"^pbkdf2_sha256\$.*"
+    is_password_hashed = bool(re.match(password_hash_pattern, instance.password))
+
+    if instance.password and not is_password_hashed:
         instance.password = make_password(instance.password)
-    else:
-        instance.password = ""
+    return instance

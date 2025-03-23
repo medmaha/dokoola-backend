@@ -1,31 +1,44 @@
 import datetime
 
+import after_response
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import HttpRequest, HttpResponse
 
 from jobs.models.job import Job, JobAgentProxy
 
 from .scrapper import G4SJobScraper, GamJobScraper
 
-printTime = lambda x, y: print(f"\n\nTime taken: {y - x}\n\n")
+printTime = lambda x, y: print(f"\nTime taken: {y - x}\n\n")
+
+scrapping = False
 
 
-@login_required
-def index(request):
+@after_response.enable
+def scrape():
+    global scrapping
 
-    # Job.objects.filter(is_third_party=True).delete()
+    if scrapping:
+        return
+
+    scrapping = True
     start_time = datetime.datetime.now()
 
     scrapper = GamJobScraper(to_json=True)
-    jobs = scrapper.scrape()
+    scrapped_jobs = scrapper.scrape()
 
     proxy = JobAgentProxy()
-    proxy.save_scraped_jobs(jobs)
+    proxy.save_scraped_jobs(scrapped_jobs)
 
     end_time = datetime.datetime.now()
     printTime(start_time, end_time)
 
-    return JsonResponse(
-        jobs,
-        safe=False,
-    )
+    scrapping = False
+
+
+@login_required
+def index(request: HttpRequest):
+    if not request.user.is_staff:
+        return HttpResponse("403 Forbidden request!")
+
+    scrape.after_response()
+    return HttpResponse("<h1>Scrapping in process</h1>")

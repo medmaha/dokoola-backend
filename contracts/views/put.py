@@ -8,6 +8,10 @@ from notifications.models import Notification
 from utilities.generator import get_serializer_error_message
 
 
+def generate_content_text(contract: Contract, accepted: bool = False):
+    return ""
+
+
 class ContractUpdateAPIView(UpdateAPIView):
     serializer_class = ContractUpdateSerializer
 
@@ -57,46 +61,24 @@ class ContractAcceptAPIView(UpdateAPIView):
         contract.status = new_status
         notifications = []
 
-        if contract.status == ContractStatusChoices.ACCEPTED:
-            notifications.append(
-                # Notify the talent
+        # Line 58-102
+        # Replace with:
+        Notification.objects.bulk_create(
+            [
                 Notification(
-                    hint_text="Contract Accepted",
-                    content_text=f"You've accepted a contract from <strong>{contract.client.user.name}</strong>",
-                    recipient=contract.talent.user,
-                    object_api_link=f"/contracts/view/{contract.pk}",
-                ),
-            )
-            notifications.append(
-                # Notify the client
-                Notification(
-                    hint_text="Contract Accepted",
-                    content_text=f"<strong>{contract.talent.user.name}</strong> has accepted your contract for project <strong>{contract.job.title}</strong>",
-                    recipient=contract.client.user,
-                    sender=contract.talent.user,
+                    hint_text="Contract Accepted" if accepted else "Contract Rejected",
+                    content_text=generate_content_text(contract, accepted),
+                    recipient=recipient,
+                    sender=sender if not accepted else None,
                     object_api_link=f"/contracts/view/{contract.pk}",
                 )
-            )
-        else:
-            notifications.append(
-                # Notify the talent
-                Notification(
-                    hint_text="Contract Rejected",
-                    content_text=f"You've rejected a contract from <strong>{contract.client.user.name}</strong>",
-                    recipient=contract.talent.user,
-                    object_api_link=f"/contracts/view/{contract.pk}",
-                ),
-            )
-            notifications.append(
-                # Notify the client
-                Notification(
-                    hint_text="Contract Rejected",
-                    content_text=f"<strong>{contract.talent.user.name}</strong> has rejected your contract for project <strong>{contract.job.title}</strong>",
-                    recipient=contract.client.user,
-                    sender=contract.talent.user,
-                    object_api_link=f"/contracts/view/{contract.pk}",
-                )
-            )
+                for recipient, sender in [
+                    (contract.talent.user, None),
+                    (contract.client.user, contract.talent.user),
+                ]
+            ]
+        )
+
         contract.talent_acknowledgement = new_status
         contract.save()
         Notification.objects.bulk_create(notifications)

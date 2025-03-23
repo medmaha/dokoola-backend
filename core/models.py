@@ -24,6 +24,9 @@ class Feedback(models.Model):
 class Category(models.Model):
 
     is_agent = models.BooleanField(default=False)
+    parent = models.ForeignKey(
+        "core.Category", on_delete=models.CASCADE, null=True, blank=True
+    )
 
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)

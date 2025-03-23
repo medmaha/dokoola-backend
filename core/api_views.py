@@ -7,20 +7,36 @@ from utilities.generator import get_serializer_error_message
 
 
 # Categories ---------------------------------------------------------------------
+class CategorySerializer(serializers.ModelSerializer):
+
+    parent = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Category
+        fields = ["slug", "name", "image_url", "description", "parent"]
+
+    def get_parent(self, instance: Category):
+        if not instance.parent:
+            return None
+
+        return {
+            "slug": instance.parent.slug,
+            "name": instance.parent.name,
+            "image_url": instance.parent.image_url,
+        }
+
+
 class CategoryAPIView(GenericAPIView):
     permission_classes = []
+    serializer_class = CategorySerializer
 
     def get_queryset(self):
-        categories = Category.objects.filter(disabled=False)
+        child = self.request.query_params.get("child", False)
+        parent__isnull = bool(child) == False
+        categories = Category.objects.filter(
+            disabled=False, is_agent=False, parent__isnull=parent__isnull
+        )
         return categories
-
-    def get_serializer_class(self):
-        class Serializer(serializers.ModelSerializer):
-            class Meta:
-                model = Category
-                fields = ["slug", "name", "image_url", "description"]
-
-        return Serializer
 
     def get(self, request):
         # ids = set()

@@ -26,20 +26,18 @@ def public_id_generator(_id: str, prefix: str, max_length=20):
         version = _uuid[14]
         _randomA = _uuid[15:22]
         _randomB = _uuid[25:]
-
+        _prefix = prefix[:3].lower()
         _pid = (
             str(f"{time_hex}{version}{_randomB}{_randomA}")
             .replace("-", "")
             .strip()
             .lower()
         )
-        _prefix = prefix[:3].lower()
-
         # If the pid is longer than the max length, truncate it
         if len(_pid) > max_length:
             _pid = _pid[:max_length]
+        return f"{_prefix}_{_pid}".replace("-", "")
 
-        return f"{_prefix}_{_pid}"
     except:
         return _id[:max_length]
 

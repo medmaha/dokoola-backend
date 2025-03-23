@@ -1,145 +1,191 @@
-from calendar import c
+from django.utils.text import slugify
 
 from core.models import Category
 
-categories = [
+default_categories = [
     {
-        "name": "Software Development",
-        "slug": "software-development",
-        "keywords": "website, frontend, backend, full stack, database, db, cms, mobile-app, web design",
-        "image_url": "/img/categories/software-development.jpg",
-        "description": "Development of software applications for web, mobile, and desktop platforms.",
-        "disabled": False,
+        "name": "Third Party",
+        "slug": "third-party",
+        "image_url": "",
+        "is_agent": True,
+        "description": "Providing top jobs from third party sources by Dokoola Agent.",
+        "keywords": "legal advice, contract writing, intellectual property, business law, copyright",
     },
     {
-        "name": "Graphic Design",
-        "slug": "graphic-design",
-        "keywords": "logo, branding, illustration, photoshop, vector, UX/UI design",
+        "name": "Software Development & IT",
+        "image_url": "/img/categories/software-development.jpg",
+        "description": "Development of software applications, IT services, cloud solutions, and cybersecurity.",
+        "keywords": "software development, IT services, cloud computing, cybersecurity, DevOps",
+        "children": [
+            "Web Development",
+            "Mobile App Development",
+            "Desktop Software Development",
+            "DevOps & Cloud Engineering",
+            "Cybersecurity",
+            "Database Development",
+            "QA & Software Testing",
+        ],
+    },
+    {
+        "name": "Design & Creative",
         "image_url": "/img/categories/graphic-design.jpg",
-        "description": "Designing creative visual concepts, graphics, and user interfaces.",
-        "disabled": False,
+        "description": "Graphic design, UI/UX, video editing, animation, and creative visual services.",
+        "keywords": "graphic design, UI/UX, video editing, animation, 3D modeling, photography",
+        "children": [
+            "Graphic Design",
+            "UI/UX Design",
+            "Video & Animation",
+            "3D Modeling & Rendering",
+            "Photography",
+            "Illustration & Art",
+        ],
     },
     {
         "name": "Writing & Translation",
-        "slug": "writing-translation",
-        "keywords": "copywriting, content writing, editing, translation, proofreading, technical writing",
         "image_url": "/img/categories/writing-translation.jpg",
-        "description": "Creating written content and providing language translation services.",
-        "disabled": False,
+        "description": "Creating written content, copywriting, and language translation services.",
+        "keywords": "copywriting, content writing, technical writing, translation, proofreading",
+        "children": [
+            "Copywriting",
+            "Content Writing",
+            "Technical Writing",
+            "Translation & Localization",
+            "Proofreading & Editing",
+        ],
     },
     {
-        "name": "Digital Marketing",
-        "slug": "digital-marketing",
-        "keywords": "SEO, SEM, social media, PPC, email marketing, content marketing, influencer marketing",
+        "name": "Marketing & Sales",
         "image_url": "/img/categories/digital-marketing.jpg",
-        "description": "Promoting brands through digital channels like social media, SEO, and paid advertising.",
-        "disabled": False,
+        "description": "SEO, social media marketing, advertising, lead generation, and branding services.",
+        "keywords": "SEO, social media marketing, advertising, branding, sales, lead generation",
+        "children": [
+            "SEO & SEM",
+            "Social Media Marketing",
+            "Email Marketing",
+            "Advertising & PPC",
+            "Branding & Strategy",
+            "Sales & Lead Generation",
+        ],
     },
     {
-        "name": "Data Science & Analytics",
-        "slug": "data-science-analytics",
-        "keywords": "data analysis, machine learning, AI, data visualization, data mining, big data, statistics",
-        "image_url": "/img/categories/data-science.jpg",
-        "description": "Analyzing complex data sets and building predictive models to drive decision-making.",
-        "disabled": False,
-    },
-    {
-        "name": "Electrical Installation",
-        "slug": "electrical-installation",
-        "keywords": "wiring, lighting, electrical panel, circuit installation, electrical maintenance, power systems",
-        "image_url": "/img/categories/electrical-installation.jpg",
-        "description": "Installation and maintenance of electrical systems and components in residential, commercial, and industrial spaces.",
-        "disabled": False,
-    },
-    {
-        "name": "Admin Support",
-        "slug": "admin-support",
-        "keywords": "virtual assistant, data entry, customer support, email handling, scheduling, office management",
-        "image_url": "/img/categories/admin-support.jpg",
-        "description": "Providing administrative assistance, virtual office management, and customer support services.",
-        "disabled": False,
-    },
-    {
-        "name": "Satellite Installation",
-        "slug": "satellite-installation",
-        "keywords": "satellite dish, antenna, installation, satellite TV, satellite internet, signal repair",
-        "image_url": "/img/categories/satellite-installation.jpg",
-        "description": "Installation and maintenance of satellite communication equipment for television, internet, and other services.",
-        "disabled": False,
-    },
-    {
-        "name": "Video & Animation",
-        "slug": "video-animation",
-        "keywords": "video editing, animation, 3D modeling, motion graphics, explainer videos",
-        "image_url": "/img/categories/video-animation.jpg",
-        "description": "Creating engaging videos, animations, and motion graphics for various purposes.",
-        "disabled": False,
-    },
-    {
-        "name": "Music & Audio",
-        "slug": "music-audio",
-        "keywords": "music production, audio editing, voiceover, mixing, mastering, sound design",
-        "image_url": "/img/categories/music-audio.jpg",
-        "description": "Providing audio and music production services, including editing, mixing, and voiceover.",
-        "disabled": False,
-    },
-    {
-        "name": "Business Consulting",
-        "slug": "business-consulting",
-        "keywords": "strategy, business plan, market research, financial analysis, startup consulting",
+        "name": "Business & Finance",
         "image_url": "/img/categories/business-consulting.jpg",
-        "description": "Offering expert advice and strategies to improve business operations and growth.",
-        "disabled": False,
+        "description": "Business consulting, accounting, finance, investment, and corporate strategy.",
+        "keywords": "business consulting, finance, investment, accounting, HR, legal services",
+        "children": [
+            "Business Consulting",
+            "Financial Advisory & Investment",
+            "Accounting & Bookkeeping",
+            "HR & Recruiting",
+            "Legal Consulting",
+        ],
     },
     {
-        "name": "Legal Services",
-        "slug": "legal-services",
-        "keywords": "legal advice, contract writing, intellectual property, business law, copyright",
-        "image_url": "/img/categories/legal-services.jpg",
-        "description": "Providing legal consultation and services, including contract drafting and intellectual property management.",
-        "disabled": False,
+        "name": "Engineering & Technical",
+        "image_url": "/img/categories/electrical-installation.jpg",
+        "description": "Electrical, satellite installation, mechanical, and civil engineering services.",
+        "keywords": "electrical engineering, mechanical engineering, civil engineering, CAD, satellite installation",
+        "children": [
+            "Electrical Engineering",
+            "Mechanical Engineering",
+            "Civil & Structural Engineering",
+            "Satellite Installation",
+            "CAD & 3D Drafting",
+        ],
     },
     {
-        "name": "Photography & Videography",
-        "slug": "photography-videography",
-        "keywords": "photography, videography, video editing, drone footage, event photography",
-        "image_url": "/img/categories/photography-videography.jpg",
-        "description": "talent photography and videography services for events, products, and more.",
-        "disabled": False,
-    },
-    {
-        "name": "Fitness & Wellness",
-        "slug": "fitness-wellness",
-        "keywords": "personal training, yoga, nutrition, fitness coaching, wellness consultation",
-        "image_url": "/img/categories/fitness-wellness.jpg",
-        "description": "Services related to fitness coaching, nutrition advice, and personal wellness.",
-        "disabled": False,
+        "name": "Admin & Customer Support",
+        "image_url": "/img/categories/admin-support.jpg",
+        "description": "Administrative assistance, virtual office management, and customer support.",
+        "keywords": "virtual assistance, customer support, data entry, project management, technical support",
+        "children": [
+            "Virtual Assistance",
+            "Customer Support",
+            "Data Entry",
+            "Project Management",
+            "Technical Support",
+        ],
     },
 ]
 
-category_slugs = lambda: [c["slug"] for c in categories]
+
+def __get_item_slug(item: dict):
+    _slug = item.get("slug", None)
+
+    if _slug:
+        return _slug
+
+    return slugify(item.get("name"))
+
+
+category_slugs = lambda: [__get_item_slug(item) for item in default_categories]
+
+
+def cleanup_categories():
+    all_slugs = category_slugs()
+
+    existing_slugs = (
+        Category.objects.only("slug", "pk").distinct().values_list("slug", flat=True)
+    )
+
+    unique_slugs = [slug for slug in all_slugs if slug not in existing_slugs]
+
+    filtered_categories = [
+        item for item in default_categories if __get_item_slug(item) in unique_slugs
+    ]
+
+    return filtered_categories
 
 
 def categories_seeding():
     """Seed categories."""
 
-    slugs = category_slugs()
+    from django.db import transaction
 
-    existing_categories = (
-        Category.objects.only("slug", "pk").distinct().values_list("slug", flat=True)
-    )
+    data = cleanup_categories()
 
-    slugs_to_create = []
+    child_count = 0
+    parent_count = 0
 
-    for c in existing_categories:
-        if c not in slugs:
-            slugs_to_create.append(c)
+    with transaction.atomic():
+        for category_data in data:
+            parent_category, created = Category.objects.get_or_create(
+                name=category_data["name"],
+                defaults={
+                    "slug": __get_item_slug(category_data),
+                    "image_url": category_data["image_url"],
+                    "description": category_data["description"],
+                    "keywords": category_data["keywords"],
+                    "disabled": False,
+                    "is_agent": category_data.get("is_agent", False),
+                },
+            )
 
-    filtered_categories = [
-        c for c in categories if c["slug"] not in existing_categories
-    ]
+            if created:
+                parent_count += 1
 
-    if len(filtered_categories) > 0:
-        Category.objects.bulk_create(
-            {Category(**c) for c in categories if c["slug"] in slugs_to_create}
+            for child_name in category_data.get("children", []):
+                _, _created = Category.objects.get_or_create(
+                    name=child_name,
+                    defaults={
+                        "slug": slugify(child_name),
+                        "parent": parent_category,
+                        "image_url": category_data["image_url"],
+                        "description": f"Subcategory of {category_data['name']}",
+                        "keywords": category_data["keywords"],
+                        "is_agent": False,
+                    },
+                )
+                if _created:
+                    child_count += 1
+
+        print(
+            {
+                "Category Seeding": {
+                    "results": {
+                        "child_count": child_count,
+                        "parent_count": parent_count,
+                    }
+                }
+            }
         )

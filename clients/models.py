@@ -5,11 +5,10 @@ from django.db import models
 
 from reviews.models import Review
 from users.models import User
-
 from utilities.generator import (
+    default_pid_generator,
     primary_key_generator,
     public_id_generator,
-    default_pid_generator,
 )
 
 
@@ -17,6 +16,7 @@ class Company(models.Model):
     id = models.UUIDField(
         primary_key=True, default=primary_key_generator, editable=False, max_length=100
     )
+    public_id = models.CharField(null=False, blank=True, max_length=100)
 
     slug = models.CharField(
         max_length=50, db_index=True, default=partial(default_pid_generator, "")
@@ -41,9 +41,9 @@ class Company(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        if self._state.adding:
-            _id = self.id or primary_key_generator()
-            self.public_id = public_id_generator(_id, "Company")
+        if self._state.adding or not self.public_id:
+            _id = self.pk or primary_key_generator()
+            self.public_id = public_id_generator(_id, "C")
         return super().save(*args, **kwargs)
 
 
@@ -54,9 +54,7 @@ class Client(models.Model):
     )
 
     is_agent = models.BooleanField(default=False)
-    public_id = models.CharField(
-        max_length=50, db_index=True, default=partial(default_pid_generator, "Client")
-    )
+    public_id = models.CharField(max_length=50, db_index=True)
 
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name="client_profile"
@@ -100,7 +98,7 @@ class Client(models.Model):
         return self.user.name
 
     def save(self, *args, **kwargs):
-        if self._state.adding:
-            _id = self.id or primary_key_generator()
-            self.public_id = public_id_generator(_id, "Client")
+        if self._state.adding or not self.public_id:
+            _id = self.pk or primary_key_generator()
+            self.public_id = public_id_generator(_id, "Cl")
         return super().save(*args, **kwargs)

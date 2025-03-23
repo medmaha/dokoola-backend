@@ -6,4 +6,4 @@ from core import models
 
 @admin.register(models.Category)
 class CategoryModelAdmin(ModelAdmin):
-    pass
+    list_display = ["name", "parent"]

@@ -2,6 +2,7 @@ import sys
 from typing import Any
 
 from django.core.management import BaseCommand
+from django.db import transaction
 
 
 class Command(BaseCommand):
@@ -14,7 +15,7 @@ class Command(BaseCommand):
 
         sys.stdout.write(
             self.style.SUCCESS(
-                "------------------------------- Executing Application Scaffolding -------------------------------\n"
+                "\n------------------------------- Executing Application Scaffolding -------------------------------\n\n"
             )
         )
 
@@ -35,10 +36,17 @@ class Command(BaseCommand):
         execute_from_command_line(argv)
         sys.stdout.write("✅ Superuser account created successfully\n")
 
-        # Collect static files
-        argv = ["manage.py", "collectstatic", "--noinput"]
+        # Create Dokoola Agent
+        argv = ["manage.py", "create_agent"]
         execute_from_command_line(argv)
-        sys.stdout.write("✅ Static files collected and saved successfully\n")
+        sys.stdout.write("✅ The Dokoola Agent account created successfully\n")
+
+        # Collect static files
+        if not "-no-static" in sys.argv:
+            argv = ["manage.py", "collectstatic", "--noinput"]
+            execute_from_command_line(argv)
+            sys.stdout.write("✅ Static files collected and saved successfully\n\n")
+
         sys.stdout.write(
             self.style.SUCCESS(
                 "------------------------------- Done Scaffolding Application -------------------------------\n"
