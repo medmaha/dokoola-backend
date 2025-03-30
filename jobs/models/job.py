@@ -6,7 +6,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.utils import timezone
 
-from agent.scrapper.base import ScrapedJob
+from agent.scrapper.base import JobScraper, ScrapedJob
 from clients.models import Client
 from core.models import Category
 from core.services.email.main import EmailService
@@ -19,6 +19,7 @@ from utilities.generator import (
 
 class JobStatusChoices(models.TextChoices):
     CLOSED = "CLOSED"
+    PENDING = "PENDING"
     PUBLISHED = "PUBLISHED"
     SUSPENDED = "SUSPENDED"
     COMPLETED = "COMPLETED"
@@ -69,7 +70,9 @@ class Job(models.Model):
 
     published = models.BooleanField(default=False, blank=True)
     status = models.CharField(
-        max_length=200, choices=JobStatusChoices.choices, default="CLOSED"
+        max_length=200,
+        choices=JobStatusChoices.choices,
+        default=JobStatusChoices.PENDING,
     )
 
     is_valid = models.BooleanField(default=True, blank=True)
@@ -80,10 +83,8 @@ class Job(models.Model):
         encoder=DjangoJSONEncoder, blank=True, null=True
     )
 
-    views_count = models.IntegerField(default=0)
-    proposal_count = models.IntegerField(default=0)
-    invitation_count = models.IntegerField(default=0)
     client_last_visit = models.DateTimeField(blank=True, null=True)
+    metadata = models.JSONField(encoder=DjangoJSONEncoder, blank=True, default=dict)
 
     experience_level = models.CharField(blank=True, null=True, max_length=200)
     experience_level_other = models.CharField(blank=True, null=True, max_length=200)
@@ -103,8 +104,21 @@ class Job(models.Model):
     def __str__(self):
         return self.title[:50]
 
+    def __title__(self):
+        return self.title[:20]
+
     class Meta:
         ordering = ["is_valid", "-created_at", "published"]
+
+    def budget(self):
+        if not self.pricing or not not self.pricing.get("budget", None):
+            return "N/A"
+
+        currency = self.pricing.get("currency", "USD")
+        return f"{currency} {self.pricing.get('budget')}"
+
+    def deadline(self):
+        return self.application_deadline
 
     def save(self, *args, **kwargs):
         if self.third_party_address:
@@ -118,7 +132,7 @@ class Job(models.Model):
         self, job_status=None, is_after_response=True
     ):
         """
-        Update the job status and notify the client and talent about the status through email
+        Update the job status and notify the client and talent about the withdrawal-status through email
         """
 
         if JobStatusChoices.verify_status(job_status or ""):
@@ -219,18 +233,69 @@ class JobAgentProxy(Job):
     class Meta:
         proxy = True
 
+    def scrape_site(self, site: str, max_jobs=None) -> int:
+        job_scraper = None
+
+        if site == "gamjobs":
+            from agent.scrapper import GamJobScraper
+
+            job_scraper = GamJobScraper
+        if site == "g4s":
+            from agent.scrapper import G4SJobScraper
+
+            job_scraper = G4SJobScraper
+        if site == "mrc":
+            from agent.scrapper import MRCJobScraper
+
+            job_scraper = MRCJobScraper
+
+        if not job_scraper:
+            return 1
+
+        def handle_exeptions(scrapped_jobs: List[ScrapedJob], *args, **kwargs):
+            print(
+                "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+            )
+            print(
+                "[EXECPTION]: Jobs: {} Args: {} - Kwargs: {}".format(
+                    len(scrapped_jobs), *args, **kwargs
+                )
+            )
+            print(
+                "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+            )
+
+            if len(scrapped_jobs) > 1:
+                self.save_scraped_jobs(scrapped_jobs)
+
+        with job_scraper(max_jobs=max_jobs, to_json=True) as scraper:
+            scraper.set_exeption_callback(handle_exeptions)
+            jobs = scraper.scrape()
+
+        if len(jobs) > 1:
+            self.save_scraped_jobs(scraper.jobs)
+
+        return 0
+
     def save_scraped_jobs(self, _jobs: dict | List[ScrapedJob]) -> None:
+        return
 
-        if len(_jobs) < 1:
+        if len(_jobs) < 1 or len(_jobs) == 0:
             return
 
-        if len(_jobs) == 0:
-            return
-
-        client = Client.objects.get(is_agent=True)
-        category = Category.objects.get(is_agent=True)
+        client = Client.objects.filter(is_agent=True).first()
+        category = Category.objects.filter(is_agent=True).first()
 
         if not client or not category:
+            print(
+                "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+            )
+            print(
+                "[ERROR]: No client or category records to associate the scraped jobs with"
+            )
+            print(
+                "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+            )
             return
 
         # Remove existing jobs
@@ -270,9 +335,10 @@ class JobAgentProxy(Job):
                     third_party_metadata=job.third_party_metadata,
                 )
                 _lazy.full_clean()
+                _lazy_jobs.append(_lazy)
             except Exception as e:
                 # TODO: log error
                 print(f"Error cleaning job {job.url}: {e}")
-            _lazy_jobs.append(_lazy)
 
-        Job.objects.bulk_create(_lazy_jobs)
+        if len(_lazy_jobs) > 0:
+            Job.objects.bulk_create(_lazy_jobs)

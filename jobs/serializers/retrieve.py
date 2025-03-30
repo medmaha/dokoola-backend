@@ -83,7 +83,6 @@ class JobListSerializer(serializers.ModelSerializer):
             "required_skills",
             "application_deadline",
             "created_at",
-            "proposal_count",
             "is_third_party",
             "third_party_metadata",
         ]
@@ -94,7 +93,6 @@ class JobListSerializer(serializers.ModelSerializer):
     # Check if the user has proposed to the job
     def to_representation(self, instance: Job):
         representation = super().to_representation(instance)
-        representation["proposal_count"] = instance.proposal_count
         if instance.is_third_party and "description" in instance.third_party_metadata:
             representation["description"] = instance.third_party_metadata["description"]
         else:
@@ -123,9 +121,6 @@ class JobRetrieveSerializer(serializers.ModelSerializer):
             "third_party_metadata",
             # Stats
             "bits_amount",
-            "views_count",
-            "proposal_count",
-            "invitation_count",
             "client_last_visit",
             # # Stats
             "job_type",

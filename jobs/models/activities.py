@@ -1,11 +1,12 @@
 from functools import partial
+
 from django.db import models
 
 from talents.models import Talent  # Updated import
 from utilities.generator import (
+    default_pid_generator,
     primary_key_generator,
     public_id_generator,
-    default_pid_generator,
 )
 
 
@@ -35,3 +36,11 @@ class Activities(models.Model):
             _id = primary_key_generator()
             self.public_id = public_id_generator(_id, "Activities")
         return super().save(*args, **kwargs)
+
+    def __job__(self):
+        title = self.job.title
+
+        if len(title) > 25:
+            return title[:25] + "..."
+
+        return title[:25]

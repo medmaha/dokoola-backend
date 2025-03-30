@@ -24,7 +24,12 @@ active_statues = [
 
 valid_job_query = Q(is_valid=True, status__in=active_statues)
 client_job_query = lambda user_id: Q(
-    client__user__pk=user_id, status__in=active_statues
+    client__user__pk=user_id,
+    status__in=[
+        *active_statues,
+        JobStatusChoices.CLOSED,
+        JobStatusChoices.PENDING,
+    ],
 )
 
 
@@ -68,10 +73,9 @@ class MyJobListAPIView(ListAPIView):
     def list(self, request, *args, **kwargs):
 
         user: User = request.user
-
         if not user.is_client:
             return Response(
-                {"message": "Only clients can access this route"},
+                {"message": "403; Only clients can access this route"},
                 status=403,
             )
 
