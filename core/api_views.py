@@ -31,8 +31,8 @@ class CategoryAPIView(GenericAPIView):
     serializer_class = CategorySerializer
 
     def get_queryset(self):
-        child = self.request.query_params.get("child", False)
-        parent__isnull = bool(child) == False
+        child = self.request.query_params.get("child", None)
+        parent__isnull = True if child is None else bool(child) == False
         categories = Category.objects.filter(
             disabled=False, is_agent=False, parent__isnull=parent__isnull
         )

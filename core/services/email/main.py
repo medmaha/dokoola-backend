@@ -134,7 +134,7 @@ class EmailService:
                 text = strip_tags(html or "").strip()
 
         # A callback function that sends the email
-        def callback(subject, text):
+        def _callback(subject, text):
             execute_send_mail(
                 subject,
                 text,
@@ -146,11 +146,12 @@ class EmailService:
 
         # If the email is to be sent immediately, call the callback function
         if execute_now:
-            callback(subject, text)
+            _callback(subject, text)
         else:
             # Register the callback function to be called after the response is sent
-            AfterResponseService.register(
-                callback,
-                subject,
-                text,
-            )
+            # AfterResponseService.register(
+            #     callback,
+            #     subject,
+            #     text,
+            # )
+            _callback(subject, text)
