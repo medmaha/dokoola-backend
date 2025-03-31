@@ -1,15 +1,18 @@
 import random
 
 from django.db import transaction
+from django.db.models import Q
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
 from contracts.models import Contract
+from contracts.models.contract import ContractStatusChoices
 from contracts.serializers import (
     ContractCreateSerializer,
-    ContractRetrieveSerializer,
+    ProposalContractRetrieveSerializer,
 )
-from jobs.models.job import JobStatusChoices
+from core.services.after.main import AfterResponseService
+from jobs.models.job import Job, JobStatusChoices
 from notifications.models import Notification
 from proposals.models import Proposal, ProposalStatusChoices
 from users.models.user import User
@@ -31,25 +34,42 @@ class ContractCreateAPIView(GenericAPIView):
             )
 
         profile, profile_name = user.profile
-        proposal_id = request.query_params.get("pid")
+        proposal_public_id = request.query_params.get("pid")
+        proposal_contract_public_id = request.query_params.get("cid")
 
         try:
             with transaction.atomic():
-                # get proposal meant for this client
-                proposal = Proposal.objects.get(
-                    id=proposal_id, job__client=profile, status="PENDING"
-                )
-                if proposal.contract.exists():  # type: ignore
-                    return Response({"message": "Contract already exists"}, status=400)
+                # This means we're updating an existing contract
+                if proposal_contract_public_id:
+                    contract = Contract.objects.get(
+                        public_id=proposal_contract_public_id
+                    )
+                    proposal = contract.proposal
+                else:
+                    # get proposal meant for this client
+                    proposal = Proposal.objects.get(
+                        job__client=profile,
+                        public_id=proposal_public_id,
+                        status__in=[
+                            ProposalStatusChoices.PENDING,
+                            ProposalStatusChoices.REVIEW,
+                            ProposalStatusChoices.ACCEPTED,
+                        ],
+                    )
 
-                serializer = ContractRetrieveSerializer(instance=proposal)
+                    if proposal.contract.exists():  # type: ignore
+                        return Response(
+                            {"message": "Contract already exists"}, status=400
+                        )
+
+                serializer = ProposalContractRetrieveSerializer(instance=proposal)
                 return Response(serializer.data, status=200)
 
         except Proposal.DoesNotExist:
-            return Response({"message": "Bad request attempted"}, status=400)
+            return Response({"message": "Bad request attempted"}, status=404)
 
         except Exception as e:
-            return Response({"message": str(e)}, status=400)
+            return Response({"message": "Internal Server Error"}, status=500)
 
     def post(self, request, *args, **kwargs):
         user: User = request.user  # type: ignore
@@ -72,9 +92,13 @@ class ContractCreateAPIView(GenericAPIView):
             # get proposal meant for this client
             with transaction.atomic():
                 proposal = Proposal.objects.select_for_update().get(
-                    id=proposal_id,
+                    public_id=proposal_id,
                     job__client=profile,
-                    status=ProposalStatusChoices.PENDING,
+                    status__in=[
+                        ProposalStatusChoices.PENDING,
+                        ProposalStatusChoices.REVIEW,
+                        ProposalStatusChoices.ACCEPTED,
+                    ],
                 )
                 if proposal.contract.exists():  # type: ignore
                     return Response(
@@ -129,40 +153,94 @@ class ContractCreateAPIView(GenericAPIView):
                     client_notification.object_api_link = (
                         f"/contracts/view/{contract.pk}"
                     )
-                    # --------------------------------------------------------------------
 
-                    # update the main proposal status
-                    proposal.status = ProposalStatusChoices.ACCEPTED
-                    proposal.save()
+                    # Update the main proposal status
+                    Proposal.objects.filter(id=proposal.pk).update(
+                        status=ProposalStatusChoices.CONTRACTED
+                    )
 
-                    # inactive other proposals
-                    Proposal.objects.filter(job=proposal.job).exclude(
-                        id=proposal.pk,
-                    ).update(status=ProposalStatusChoices.DECLINED)
+                    # Inactive other proposals
+                    Proposal.objects.filter(
+                        job=proposal.job, status=ProposalStatusChoices.PENDING
+                    ).exclude(id=proposal.pk).update(
+                        status=ProposalStatusChoices.DECLINED
+                    )
 
                     # update job status
-                    proposal.job.published = False
-                    proposal.job.status = JobStatusChoices.CLOSED
-                    proposal.job.save()
+                    Job.objects.filter(id=proposal.job.pk).update(
+                        published=False, status=JobStatusChoices.CONTRACTED
+                    )
 
                     # update job activities
                     job_activity = proposal.job.activities
                     job_activity.hired.add(proposal.talent)
 
                     # Save notifications
-                    Notification.objects.bulk_create(notifications)
-                    # TODO: Notify 7 through email
+                    AfterResponseService.schedule_task(
+                        Notification.objects.bulk_create, notifications
+                    )
 
                     return Response(
                         {
-                            "contract_id": contract.pk,
+                            "_id": contract.pk,
                             "message": "Contract created successfully",
                         },
-                        status=200,
+                        status=201,
                     )
                 error_message = get_serializer_error_message(serializer.errors)
                 return Response({"message": error_message}, status=400)
         except Proposal.DoesNotExist:
-            return Response({"message": "Proposal does not exist"}, status=400)
+            return Response({"message": "Proposal does not exist"}, status=404)
         except Exception as e:
-            return Response({"message": str(e)}, status=400)
+            return Response({"message": str(e)}, status=500)
+
+    def put(self, request, public_id, *args, **kwargs):
+        user: User = request.user  # type: ignore
+
+        if not user.is_client:
+            return Response(
+                {"message": "Forbidden! Only clients are allowed"},
+                status=403,
+            )
+        try:
+            # get proposal meant for this client
+            with transaction.atomic():
+
+                contract = Contract.objects.get(public_id=public_id)
+
+                assert (
+                    contract.client.public_id == request.user.public_id
+                ), "403: Forbidden request!"
+
+                if contract.status != ContractStatusChoices.PENDING:
+                    return Response(
+                        {"message": "Contract cannot be edited"},
+                        status=403,
+                    )
+
+                Contract.objects.select_for_update().filter(pk=contract.pk).update(
+                    duration=request.data.get("duration", contract.duration),
+                    end_date=request.data.get("end_date", contract.end_date),
+                    start_date=request.data.get("start_date", contract.start_date),
+                    additional_terms=request.data.get(
+                        "additional_terms", contract.additional_terms
+                    ),
+                )
+                return Response(
+                    {
+                        "_id": contract.pk,
+                        "message": "Contract updated successfully",
+                    },
+                    status=200,
+                )
+        except Contract.DoesNotExist:
+            # TODO: log error
+            return Response({"message": "Contract does not exist"}, status=404)
+
+        except AssertionError as e:
+            # TODO: log error
+            return Response({"message": str(e)}, status=403)
+
+        except Exception as e:
+            # TODO: log error
+            return Response({"message": "Internal Server Error"}, status=500)

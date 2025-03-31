@@ -8,7 +8,7 @@ class ContractListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contract
         fields = [
-            "id",
+            "public_id",
             "created_at",
             "start_date",
             "end_date",
@@ -22,14 +22,15 @@ class ContractListSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance: Contract):
         data = super().to_representation(instance)
-        return {**data, **get_related_fields(instance.proposal)}
+        data.update(get_related_fields(instance.proposal))
+        return data
 
 
-class ContractRetrieveSerializer(serializers.Serializer):
+class ProposalContractRetrieveSerializer(serializers.Serializer):
 
     class Meta:
         model = Proposal
-        fields = []
+        fields = ["public_id"]
 
     def to_representation(self, instance: Proposal):
         return get_related_fields(instance)
@@ -40,13 +41,13 @@ def get_related_fields(instance: Proposal):
     data["job"] = {
         "public_id": instance.job.public_id,
         "title": instance.job.title,
-        "description": instance.job.description[:400],
+        "description": instance.job.description[:200],
         "address": instance.job.address,
         "budget": instance.budget,
         "duration": instance.duration,
     }
     data["proposal"] = {
-        "id": instance.pk,
+        "public_id": instance.public_id,
         "cover_letter": instance.cover_letter,
         "budget": instance.budget,
         "status": instance.status,

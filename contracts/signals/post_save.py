@@ -1,11 +1,8 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
-from contracts.models import (
-    Contract,
-    ContractProgressChoices,
-    ContractStatusChoices,
-)
+from contracts.models import Contract, ContractProgressChoices, ContractStatusChoices
 from jobs.models import JobStatusChoices
 from notifications.models import Notification
 from projects.models.project import Project
@@ -85,6 +82,9 @@ def on_completed_contract(sender, instance: Contract, created, **kwargs):
     if instance.progress != ContractProgressChoices.COMPLETED:
         return
 
+    if instance.completed_at is not None:
+        return
+
     client = instance.client
     talent = instance.talent
 
@@ -113,4 +113,7 @@ def on_completed_contract(sender, instance: Contract, created, **kwargs):
         sender=talent.user,
         object_api_link=f"/contracts/view/{instance.pk}",
     )
+
+    instance.completed_at = timezone.now()
+    instance.save()
     # TODO: Notify client through email

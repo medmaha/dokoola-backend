@@ -5,30 +5,24 @@ from . import views
 # Url Pattern /api/contracts/*/**/
 
 urlpatterns = [
-    path("", views.ContractListAPIView.as_view(), name="contracts"),
+    path(
+        "",
+        views.ContractAPIView.as_view(),  # method -> GET
+        name="contracts",
+    ),
     path(
         "create/",
-        views.ContractCreateAPIView.as_view(),
-        name="contract-create",
-    ),
-    path(
-        "accept/<contract_id>/",
-        views.ContractAcceptAPIView.as_view(),
-        name="contract-accept",
-    ),
-    path(
-        "reject/<contract_id>/",
-        views.ContractAcceptAPIView.as_view(),
-        name="contract-reject",
-    ),
-    path(
-        "completed/<contract_id>/",
-        views.ContractCompleteAPIView.as_view(),
-        name="contract-completed",
+        views.ContractCreateAPIView.as_view(),  # method -> POST
+        name="contract_create",
     ),
     path(
         "<contract_id>/",
-        views.ContractRetrieveAPIView.as_view(),
-        name="contract_retrieve",
+        views.ContractAPIView.as_view(),  # method -> GET/POST/PUT
+        name="contracts",
+    ),
+    path(
+        "<contract_id>/completed/",
+        views.ContractCompleteAPIView.as_view(),  # method -> PUT
+        name="contract_completed",
     ),
 ]

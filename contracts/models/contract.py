@@ -2,6 +2,7 @@ from django.db import models
 
 from clients.models import Client
 from proposals.models import Job, Proposal, Talent
+from utilities.generator import primary_key_generator, public_id_generator
 
 
 class ContractProgressChoices(models.TextChoices):
@@ -94,8 +95,18 @@ class Contract(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    public_id = models.CharField(null=True, blank=True, db_index=True)
+
+    PUBLIC_ID_PREFIX = "C"
+
     def __str__(self) -> str:
         return f"Contract: {self.job.title}"
+
+    def save(self, *args, **kwargs):
+        if not self.public_id:
+            _id = self.pk or primary_key_generator()
+            self.public_id = public_id_generator(_id, self.PUBLIC_ID_PREFIX)
+        return super().save(*args, **kwargs)
 
     @classmethod
     def _active_statuses(cls):

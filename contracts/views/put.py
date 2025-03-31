@@ -1,97 +1,143 @@
-from rest_framework.generics import UpdateAPIView
+from django.db import transaction
+from django.db.models import Q
+from rest_framework.generics import GenericAPIView, UpdateAPIView
 from rest_framework.response import Response
 
 from contracts.models import Contract, ContractProgressChoices
 from contracts.models.contract import ContractStatusChoices
+from contracts.serializers.retrieve import ContractListSerializer
 from contracts.serializers.update import ContractUpdateSerializer
 from notifications.models import Notification
-from utilities.generator import get_serializer_error_message
+from users.models.user import User
 
 
 def generate_content_text(contract: Contract, accepted: bool = False):
     return ""
 
 
-class ContractUpdateAPIView(UpdateAPIView):
-    serializer_class = ContractUpdateSerializer
+class ContractAPIView(GenericAPIView):
 
-    def update(self, request, contract_id: str, *args, **kwargs):
-
+    def get_queryset(self, contract_id=None, query_params=None):
         try:
-            contract = Contract.objects.get(
-                id=contract_id, status=ContractStatusChoices.PENDING
-            )
-        except Contract.DoesNotExist:
-            return Response({"message": "Contract does not exist"}, status=403)
+            user = self.request.user
+            owner_identity = Q(talent__user=user) | Q(client__user=user)
+            if contract_id:
+                query_params = query_params or dict()
+                is_proposal_id = query_params.get("pid", None)
 
-        serializer = self.get_serializer(contract, data=request.data)
+                if is_proposal_id:
+                    identity_query = Q(proposal__public_id=contract_id)
+                else:
+                    identity_query = Q(public_id=contract_id)
 
-        if not serializer.is_valid():
-            error_message = get_serializer_error_message(serializer.errors)
-            return Response({"message": error_message}, status=400)
+                identity_query = identity_query & owner_identity
+                queryset = Contract.objects.get(identity_query)
+            else:
+                identity_query = owner_identity
+                queryset = Contract.objects.filter(identity_query)
+            return queryset
+        except:
+            return None
 
-        serializer.save()
-        return Response({"message": "Contract updated successfully"}, status=200)
+    def get(self, request, contract_id=None, *args, **kwargs):
+        queryset = self.get_queryset(contract_id, request.query_params)
+        if not queryset:
+            return Response({"message": "Resource not found"}, status=404)
 
+        get_list = contract_id is None
 
-class ContractAcceptAPIView(UpdateAPIView):
-
-    def update(self, request, contract_id: str, *args, **kwargs):
-
-        try:
-            contract = Contract.objects.get(id=contract_id)
-        except Contract.DoesNotExist:
-            return Response({"message": "Contract does not exist"}, status=403)
-
-        accepted = request.data.get("accept", None)
-
-        if accepted is None:
-            return Response(
-                {"message": 'Request body missing a "accept" value'},
-                status=400,
-            )
-
-        if accepted in ["true", True]:
-            new_status = ContractStatusChoices.ACCEPTED
-        elif accepted in ["false", False]:
-            new_status = ContractStatusChoices.REJECTED
+        # If no contract_id provided then we are dealing with a list of queryset
+        if get_list:
+            self.serializer_class = ContractListSerializer
+            # Paginate the queryset list
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                # use the paginated data as the queryset
+                queryset = page
         else:
-            return Response({"message": "Invalid accept value"}, status=400)
+            self.serializer_class = ContractListSerializer
 
-        contract.status = new_status
-        notifications = []
+        serializer = self.get_serializer(instance=queryset, many=get_list, context={})
 
-        # Line 58-102
-        # Replace with:
-        Notification.objects.bulk_create(
-            [
-                Notification(
-                    hint_text="Contract Accepted" if accepted else "Contract Rejected",
-                    content_text=generate_content_text(contract, accepted),
-                    recipient=recipient,
-                    sender=sender if not accepted else None,
-                    object_api_link=f"/contracts/view/{contract.pk}",
+        if get_list:
+            # let's return a paginator response
+            return self.get_paginated_response(serializer.data)
+
+        return Response(serializer.data, status=200)
+
+    def put(self, request, contract_id: str, *args, **kwargs):
+        self.serializer_class = ContractUpdateSerializer
+
+        try:
+            user: User = request.user
+
+            with transaction.atomic():
+
+                contract = Contract.objects.get(public_id=contract_id)
+
+                if "acknowledgement" in request.query_params:
+                    assert (
+                        contract.talent.public_id == user.public_id
+                    ), "403: Forbidden request!"
+
+                    accepted = request.data.get("accept", False)
+
+                    err_status, err_msg = accept_or_reject_contract_for_talent(
+                        contract, accepted
+                    )
+                    if err_status:
+                        return Response({"message": err_msg}, status=err_status)
+
+                    return Response(
+                        {
+                            "_id": contract.public_id,
+                            "message": "Contract updated successfully",
+                        },
+                        status=200,
+                    )
+
+                assert (
+                    contract.client.public_id == user.public_id
+                ), "403: Forbidden request!"
+
+                if contract.status != ContractStatusChoices.PENDING:
+                    return Response(
+                        {"message": "Contract cannot be edited"},
+                        status=403,
+                    )
+
+                Contract.objects.select_for_update().filter(pk=contract.pk).update(
+                    duration=request.data.get("duration", contract.duration),
+                    end_date=request.data.get("end_date", contract.end_date),
+                    start_date=request.data.get("start_date", contract.start_date),
+                    additional_terms=request.data.get(
+                        "additional_terms", contract.additional_terms
+                    ),
                 )
-                for recipient, sender in [
-                    (contract.talent.user, None),
-                    (contract.client.user, contract.talent.user),
-                ]
-            ]
-        )
+                return Response(
+                    {
+                        "_id": contract.public_id,
+                        "message": "Contract updated successfully",
+                    },
+                    status=200,
+                )
 
-        contract.talent_acknowledgement = new_status
-        contract.save()
-        Notification.objects.bulk_create(notifications)
-        return Response({"message": "Contract updated successfully"}, status=200)
+        except Contract.DoesNotExist:
+            # TODO: log error
+            return Response({"message": "Contract does not exist"}, status=404)
+
+        except AssertionError as e:
+            # TODO: log error
+            return Response({"message": str(e)}, status=403)
+
+        except Exception as e:
+            # TODO: log error
+            return Response({"message": "Internal Server Error"}, status=500)
 
 
 class ContractCompleteAPIView(UpdateAPIView):
 
-    def get_serializer_class(self):
-        class ContractCompleteSerializer(ContractUpdateSerializer):
-            pass
-
-        return ContractCompleteSerializer
+    serializer_class = ContractUpdateSerializer
 
     def update(self, request, contract_id, *args, **kwargs):
         if not contract_id:
@@ -103,19 +149,71 @@ class ContractCompleteAPIView(UpdateAPIView):
         if profile_name.lower() == "client":
             return Response({"message": "Forbidden"}, status=403)
 
-        if profile_name.lower() == "talent":
-            try:
-                contract = Contract.objects.get(id=contract_id, talent__user=user)
-                contract.progress = ContractProgressChoices.COMPLETED
-                contract.save()
+        try:
+            contract = Contract.objects.select_for_update().get(
+                id=contract_id, talent__user=user
+            )
 
-                # TODO: Notify 4 through email and create a notification for both users
-                return Response(
-                    {"message": "Contract completed successfully"},
-                    status=200,
-                )
-            except Exception:
+            assert (
+                contract.talent.public_id == request.user.public_id
+            ), "403: Forbidden request"
+            assert (
+                contract.progress == ContractProgressChoices.ACTIVE
+            ), "Contract cannot be completed"
 
-                return Response({"message": "Resource not found"}, status=404)
+            contract.progress = ContractProgressChoices.COMPLETED
+            contract.save()
 
-        return Response({"message": "Bad request"}, status=400)
+            return Response(
+                {"message": "Contract completed successfully"},
+                status=200,
+            )
+        except Contract.DoesNotExist:
+            # TODO: log error
+            return Response({"message": "Resource not found"}, status=404)
+
+        except AssertionError as e:
+            # TODO: log error
+            error_message = str(e)
+            return Response({"message": error_message}, status=403)
+
+        except Exception as e:
+            # TODO: log error
+            return Response({"message": "Internal Server Error"}, status=500)
+
+
+def accept_or_reject_contract_for_talent(contract: Contract, accepted: bool):
+
+    if accepted is None:
+        return [400, 'Request body missing a "accept" value']
+
+    if accepted in ["true", True]:
+        new_status = ContractStatusChoices.ACCEPTED
+    elif accepted in ["false", False]:
+        new_status = ContractStatusChoices.REJECTED
+    else:
+        return [400, "Invalid accept value"]
+
+    contract.status = new_status
+    contract.talent_acknowledgement = new_status
+    contract.save()
+
+    notifications = []
+    Notification.objects.bulk_create(
+        [
+            Notification(
+                hint_text="Contract Accepted" if accepted else "Contract Rejected",
+                content_text=generate_content_text(contract, accepted),
+                recipient=recipient,
+                sender=sender if not accepted else None,
+                object_api_link=f"/contracts/{contract.pk}",
+            )
+            for recipient, sender in [
+                (contract.talent.user, None),
+                (contract.client.user, contract.talent.user),
+            ]
+        ]
+    )
+
+    Notification.objects.bulk_create(notifications)
+    return [None, ""]
