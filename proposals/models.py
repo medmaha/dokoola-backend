@@ -16,6 +16,7 @@ class ProposalStatusChoices(models.TextChoices):
     REVIEW = "REVIEW"
     PENDING = "PENDING"
     ACCEPTED = "ACCEPTED"
+    CONTRACTED = "CONTRACTED"
     DECLINED = "DECLINED"
     WITHDRAWN = "WITHDRAWN"
     TERMINATED = "TERMINATED"

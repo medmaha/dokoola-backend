@@ -1,7 +1,7 @@
 import datetime
 
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import F, Q
 from rest_framework.generics import (
     CreateAPIView,
     GenericAPIView,
@@ -36,14 +36,19 @@ class ProposalListApiView(ListAPIView):
     serializer_class = ProposalListSerializer
 
     def get_queryset(self):
-        public_id = self.request.query_params.get("pid")  # type: ignore
-        if public_id:
-            user = User.objects.filter(public_id=public_id).first()
-            if user:
-                [profile, profile_name] = user.profile
+        user_public_id = self.request.query_params.get("u")  # type: ignore
+        if user_public_id:
+            profile, profile_type = User.get_profile_by_username_or_public_id(
+                user_public_id
+            )
+
+            print("===================================================================")
+            print(profile, profile_type)
+            print("===================================================================")
+            if profile:
 
                 # Check if the user is a client or a talent
-                if profile_name.lower() == "client":
+                if profile_type.lower() == "client":
                     # Gets all proposals for jobs that the client has posted
                     queryset = (
                         Proposal.objects.select_related(
@@ -54,13 +59,15 @@ class ProposalListApiView(ListAPIView):
                     )
 
                 # Gets all proposals for jobs that the talent has applied to
-                elif profile_name.lower() == "talent":
+                elif profile_type.lower() == "talent":
                     queryset = Proposal.objects.filter(talent=profile).order_by(
                         "-updated_at"
                     )
                 else:
                     queryset = []
-        return queryset
+
+                return queryset
+        return []
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -201,15 +208,15 @@ class ProposalUpdateAPIView(GenericAPIView):
                         proposal.status = ProposalStatusChoices.ACCEPTED
                         proposal.save()
 
-                        AfterResponseService.schedule_email(
+                        AfterResponseService.schedule_task(
                             proposal.notify_talent, ProposalStatusChoices.ACCEPTED
                         )
-                        AfterResponseService.schedule_email(
+                        AfterResponseService.schedule_task(
                             proposal.job.notify_client,
                             JobStatusChoices.IN_PROGRESS,
                             proposal,
                         )
-                        AfterResponseService.schedule_email(
+                        AfterResponseService.schedule_task(
                             proposal.job.update_status_and_withdraw_proposals,
                             job_status=JobStatusChoices.IN_PROGRESS,
                         )
@@ -226,7 +233,7 @@ class ProposalUpdateAPIView(GenericAPIView):
 
                         proposal.status = ProposalStatusChoices.DECLINED
                         proposal.save()
-                        AfterResponseService.schedule_email(
+                        AfterResponseService.schedule_task(
                             proposal.notify_talent, ProposalStatusChoices.DECLINED
                         )
 
@@ -242,7 +249,7 @@ class ProposalUpdateAPIView(GenericAPIView):
 
                         proposal.status = ProposalStatusChoices.TERMINATED
                         proposal.save()
-                        AfterResponseService.schedule_email(
+                        AfterResponseService.schedule_task(
                             proposal.notify_talent, ProposalStatusChoices.TERMINATED
                         )
 
@@ -368,14 +375,16 @@ class ProposalCreateAPIView(CreateAPIView):
                 activity.proposal_count = activity.proposal_count + 1
                 activity.save()
 
-                # Update the job's proposal count
-                job.proposal_count = activity.proposal_count
-                job.save()
+                # Update the job's metadata
+                metdata_data = job.metadata
+                metdata_data["has_proposal"] = True
+                Job.objects.filter(id=job.pk).update(metdata_data=metdata_data)
 
                 # Update the talent's bits
-                talent.bits = talent.bits - proposal.bits_amount
-                talent.save()
+                bits = F("bits") - proposal.bits_amount
+                Talent.objects.filter(id=talent.pk).update(bits=bits)
 
+                # Notify the client
                 proposal.job.notify_client(
                     JobStatusChoices.PUBLISHED, new_proposal=proposal
                 )
@@ -390,8 +399,8 @@ class ProposalCreateAPIView(CreateAPIView):
                     service_fee=DokoolaConstants.get_service_fee(),
                 )
 
-                AfterResponseService.schedule_email(after_response, proposal)
-
+                # AfterResponseService.schedule_email(after_response, proposal)
+                after_response(proposal)
                 return Response(
                     {
                         "public_id": proposal.public_id,
