@@ -24,11 +24,11 @@ class ProjectStatusUpdateAPIView(UpdateAPIView):
         try:
             project = Project.objects.get(
                 Q(
-                    id=project_id,
+                    public_id=project_id,
                     contract__client__user=user,
                 )
                 | Q(
-                    id=project_id,
+                    public_id=project_id,
                     contract__talent__user=user,
                 ),
             )

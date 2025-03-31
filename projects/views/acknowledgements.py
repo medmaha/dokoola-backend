@@ -1,12 +1,8 @@
 from django.db.models import Q
-from rest_framework.generics import (
-    CreateAPIView,
-    RetrieveAPIView,
-    UpdateAPIView,
-)
+from rest_framework.generics import CreateAPIView, RetrieveAPIView, UpdateAPIView
 from rest_framework.response import Response
 
-from projects.models import Acknowledgement, Project, ProjectStatusChoices
+from projects.models import Project, ProjectStatusChoices
 from projects.serializers import (
     AcknowledgementCreateSerializer,
     AcknowledgementRetrieveSerializer,
@@ -29,7 +25,7 @@ class AcknowledgementCreateAPIView(CreateAPIView):
             )
         try:
             project = Project.objects.get(
-                id=request.data.get("project_id", 0),
+                public_id=request.data.get("project_id"),
                 contract__client__user=user,
             )
 
@@ -84,7 +80,7 @@ class AcknowledgementUpdateAPIView(UpdateAPIView):
             )
         try:
             project = Project.objects.get(
-                id=request.data.get("project_id", 0),
+                public_id=request.data.get("project_id", 0),
                 contract__client__user=user,
             )
             if project.status not in [
@@ -133,8 +129,8 @@ class AcknowledgementRetrieveAPIView(RetrieveAPIView):
 
         try:
             project = Project.objects.get(
-                Q(id=project_id, contract__client__user=user)
-                | Q(id=project_id, contract__talent__user=user),
+                Q(public_id=project_id, contract__client__user=user)
+                | Q(public_id=project_id, contract__talent__user=user),
             )
         except:
             return Response({"message": "Project does not exist"}, status=400)

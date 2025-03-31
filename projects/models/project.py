@@ -2,12 +2,15 @@ from django.db import models
 
 from contracts.models import Contract
 from projects.models.milestone import Acknowledgement, Milestone
+from utilities.generator import primary_key_generator, public_id_generator
 
 
 class ProjectStatusChoices(models.TextChoices):
+    ACTIVE = "ACTIVE"
     CLOSED = "CLOSED"
     PENDING = "PENDING"
     ACCEPTED = "ACCEPTED"
+    REJECTED = "REJECTED"
     COMPLETED = "COMPLETED"
     CANCELLED = "CANCELLED"
     TERMINATED = "TERMINATED"
@@ -39,12 +42,17 @@ class Project(models.Model):
         default=ProjectStatusChoices.PENDING,
     )
 
+    rejection_comment = models.TextField(max_length=1000, null=True, blank=True)
     acceptance_comment = models.TextField(max_length=1000, null=True, blank=True)
     completion_comment = models.TextField(max_length=1000, null=True, blank=True)
     termination_comment = models.TextField(max_length=1000, null=True, blank=True)
     cancellation_comment = models.TextField(max_length=1000, null=True, blank=True)
 
     system_closed = models.BooleanField(default=False)
+
+    public_id = models.CharField(null=True, blank=True, db_index=True)
+
+    PUBLIC_ID_PREFIX = "P"
 
     class Meta:
         ordering = ["-created_at"]
@@ -70,8 +78,14 @@ class Project(models.Model):
         self.termination_comment = reason
         self.save()
 
-    def milestones(self):
+    def get_milestones(self):
         from .milestone import Milestone
 
         _milestones = Milestone.objects.filter(project_pk=self.pk)
         return _milestones
+
+    def save(self, *args, **kwargs):
+        if not self.public_id:
+            _id = self.pk or primary_key_generator()
+            self.public_id = public_id_generator(_id, self.PUBLIC_ID_PREFIX)
+        return super().save(*args, **kwargs)

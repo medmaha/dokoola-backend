@@ -12,6 +12,7 @@ class ProjectStatusUpdateSerializer(serializers.ModelSerializer):
         model = Project
         fields = [
             "status",
+            "rejection_comment",
             "acceptance_comment",
             "completion_comment",
             "termination_comment",
@@ -19,6 +20,12 @@ class ProjectStatusUpdateSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, attrs):
+        if attrs.get("status") == ProjectStatusChoices.REJECTED.value and not attrs.get(
+            "rejection_comment"
+        ):
+            raise serializers.ValidationError(
+                "rejection_comment is required", "comment"
+            )
         if attrs.get("status") == ProjectStatusChoices.ACCEPTED.value and not attrs.get(
             "acceptance_comment"
         ):

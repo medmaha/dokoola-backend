@@ -1,10 +1,5 @@
-from django.db import connection
 from django.db.models import Q
-from rest_framework.generics import (
-    CreateAPIView,
-    ListAPIView,
-    UpdateAPIView,
-)
+from rest_framework.generics import CreateAPIView, ListAPIView, UpdateAPIView
 from rest_framework.response import Response
 
 from projects.models import Milestone, Project
@@ -20,9 +15,7 @@ class MilestoneCreateAPIView(CreateAPIView):
     serializer_class = MilestoneCreateSerializer
 
     def create(self, request, *args, **kwargs):
-
         user = request.user
-
         if not user.is_talent:
             return Response(
                 {"message": "Only talents can create milestones"},
@@ -30,7 +23,7 @@ class MilestoneCreateAPIView(CreateAPIView):
             )
         try:
             project = Project.objects.get(
-                id=request.data.get("project_id", 0),
+                public_id=request.data.get("project_id", 0),
                 contract__talent__user=user,
             )
         except:
@@ -46,7 +39,7 @@ class MilestoneCreateAPIView(CreateAPIView):
         serializer = self.get_serializer(data=data)
 
         if serializer.is_valid():
-            milestone = serializer.save(project_pk=project.pk)
+            milestone = serializer.save(project_pk=project.public_id)
             project.milestones.add(milestone)
             return Response(
                 {
@@ -72,8 +65,9 @@ class MilestoneUpdateAPIView(UpdateAPIView):
                 status=400,
             )
         try:
+            project_id = request.data.get("project_id", 0)
             project = Project.objects.get(
-                id=request.data.get("project_id", 0),
+                public_id=project_id,
                 contract__talent__user=user,
             )
         except:
@@ -81,7 +75,7 @@ class MilestoneUpdateAPIView(UpdateAPIView):
         try:
             instance = Milestone.objects.get(
                 id=request.data.get("milestone_id", 0),
-                project_pk=project.pk,
+                project_pk=project.public_id,
             )
         except:
             return Response({"message": "Milestone does not exist"}, status=400)
@@ -96,7 +90,7 @@ class MilestoneUpdateAPIView(UpdateAPIView):
         serializer = self.get_serializer(instance, data=data)
 
         if serializer.is_valid():
-            serializer.save(project_pk=project.pk)
+            serializer.save()
             return Response(
                 {
                     "message": "Milestone updated successfully",
@@ -117,20 +111,22 @@ class MilestoneListAPIView(ListAPIView):
 
         try:
             project = Project.objects.get(
-                Q(id=project_id, contract__client__user=user)
-                | Q(id=project_id, contract__talent__user=user)
+                Q(public_id=project_id, contract__client__user=user)
+                | Q(public_id=project_id, contract__talent__user=user)
             )
         except:
             return Response({"message": "Project does not exist"}, status=400)
 
+        project.milestones
+
         milestones = Milestone.objects.filter(
             Q(
                 published=True,
-                project_pk=project.pk,
+                project_pk=project.public_id,
                 milestone_project__contract__client__user=user,
             )
             | Q(
-                project_pk=project.pk,
+                project_pk=project.public_id,
                 milestone_project__contract__talent__user=user,
             ),
         )

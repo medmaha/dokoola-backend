@@ -3,10 +3,7 @@ from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
 
 from projects.models.project import Project
-from projects.serializers import (
-    ProjectListSerializer,
-    ProjectRetrieveSerializer,
-)
+from projects.serializers import ProjectListSerializer, ProjectRetrieveSerializer
 from users.models.user import User
 
 
@@ -45,7 +42,7 @@ class ProjectRetrieveAPIView(RetrieveAPIView):
         try:
             project = Project.objects.get(
                 Q(contract__client__user=user) | Q(contract__talent__user=user),
-                id=project_id,
+                public_id=project_id,
             )
             return project
 
