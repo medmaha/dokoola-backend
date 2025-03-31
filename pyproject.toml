@@ -28,4 +28,5 @@ dependencies = [
     "ratelimit>=2.2.1",
     "parsel>=1.10.0",
     "selenium>=4.30.0",
+    "webdriver-manager>=4.0.2",
 ]
