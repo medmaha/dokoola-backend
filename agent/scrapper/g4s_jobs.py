@@ -2,9 +2,6 @@ import re
 from datetime import datetime
 from typing import Callable, Dict, List, Optional, Tuple
 
-from bs4 import BeautifulSoup
-from lxml import etree
-
 from agent.scrapper.base import JobParser, JobScraper, ScrapedJob
 
 
