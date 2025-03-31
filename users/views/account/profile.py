@@ -16,7 +16,7 @@ class UserProfileAPIView(RetrieveAPIView):
     metadata = {}
 
     def get_serializer_class(self):
-        profile_type = self.metadata.get("profile_type")
+        profile_type = self.metadata.get("profile_type", "")
 
         if profile_type.lower() == "talent":
             return TalentReadSerializer
@@ -24,9 +24,9 @@ class UserProfileAPIView(RetrieveAPIView):
             return ClientRetrieveSerializer
         return TalentReadSerializer
 
-    def get_user(self, username: str):
+    def get_user(self, public_id: str):
         try:
-            user = User.objects.get(username=username)
+            user = User.objects.get(username=public_id)
             profile, profile_type = user.profile
             self.metadata.update(
                 {
@@ -35,10 +35,6 @@ class UserProfileAPIView(RetrieveAPIView):
             )
             return profile
         except User.DoesNotExist:
-            return None
-
-    def get_client(self, public_id: str):
-        try:
             client = Client.objects.get(public_id=public_id)
             self.metadata.update(
                 {
@@ -47,10 +43,6 @@ class UserProfileAPIView(RetrieveAPIView):
             )
             return client
         except Client.DoesNotExist:
-            return None
-
-    def get_talent(self, public_id: str):
-        try:
             talent = Talent.objects.get(public_id=public_id)
             self.metadata.update(
                 {
@@ -59,11 +51,7 @@ class UserProfileAPIView(RetrieveAPIView):
             )
             return talent
         except Talent.DoesNotExist:
-            return None
-
-    def get_staff(self, username: str):
-        try:
-            staff = Staff.objects.get(username=username)
+            staff = Staff.objects.get(public_id=public_id)
             self.metadata.update(
                 {
                     "profile_type": "Staff",
@@ -74,12 +62,7 @@ class UserProfileAPIView(RetrieveAPIView):
             return None
 
     def get_user_by_public_id(self, public_id: str):
-        profile = (
-            self.get_user(public_id)
-            or self.get_talent(public_id)
-            or self.get_client(public_id)
-            or self.get_staff(public_id)
-        )
+        profile = self.get_user(public_id)
         return profile
 
     def retrieve(self, request, public_id: str, *args, **kwargs):

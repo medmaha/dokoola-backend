@@ -1,11 +1,12 @@
-from functools import partial
 from typing import Any, Literal, Optional, Union
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from utilities.generator import default_pid_generator, public_id_generator
+from clients.models import Client
+from staffs.models import Staff
+from talents.models import Talent
 
 
 class User(AbstractUser):
@@ -28,6 +29,7 @@ class User(AbstractUser):
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
+    DEFAULT_PASSWORD = "%!dokoola#"
 
     # Personal info
     phone = models.CharField(max_length=50, default="", blank=True)
@@ -109,18 +111,38 @@ class User(AbstractUser):
 
         return None
 
-    # from clients.models import Client
-    # from staffs.models import Staff
-    # from talents.models import Talent
+    @classmethod
+    def get_profile_by_username_or_public_id(cls, public_id: str):
+        if public_id.lower().startswith(Staff.PUBLIC_ID_PREFIX.lower()):
+            profile = Staff
 
-    # type StaffProfile = tuple[Staff, Literal["Staff"]]
-    # type ClientProfile = tuple[Client, Literal["Client"]]
-    # type TalentProfile = tuple[Talent, Literal["Talent"]]
-    # type UserProfile = Union[StaffProfile, ClientProfile, TalentProfile]
+        elif public_id.lower().startswith(Client.PUBLIC_ID_PREFIX.lower()):
+            profile = Client
+
+        elif public_id.lower().startswith(Talent.PUBLIC_ID_PREFIX.lower()):
+            profile = Talent
+        else:
+            profile = None
+
+        if not profile:
+            user = (
+                User.objects.only(
+                    "is_talent", "is_client", "is_staff", "id", "username"
+                )
+                .filter(username=public_id)
+                .first()
+            )
+            if not user:
+                return [None, ""]
+            profile, profile_type = user.profile
+            return [profile, profile_type]
+
+        _profile = profile.objects.filter(public_id=public_id).first()
+        return [_profile, profile.__name__ if _profile else ""]
 
 
 type UserProfile = Union[
-    tuple[Any, Literal["Staff"]],
-    tuple[Any, Literal["Client"]],
-    tuple[Any, Literal["Talent"]],
+    tuple[Staff, Literal["Staff"]],
+    tuple[Talent, Literal["Client"]],
+    tuple[Client, Literal["Talent"]],
 ]

@@ -12,6 +12,7 @@ class OTT(models.Model):
     code = models.CharField(max_length=8)
     is_sent = models.BooleanField(default=False)
     is_valid = models.BooleanField(default=False)
+    verified = models.BooleanField(default=False)
     expire_at = models.DateTimeField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -37,7 +38,6 @@ class OTTProxy(OTT):
         )
 
         ott.save()
-
         return ott
 
     @classmethod
@@ -45,9 +45,21 @@ class OTTProxy(OTT):
         return cls.objects.filter(identifier=identifier, code=code).exists()
 
     @classmethod
+    def validate_verified_ott(cls, identifier: str):
+        one_month_ago = timezone.now() - timezone.timedelta(weeks=4)
+        return cls.objects.filter(
+            identifier=identifier,
+            is_valid=False,
+            verified=True,
+            updated_at__gte=one_month_ago,
+        ).exists()
+
+    @classmethod
     def generate_code(cls):
         return random.randrange(10000, 99999).__str__()
 
     @classmethod
-    def invalidate_ott(cls, identifier: str):
-        cls.objects.filter(identifier=identifier).update(is_valid=False)
+    def invalidate_ott(cls, identifier: str, verified=True):
+        cls.objects.filter(identifier=identifier).update(
+            is_valid=False, verified=verified
+        )

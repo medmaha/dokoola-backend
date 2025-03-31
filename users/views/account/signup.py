@@ -9,6 +9,7 @@ from clients.models import Client
 from staffs.models import Staff
 from talents.models import Talent
 from users.models import User
+from users.models.ott import OTT, OTTProxy
 from users.serializer import UserWriteSerializer
 
 from .auth_token import GenerateToken
@@ -45,18 +46,25 @@ class SignupAPIView(GenericAPIView):
             serializer = UserWriteSerializer(data=data)
 
             if serializer.is_valid():
-                user: User = serializer.save()  # type: ignore
-                user.is_active = False
-                token_generator = GenerateToken()
-                tokens = token_generator.tokens(user, init=True, context={"request": request})  # type: ignore
-                user.set_password(data.get("password", "dokoola"))
+                user: User = serializer.save()
+                profile = None
 
                 if user.is_staff:
-                    Staff.objects.get_or_create(user=user)
+                    profile = Staff.objects.create(user=user)
                 if user.is_client:
-                    Client.objects.get_or_create(user=user)
+                    profile = Client.objects.create(user=user)
                 if user.is_talent:
-                    Talent.objects.get_or_create(user=user)
+                    profile = Talent.objects.create(user=user)
+
+                if not profile:
+                    raise ValueError("No associated profile account")
+
+                token_generator = GenerateToken()
+                tokens = token_generator.tokens(user)
+                is_active = OTTProxy.validate_verified_ott(user.email)
+                user.is_active = is_active
+                user.set_password(data.get("password", User.DEFAULT_PASSWORD))
+                user.save()
 
                 # TODO: send a welcome email to the user
                 return Response(tokens, status=201)

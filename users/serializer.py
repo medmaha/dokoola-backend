@@ -28,8 +28,15 @@ class UserWriteSerializer(MergeSerializer, serializers.ModelSerializer):
             "username",
             "first_name",
             "last_name",
-            "is_client",
-            "is_talent",
+            "phone",
+            "gender",
+            "state",
+            "district",
+            "country",
+            "city",
+            "zip_code",
+            "phone_code",
+            "country_code",
         ]
 
 
