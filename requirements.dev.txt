@@ -16,8 +16,7 @@ psycopg2-binary==2.9.9
 uuid_v7==1.0.0
 bs4==0.0.2
 ratelimit==2.2.1
-lxml==5.3.1
-parsel==1.10.0
+selenium==4.30.0
 
 # Django Dev Packages
 django-silk==5.2.0

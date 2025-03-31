@@ -3,8 +3,6 @@ from abc import abstractmethod
 from typing import Callable, List, Literal, Optional, final
 
 from bs4 import BeautifulSoup
-from lxml import etree
-from parsel import Selector
 
 from .models import ScrapedJob
 from .utils import clean_html_content, get_job_type_or_other, logger
@@ -35,33 +33,13 @@ class JobParser:
 
         if "bs4" in parsers:
             self.setup_bs4(body)
-        if "lxml" in parsers:
-            self.setup_lxml(body)
-        if "percel" in parsers:
-            self.setup_parcel(body)
 
     def setup_bs4(self, body):
         html = """<html>{}</html>""".format(body)
         self.bs4 = BeautifulSoup(html, "html.parser")
 
-    def setup_parcel(self, body):
-        html = """<html>{}</html>""".format(body)
-        self.percel = Selector(html)
-
-    def setup_lxml(self, body):
-        html = """<html>{}</html>""".format(body)
-        html_parser = etree.HTMLParser()
-        self.lxml_tree = etree.fromstring(html)
-
     @final
     def get_element_by_xpath(self, xpath):
-        result = self.percel.xpath(xpath).getall()
-        print("====================================================================")
-        print("Xpath Results:", result)
-        print("Xpath", xpath)
-        print("====================================================================")
-        if result:
-            return result
         return None
 
     @abstractmethod

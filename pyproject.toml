@@ -27,4 +27,5 @@ dependencies = [
     "drf-spectacular[sidecar]>=0.27.2",
     "ratelimit>=2.2.1",
     "parsel>=1.10.0",
+    "selenium>=4.30.0",
 ]
