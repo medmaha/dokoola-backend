@@ -1,44 +1,112 @@
 import datetime
+from typing import List
 
 import after_response
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.models import AbstractUser
+from django.core.cache import cache
 from django.http import HttpRequest, HttpResponse
+from django.utils import timezone
 
 from jobs.models.job import Job, JobAgentProxy
 
 from .scrapper import G4SJobScraper, GamJobScraper
 
-printTime = lambda x, y: print(f"\nTime taken: {y - x}\n\n")
 
-scrapping = False
+def is_admin(user: AbstractUser):
+    # if not hasattr(user, "is_authenticated"): return False
+    # if not user.is_authenticated: return False
+    # return user.is_staff
+
+    return True
+
+
+@user_passes_test(is_admin)
+def index(request: HttpRequest):
+    global time_remaining
+
+    if not check_is_scraping():
+        # Call the function after the response is sentt
+        do_scrape.after_response()
+        return HttpResponse("<h1>Scrapping in process</h1>")
+
+    return HttpResponse(
+        "<h1 style='color:red;'>{}</h1>".format(
+            time_remaining or "Error: Scrapping in process"
+        ),
+        status=403,
+    )
+
+
+@user_passes_test(is_admin)
+def invalidate_jobs(request: HttpRequest):
+
+    today = timezone.now()
+    last_name = today - datetime.timedelta(days=30)
+
+    invalid_jobs = (
+        Job.objects.only("id")
+        .filter(
+            is_valid=True,
+            published=True,
+            is_third_party=True,
+            application_deadline__lt=today,
+        )
+        .values_list("id", flat=True)
+    )
+
+    if len(invalid_jobs):
+        do_invalidation.after_response(invalid_jobs)
+
+    response = HttpResponse(
+        '{"success": true, "message": "Jobs invalidated", "jobs_count": '
+        + str(len(invalid_jobs))
+        + "}"
+    )
+    response.headers["content-type"] = "application/json"
+    return response
+
+
+is_deleting = False
+is_scrapping = False
+time_remaining = ""
+last_scraped_time = None
+
+
+def check_is_scraping():
+
+    global last_scraped_time, time_remaining
+
+    now = datetime.datetime.now()
+    if last_scraped_time is None:
+        return False
+
+    time_difference = now - last_scraped_time
+    restriction_expired = (
+        time_difference.total_seconds() > 300
+    )  # 5 minutes = 300 seconds
+
+    if not restriction_expired:
+        last_scraped_time = None
+        time_remaining = f"{5 - int(time_difference.total_seconds() / 60)} minutes remaining until next scrape"
+
+    return restriction_expired
 
 
 @after_response.enable
-def scrape():
-    global scrapping
+def do_invalidation(job_ids: List[int]):
+    Job.objects.only("id").filter(id__in=job_ids).delete()
 
-    if scrapping:
+
+@after_response.enable
+def do_scrape(max_jobs=2):
+    global is_scrapping
+    if check_is_scraping():
         return
-
-    scrapping = True
-    start_time = datetime.datetime.now()
-
-    scrapper = GamJobScraper(to_json=True)
-    scrapped_jobs = scrapper.scrape()
-
-    proxy = JobAgentProxy()
-    proxy.save_scraped_jobs(scrapped_jobs)
-
-    end_time = datetime.datetime.now()
-    printTime(start_time, end_time)
-
-    scrapping = False
-
-
-@login_required
-def index(request: HttpRequest):
-    if not request.user.is_staff:
-        return HttpResponse("403 Forbidden request!")
-
-    scrape.after_response()
-    return HttpResponse("<h1>Scrapping in process</h1>")
+    try:
+        is_scrapping = True
+        proxy = JobAgentProxy()
+        proxy.scrape_site(site="gamjobs", max_jobs=max_jobs)
+        last_scraped_time = datetime.datetime.now()
+    except Exception as e:
+        print(e)
