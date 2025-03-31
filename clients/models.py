@@ -4,7 +4,6 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 
 from reviews.models import Review
-from users.models import User
 from utilities.generator import (
     default_pid_generator,
     primary_key_generator,
@@ -57,7 +56,7 @@ class Client(models.Model):
     public_id = models.CharField(max_length=50, db_index=True)
 
     user = models.OneToOneField(
-        User, on_delete=models.CASCADE, related_name="client_profile"
+        "users.User", on_delete=models.CASCADE, related_name="client_profile"
     )
 
     company = models.OneToOneField(Company, on_delete=models.SET_NULL, null=True)
@@ -74,6 +73,8 @@ class Client(models.Model):
 
     # Misc
     deleted_at = models.DateTimeField(null=True, blank=True)
+
+    PUBLIC_ID_PREFIX = "CL"
 
     def __str__(self):
         return self.name
@@ -100,5 +101,5 @@ class Client(models.Model):
     def save(self, *args, **kwargs):
         if self._state.adding or not self.public_id:
             _id = self.pk or primary_key_generator()
-            self.public_id = public_id_generator(_id, "Cl")
+            self.public_id = public_id_generator(_id, self.PUBLIC_ID_PREFIX)
         return super().save(*args, **kwargs)
