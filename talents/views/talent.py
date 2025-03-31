@@ -56,6 +56,7 @@ class TalentAPIView(GenericAPIView):
 
         except Exception as e:
             # TODO: log error
+            print("Error:", e)
             return Response({"message": "Invalid Server Error"}, status=500)
 
     def post(self, request, public_id=None):
@@ -131,7 +132,7 @@ class TalentAPIView(GenericAPIView):
                 updated_talent, context={"r_type": "detail"}
             )
 
-            # Check to see of username of this user was updated
+            # Check, to see if the username of this user was updated
             if updated_user.username != current_username:
                 # Generate a new token for this user's credentials
                 token = GenerateToken().tokens(updated_user, init=True)

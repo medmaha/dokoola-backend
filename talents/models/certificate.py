@@ -1,10 +1,5 @@
-from functools import partial
-
 from django.db import models
-from django.db.models.manager import Manager
 
-from reviews.models import Review
-from users.models import User
 from utilities.generator import primary_key_generator, public_id_generator
 
 

@@ -28,14 +28,6 @@ class TalentReadSerializer(serializers.ModelSerializer):
         model = Talent
         fields = []
 
-    def mini_representation(self, instance: Talent):
-        return {
-            "public_id": instance.public_id,
-            "avatar": instance.user.avatar,
-            "name": instance.name,
-            "title": instance.title,
-        }
-
     def common_values(self, instance: Talent):
         return {
             "badge": instance.badge,
@@ -46,21 +38,44 @@ class TalentReadSerializer(serializers.ModelSerializer):
             "avatar": instance.user.avatar,
             "name": instance.name,
             "title": instance.title,
-            "bio": instance.bio[:300],
+            "bits": instance.bits,
         }
 
-    def detailed_representation(self, instance: Talent, is_edit=False):
+    def edit_representation(self, instance: Talent):
         data = self.common_values(instance)
         user_fields = (
             "username",
-            "email",
-            "date_joined",
+            "phone",
+            "gender",
+            "state",
+            "district",
+            "country",
+            "city",
+            "zip_code",
+            "phone_code",
+            "country_code",
         )
         for field in user_fields:
             data[field] = getattr(instance.user, field)
 
         talents_fields = (
-            "bits",
+            "bio",
+            "dob",
+        )
+
+        for field in talents_fields:
+            data[field] = getattr(instance, field)
+
+        data["location"] = instance.user.get_location()
+        return data
+
+    def detailed_representation(self, instance: Talent):
+        data = self.common_values(instance)
+        user_fields = ("date_joined",)
+        for field in user_fields:
+            data[field] = getattr(instance.user, field)
+
+        talents_fields = (
             "bio",
             "jobs_completed",
             "deleted_at",
@@ -70,23 +85,20 @@ class TalentReadSerializer(serializers.ModelSerializer):
         for field in talents_fields:
             data[field] = getattr(instance, field)
 
-        if is_edit:
-            data["username"] = instance.user.username
-
         data["location"] = instance.user.get_location()
         return data
 
     def to_representation(self, instance: Talent):
-        s_type_list = ("mini", "detail", "common")
-        s_type = str(self.context.get("r_type", "")).lower()
+        r_type_list = ("detail", "edit")
+        r_type = str(self.context.get("r_type", "")).lower()
 
-        if s_type not in s_type_list:
+        if r_type not in r_type_list:
             return self.common_values(instance)
 
-        if s_type == "mini":
-            return self.mini_representation(instance)
+        if r_type == "edit":
+            return self.edit_representation(instance)
 
-        if s_type == "detail":
+        if r_type == "detail":
             return self.detailed_representation(instance)
 
         return self.common_values(instance)
