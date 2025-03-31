@@ -25,6 +25,7 @@ class JobStatusChoices(models.TextChoices):
     COMPLETED = "COMPLETED"
     IN_PROGRESS = "IN_PROGRESS"
     DELETED = "DELETED"
+    CONTRACTED = "CONTRACTED"
 
     @classmethod
     def verify_status(cls, status: str):
@@ -161,9 +162,7 @@ class Job(models.Model):
 
         Proposal.objects.bulk_update(other_proposals, ["status"])
 
-    def notify_client(
-        self, job_status, proposal=None, new_proposal=None, is_after_response=True
-    ):
+    def notify_client(self, job_status, proposal=None, new_proposal=None):
         """
         Notify the client about the job status through email
         """
@@ -217,7 +216,6 @@ class Job(models.Model):
             sender_name=sender_name,
             html_template_name=html_template_name,
             html_template_context=html_template_context,
-            execute_now=is_after_response == True,
         )
 
     @property
