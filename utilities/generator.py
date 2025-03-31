@@ -2,11 +2,11 @@ import time
 from uuid import UUID
 
 from rest_framework.serializers import ReturnDict, ReturnList
-from uuid_v7.base import uuid7
+from uuid_v7.base import UUID, uuid7
 
 
 def primary_key_generator():
-    id = uuid7().__str__()
+    id = uuid7()
     return id
 
 
@@ -15,11 +15,12 @@ def default_pid_generator(prefix: str):
     return public_id_generator(_id, prefix)
 
 
-def public_id_generator(_id: str, prefix: str, max_length=20):
+def public_id_generator(_id, prefix: str, max_length=20):
+    _id = str(_id)
     try:
         _uuid = UUID(_id).__str__()
     except:
-        _uuid = primary_key_generator()
+        _uuid = primary_key_generator().__str__()
 
     try:
         time_hex = _uuid[:8] + _uuid[9:11]
