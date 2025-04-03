@@ -13,14 +13,4 @@ REST_FRAMEWORK = {
     ],
 }
 
-from src.settings.shared import DEBUG
-
-if DEBUG:
-    REST_FRAMEWORK.update(
-        {
-            "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-        }
-    )
-
-
 __all__ = ["REST_FRAMEWORK"]

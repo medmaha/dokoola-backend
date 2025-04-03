@@ -28,6 +28,15 @@ class TalentReadSerializer(serializers.ModelSerializer):
         model = Talent
         fields = []
 
+    def mini_values(self, instance: Talent):
+        return {
+            "bits": instance.bits,
+            "name": instance.name,
+            "title": instance.title,
+            "avatar": instance.user.avatar,
+            "public_id": instance.public_id,
+        }
+
     def common_values(self, instance: Talent):
         return {
             "badge": instance.badge,
@@ -89,11 +98,11 @@ class TalentReadSerializer(serializers.ModelSerializer):
         return data
 
     def to_representation(self, instance: Talent):
-        r_type_list = ("detail", "edit")
+        r_type_list = ("mini", "detail", "edit")
         r_type = str(self.context.get("r_type", "")).lower()
 
-        if r_type not in r_type_list:
-            return self.common_values(instance)
+        if r_type not in r_type_list or r_type == "mini":
+            return self.mini_values(instance)
 
         if r_type == "edit":
             return self.edit_representation(instance)

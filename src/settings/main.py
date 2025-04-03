@@ -5,41 +5,28 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from src.settings.shared import APPLICATION_NAME, DEBUG
+from src.settings.shared import APPLICATION_NAME, DEBUG, SECRET_KEY
 
-from .api import *
-from .cors import *
-from .db import *
-from .email import *
-from .jwt import *
-from .logger import *
-from .unfold import *
-from .whitenoice import *
-
-# from .db import DATABASES
-# from .unfold import UNFOLD
-# from .jwt import SIMPLE_JWT
-# from .logger import LOG_CONFIG
-# from .api import REST_FRAMEWORK
-# from .whitenoice import STORAGES
-
-# from .cors import (
-#     CORS_ALLOW_METHODS,
-#     CORS_ALLOW_HEADERS,
-#     CORS_ALLOW_ALL_ORIGINS,
-#     CORS_ALLOW_CREDENTIALS
-# )
-
-# from .email import (
-#     EMAIL_HOST,
-#     EMAIL_PORT,
-#     EMAIL_BACKEND,
-#     EMAIL_USE_TLS,
-#     EMAIL_HOST_USER,
-#     EMAIL_HOST_PASSWORD
-# )
-
-# from src.settings.shared import DEBUG, SECRET_KEY
+from .api import REST_FRAMEWORK
+from .cors import (
+    CORS_ALLOW_ALL_ORIGINS,
+    CORS_ALLOW_CREDENTIALS,
+    CORS_ALLOW_HEADERS,
+    CORS_ALLOW_METHODS,
+)
+from .db import DATABASES
+from .email import (
+    EMAIL_BACKEND,
+    EMAIL_HOST,
+    EMAIL_HOST_PASSWORD,
+    EMAIL_HOST_USER,
+    EMAIL_PORT,
+    EMAIL_USE_TLS,
+)
+from .jwt import SIMPLE_JWT
+from .logger import LOG_CONFIG
+from .unfold import UNFOLD
+from .whitenoice import STORAGES
 
 ALLOWED_HOSTS = list(
     set(
@@ -108,11 +95,20 @@ MIDDLEWARE = [
     # "core.middleware.aftar.DokoolaAfterMiddleware",
     # "core.middleware.csrf.DokoolaCSRFMiddleware",
 ]
+
 # if DEBUG:
 #     INSTALLED_APPS.append("silk")
 #     INSTALLED_APPS.append("drf_spectacular")
 #     INSTALLED_APPS.append("drf_spectacular_sidecar")
 #     MIDDLEWARE.append("silk.middleware.SilkyMiddleware")
+
+#     from .spectacular import SPECTACULAR_SETTINGS
+
+#     REST_FRAMEWORK.update(
+#         {
+#             "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+#         }
+#     )
 
 
 ROOT_URLCONF = "src.urls"
@@ -162,13 +158,12 @@ USE_I18N = True
 USE_TZ = True
 
 MEDIA_URL = "media/"
-STATIC_URL = "static/"
+MEDIA_ROOT = BASE_DIR / "media"
 
+STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "static"
 STATICFILES_DIRS = [
     BASE_DIR / "public",
 ]
-
-MEDIA_ROOT = BASE_DIR / "media"
-STATIC_ROOT = BASE_DIR / "static"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

@@ -1,4 +1,3 @@
-from tkinter import E
 from typing import Any, Dict, Optional
 
 from core.services.after.main import AfterResponseService
