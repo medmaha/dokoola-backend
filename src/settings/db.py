@@ -27,4 +27,5 @@ if DB_ENGINE:
 
 DATABASES = {"default": credentials}
 
+
 __all__ = ["DATABASES"]

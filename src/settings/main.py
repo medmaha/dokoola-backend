@@ -16,6 +16,31 @@ from .logger import *
 from .unfold import *
 from .whitenoice import *
 
+# from .db import DATABASES
+# from .unfold import UNFOLD
+# from .jwt import SIMPLE_JWT
+# from .logger import LOG_CONFIG
+# from .api import REST_FRAMEWORK
+# from .whitenoice import STORAGES
+
+# from .cors import (
+#     CORS_ALLOW_METHODS,
+#     CORS_ALLOW_HEADERS,
+#     CORS_ALLOW_ALL_ORIGINS,
+#     CORS_ALLOW_CREDENTIALS
+# )
+
+# from .email import (
+#     EMAIL_HOST,
+#     EMAIL_PORT,
+#     EMAIL_BACKEND,
+#     EMAIL_USE_TLS,
+#     EMAIL_HOST_USER,
+#     EMAIL_HOST_PASSWORD
+# )
+
+# from src.settings.shared import DEBUG, SECRET_KEY
+
 ALLOWED_HOSTS = list(
     set(
         [
@@ -83,11 +108,11 @@ MIDDLEWARE = [
     # "core.middleware.aftar.DokoolaAfterMiddleware",
     # "core.middleware.csrf.DokoolaCSRFMiddleware",
 ]
-if DEBUG:
-    INSTALLED_APPS.append("silk")
-    INSTALLED_APPS.append("drf_spectacular")
-    INSTALLED_APPS.append("drf_spectacular_sidecar")
-    MIDDLEWARE.append("silk.middleware.SilkyMiddleware")
+# if DEBUG:
+#     INSTALLED_APPS.append("silk")
+#     INSTALLED_APPS.append("drf_spectacular")
+#     INSTALLED_APPS.append("drf_spectacular_sidecar")
+#     MIDDLEWARE.append("silk.middleware.SilkyMiddleware")
 
 
 ROOT_URLCONF = "src.urls"

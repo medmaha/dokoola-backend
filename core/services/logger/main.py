@@ -5,7 +5,6 @@ from core.services.after.main import AfterResponseService
 from src.settings.logger import LOG_CONFIG
 from utilities.time import utc_datetime
 
-
 logger = LOG_CONFIG.logger
 
 
@@ -42,62 +41,38 @@ class DokoolaLoggerService:
 
             if not hasattr(logger, log_attr.lower()):
                 return None
-            
+
             log_method = getattr(logger, log_attr.lower())
 
             AfterResponseService.schedule_log(
                 lambda: log_method(message, extra=enriched_extras)
-            )  
+            )
 
     @classmethod
-    def debug(
-        cls,
-        message: Any,
-        extra: Optional[Dict[str, Any]] = None
-    ) -> None:
+    def debug(cls, message: Any, extra: Optional[Dict[str, Any]] = None) -> None:
         return cls.__log("debug", message, extra)
 
     @classmethod
-    def info(
-        cls,
-        message: Any,
-        extra: Optional[Dict[str, Any]] = None
-    ) -> None:
+    def info(cls, message: Any, extra: Optional[Dict[str, Any]] = None) -> None:
         return cls.__log("info", message, extra)
 
     @classmethod
-    def warning(
-        cls,
-        message: Any,
-        extra: Optional[Dict[str, Any]] = None
-    ) -> None:
+    def warning(cls, message: Any, extra: Optional[Dict[str, Any]] = None) -> None:
         return cls.__log("warning", message, extra)
 
     @classmethod
-    def error(
-        cls,
-        message: Any,
-        extra: Optional[Dict[str, Any]] = None
-    ) -> None:
+    def error(cls, message: Any, extra: Optional[Dict[str, Any]] = None) -> None:
         return cls.__log("error", message, extra)
 
     @classmethod
-    def critical(
-        cls,
-        message: Any,
-        extra: Optional[Dict[str, Any]] = None
-    ) -> None:
+    def critical(cls, message: Any, extra: Optional[Dict[str, Any]] = None) -> None:
         return cls.__log("critical", message, extra)
-        
+
     @classmethod
-    def exception(
-        cls,
-        message: Any,
-        extra: Optional[Dict[str, Any]] = None
-    ) -> None:
+    def exception(cls, message: Any, extra: Optional[Dict[str, Any]] = None) -> None:
         return cls.__log("exception", message, extra)
 
-    
+
 class DokoolaLazyLoggerService(DokoolaLoggerService):
 
     def __init__(self, lazy=False):
@@ -108,7 +83,7 @@ class DokoolaLazyLoggerService(DokoolaLoggerService):
     def _log(
         cls, log_attr: str, message: Any, extras: Optional[Dict[str, Any]] = None
     ) -> None:
-        
+
         return cls.__log(log_attr, message, extras)
 
 

@@ -1,7 +1,6 @@
 import os
 from datetime import timedelta
-
-SECRET_KEY = os.environ.get("SECRET_KEY")
+from src.settings.shared import SECRET_KEY
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(weeks=4),

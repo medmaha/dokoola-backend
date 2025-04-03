@@ -1,5 +1,6 @@
 from typing import Any, Callable
 
+
 class _AfterResponseService:
     """Service for managing and executing callbacks after HTTP response"""
 
@@ -17,7 +18,6 @@ class _AfterResponseService:
     ) -> None:
 
         callback()
-
 
 
 # Singleton instance
