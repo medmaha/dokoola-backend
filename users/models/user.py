@@ -1,4 +1,4 @@
-from typing import Any, Literal, Optional, Union
+from typing import Any, Literal, Optional, Tuple, Union
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -54,8 +54,10 @@ class User(AbstractUser):
         return self.get_full_name()
 
     @property
-    def profile(self) -> "UserProfile":
+    def profile(self):
+        return self.get_profile()
 
+    def get_profile(self) -> Tuple[Any, str]:
         if self.is_client:
             return (self.client_profile, "Client")  # type: ignore
         if self.is_talent:
@@ -115,10 +117,8 @@ class User(AbstractUser):
     def get_profile_by_username_or_public_id(cls, public_id: str):
         if public_id.lower().startswith(Staff.PUBLIC_ID_PREFIX.lower()):
             profile = Staff
-
         elif public_id.lower().startswith(Client.PUBLIC_ID_PREFIX.lower()):
             profile = Client
-
         elif public_id.lower().startswith(Talent.PUBLIC_ID_PREFIX.lower()):
             profile = Talent
         else:
@@ -139,10 +139,3 @@ class User(AbstractUser):
 
         _profile = profile.objects.filter(public_id=public_id).first()
         return [_profile, profile.__name__ if _profile else ""]
-
-
-type UserProfile = Union[
-    tuple[Staff, Literal["Staff"]],
-    tuple[Talent, Literal["Client"]],
-    tuple[Client, Literal["Talent"]],
-]
