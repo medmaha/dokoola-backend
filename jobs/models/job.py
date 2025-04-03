@@ -1,6 +1,6 @@
 import random
 from functools import partial
-from typing import List
+from typing import List, Literal, Optional
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
@@ -52,9 +52,15 @@ class Job(models.Model):
     title = models.CharField(max_length=200, db_index=True)
     description = models.TextField()
 
-    pricing = models.JSONField(encoder=DjangoJSONEncoder, blank=True, null=True)
-    benefits = models.JSONField(encoder=DjangoJSONEncoder, blank=True, null=True)
-    required_skills = models.JSONField(encoder=DjangoJSONEncoder, blank=True, null=True)
+    pricing = models.JSONField(
+        encoder=DjangoJSONEncoder, blank=True, null=True, default=dict
+    )
+    benefits = models.JSONField(
+        encoder=DjangoJSONEncoder, blank=True, null=True, default=dict
+    )
+    required_skills = models.JSONField(
+        encoder=DjangoJSONEncoder, blank=True, null=True, default=dict
+    )
 
     country = models.JSONField(encoder=DjangoJSONEncoder)
     address = models.CharField(max_length=200, blank=True, null=True)
@@ -90,9 +96,9 @@ class Job(models.Model):
     experience_level = models.CharField(blank=True, null=True, max_length=200)
     experience_level_other = models.CharField(blank=True, null=True, max_length=200)
 
-    estimated_duration = models.CharField(blank=True, null=True)
     application_deadline = models.DateTimeField(blank=True, null=True)
-    additional_payment_terms = models.CharField(blank=True, default="")
+    estimated_duration = models.CharField(blank=True, null=True, max_length=255)
+    additional_payment_terms = models.CharField(blank=True, default="", max_length=255)
 
     client = models.ForeignKey(
         Client, related_name="jobs", on_delete=models.CASCADE, null=False
@@ -101,6 +107,8 @@ class Job(models.Model):
     bits_amount = models.IntegerField(default=16)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(default=timezone.now)
+
+    PUBLIC_ID_PREFIX = "Job"
 
     def __str__(self):
         return self.title[:50]
@@ -126,7 +134,7 @@ class Job(models.Model):
             self.is_third_party = True
         if self._state.adding or not self.public_id:
             _id = self.pk or primary_key_generator()
-            self.public_id = public_id_generator(_id, "Job")
+            self.public_id = public_id_generator(_id, self.PUBLIC_ID_PREFIX)
         return super().save(*args, **kwargs)
 
     def update_status_and_withdraw_proposals(
@@ -231,17 +239,22 @@ class JobAgentProxy(Job):
     class Meta:
         proxy = True
 
-    def scrape_site(self, site: str, max_jobs=None) -> int:
+    SITE = Literal["gamjobs", "g4s", "mrc"]
+    SITES: List[SITE] = ["gamjobs", "g4s", "mrc"]
+
+    def scrape_site(self, site: SITE, max_jobs: Optional[int] = None) -> int:
         job_scraper = None
 
         if site == "gamjobs":
             from agent.scrapper import GamJobScraper
 
             job_scraper = GamJobScraper
+
         if site == "g4s":
             from agent.scrapper import G4SJobScraper
 
             job_scraper = G4SJobScraper
+
         if site == "mrc":
             from agent.scrapper import MRCJobScraper
 
@@ -276,7 +289,6 @@ class JobAgentProxy(Job):
         return 0
 
     def save_scraped_jobs(self, _jobs: dict | List[ScrapedJob]) -> None:
-        return
 
         if len(_jobs) < 1 or len(_jobs) == 0:
             return

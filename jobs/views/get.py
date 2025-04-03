@@ -22,7 +22,7 @@ active_statues = [
     # JobStatusChoices.DELETED
 ]
 
-valid_job_query = Q(is_valid=True, status__in=active_statues)
+guest_job_query = Q(is_valid=True, status__in=active_statues)
 client_job_query = lambda user_id: Q(
     client__user__pk=user_id,
     status__in=[
@@ -40,19 +40,16 @@ class JobListAPIView(ListAPIView):
     def get_queryset(self):
         user_id = self.request.user.pk
         if user_id:
-            query = valid_job_query | client_job_query(user_id)
-            queryset = (
-                Job.objects.filter(query)
-                .select_related("client", "category")
-                .order_by("-created_at", "published")
-            )
+            query = guest_job_query & Q(published=True) | client_job_query(user_id)
+            queryset = Job.objects.filter(query).select_related("client", "category")
             return queryset
         else:
-            queryset = Job.objects.filter(Q(is_valid=True)).order_by(
-                "-created_at", "published"
+            queryset = Job.objects.filter(
+                guest_job_query,
+                published=True,
             )
 
-        return queryset
+        return queryset.order_by("application_deadline", "-created_at", "published")
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -92,7 +89,7 @@ class JobRetrieveAPIView(RetrieveAPIView):
     def get_queryset(self, public_id: str):
         try:
             user_id = self.request.user.pk
-            query = valid_job_query | client_job_query(user_id)
+            query = guest_job_query | client_job_query(user_id)
             return Job.objects.get(query, public_id=public_id)
 
         except Exception as e:
@@ -113,7 +110,7 @@ class JobRetrieveAPIView(RetrieveAPIView):
             #     j.save()
 
             if instance.client.user.pk == request.user.pk:
-                AfterResponseService.register(self.update_last_visit, instance)
+                AfterResponseService.schedule_task(self.update_last_visit, instance)
             return Response(serializer.data, status=200)
 
         return Response({"message':'Resources not found"}, status=404)

@@ -3,6 +3,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
 from jobs.models import Job
+from jobs.models.job import JobStatusChoices
 from users.models.user import User
 from utilities.generator import get_serializer_error_message
 
@@ -29,20 +30,9 @@ class ThirdPartyJobAPIView(GenericAPIView):
     def get_serializer(self, *args, **kwargs) -> ThirdPartyJobSerializer:
         return self.serializer_class(*args, **kwargs)
 
-    def get_client_id(self, request):
-        user: User = request.user
-
-        client, profile_name = user.profile
-
-        if profile_name.lower() != "client":
-            raise ValueError("Forbidden Request")
-
-        return client.public_id
-
     def get_queryset(self, public_id: str, client_id: str):
         queryset = Job.objects.only(
             "id",
-            "title",
             "client__public_id",
             "published",
             "status",
@@ -53,12 +43,12 @@ class ThirdPartyJobAPIView(GenericAPIView):
 
     def put(self, request, public_id):
         try:
-            client_id = self.get_client_id(request)
+            client_id = request.user.public_id
             job = self.get_queryset(public_id, client_id)
             serializer = self.get_serializer(data=request.data, instance=job)
 
             if serializer.is_valid():
-                serializer.save()
+                serializer.save(status=JobStatusChoices.CLOSED)
                 return Response(
                     status=204,
                 )
