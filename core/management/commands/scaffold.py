@@ -2,16 +2,13 @@ import sys
 from typing import Any
 
 from django.core.management import BaseCommand
-from django.db import transaction
-
 
 class Command(BaseCommand):
 
     def handle(self, *args: Any, **options: Any) -> str | None:
-        from django.conf import settings
         from django.core.management import execute_from_command_line
-
         from core.management.seeders import categories_seeding
+        from src.settings.shared import RUNTIME_ENVIRONMENT
 
         sys.stdout.write(
             self.style.SUCCESS(
@@ -41,8 +38,8 @@ class Command(BaseCommand):
         execute_from_command_line(argv)
         sys.stdout.write("✅ The Dokoola Agent created successfully\n")
 
-        # Collect static files
-        if not "-no-static" in sys.argv:
+        if RUNTIME_ENVIRONMENT == "production":
+            # Collect static files
             argv = ["manage.py", "collectstatic", "--noinput"]
             execute_from_command_line(argv)
             sys.stdout.write("✅ Static files collected and saved successfully\n")

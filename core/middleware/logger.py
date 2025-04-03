@@ -15,7 +15,8 @@ class DokoolaLoggerMiddleware:
     SLOW_QUERY_THRESHOLD = 0.1  # 100ms
     STATUS_CODE_MAPPINGS = {
         (200, 201, 204, 304, 307): ("INFO", DokoolaLoggerService.info),
-        (401, 404): ("WARN", DokoolaLoggerService.warning),
+        (400, 401, 404): ("WARN", DokoolaLoggerService.warning),
+        (500, 503): ("ERROR", DokoolaLoggerService.critical),
         (500, 503): ("CRITICAL", DokoolaLoggerService.critical),
     }
 

@@ -13,21 +13,17 @@ months = [
     "December",
 ]
 
-
-#
-def get_month_name(month: int) -> str:
-
-    if month < 1:
-        month = 1
-    if month > 12:
-        month = 12
-
-    # Month 1-12
-    return months[month - 1]
+def get_month_name_by_index(index: int) -> str:
+    if index < 0:
+        index = 1
+    if index > 12:
+        index = 12
+    return months[index - 1]
 
 
-def get_month_index(month: str) -> int:
+def get_month_index_by_name(month: str) -> int:
+    month = month.lower()
     for index, m in enumerate(months):
-        if m == month:
+        if m.lower() == month:
             return index
     return 1

@@ -1,3 +1,4 @@
+from random import randint
 import time
 from uuid import UUID
 
@@ -70,3 +71,7 @@ def get_serializer_error_message(
             return value
 
     return default_message or "Something went wrong"
+
+
+def generate_ott() -> str:
+    return "".join(str(randint(0, 9)) for _ in range(5))
