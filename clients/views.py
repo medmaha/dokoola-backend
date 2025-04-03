@@ -50,9 +50,7 @@ class ClientGenericAPIView(GenericAPIView):
 
         try:
             if public_id:
-                queryset = Client.objects.get(
-                    public_id=public_id
-                )
+                queryset = Client.objects.get(public_id=public_id)
                 serializer = ClientRetrieveSerializer(
                     queryset, context={"request": request}
                 )
@@ -163,9 +161,12 @@ class ClientGenericAPIView(GenericAPIView):
             _valid_uuid = validate_uuid(public_id)
 
             if not _valid_uuid:
-                return Response({
-                    "message": "Forbiddeb request parameters",
-                }, status=403)
+                return Response(
+                    {
+                        "message": "Forbiddeb request parameters",
+                    },
+                    status=403,
+                )
 
             with transaction.atomic():
                 _client = Client.objects.get(public_id=public_id)
@@ -270,7 +271,7 @@ class ClientGenericAPIView(GenericAPIView):
                     "client.public_id": public_id,
                     "request.user_id": request.user.pk,
                     "error.type": "Exception",
-                    "request.handler": 'ClientGenericAPIView',
+                    "request.handler": "ClientGenericAPIView",
                 },
             )
             return Response({"message": str(e)}, status=500)
@@ -451,34 +452,17 @@ class ClientJobPostingApiView(ListAPIView):
                 # JobStatusChoices.DELETED
             ]
 
-            valid_job_query = Q(is_valid=True, status__in=active_statues)
-            client_job_query = Q(
-                public_id=public_id, status__in=active_statues
-            )
-
-            query = valid_job_query | client_job_query
-
-            identity_query = Q(public_id=public_id)
-
-            other_users_query = identity_query & Q(
-                is_valid=True,
-                published=True,
+            guest_job_query = Q(is_valid=True, status__in=active_statues)
+            client_job_query = lambda user_id: Q(
+                client__user__pk=user_id,
                 status__in=[
-                    JobStatusChoices.PUBLISHED,
-                    JobStatusChoices.IN_PROGRESS,
-                    JobStatusChoices.COMPLETED,
-                ],
-            )
-            owner_query = identity_query & Q(
-                is_valid=True,
-                status__in=[
-                    JobStatusChoices.PUBLISHED,
-                    JobStatusChoices.IN_PROGRESS,
-                    JobStatusChoices.COMPLETED,
+                    *active_statues,
+                    JobStatusChoices.CLOSED,
+                    JobStatusChoices.PENDING,
                 ],
             )
 
-            jobs = Job.objects.filter(query).order_by("published", "-created_at")  # type: ignore
+            jobs = Job.objects.filter(guest_job_query | client_job_query).order_by("published", "-created_at")  # type: ignore
 
             page = self.paginate_queryset(jobs)
             serializer = self.get_serializer(

@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from clients.models import Client
 from projects.models.project import Project, ProjectStatusChoices
 from users.models import User
-from utilities.formatters import get_month_index, get_month_name
+from utilities.formatters import get_month_index_by_name, get_month_name_by_index
 
 
 class ClientDashboardSerializer(serializers.Serializer):
@@ -78,7 +78,7 @@ class ClientDashboardQuery:
         self.month = self.today.month
 
         if month and isinstance(month, int):
-            self.month = get_month_index(get_month_name(month))
+            self.month = get_month_index_by_name(get_month_name_by_index(month))
         if year and isinstance(year, int):
             self.year = year
 
@@ -213,9 +213,9 @@ class ClientDashboardQuery:
                         "data": [
                             {
                                 "year": month["year"],
-                                "label": get_month_name(month["month"]),
+                                "label": get_month_name_by_index(month["month"]),
                                 "category": month["category"],
-                                "x": get_month_name(month["month"]),
+                                "x": get_month_name_by_index(month["month"]),
                                 "y": projects.filter(
                                     created_at__month=month["month"],
                                 )
@@ -278,7 +278,7 @@ class ClientDashboardQuery:
             {
                 "id": project["slug"],
                 "year": project["year"],
-                "month": get_month_name(project["month"]),
+                "month": get_month_name_by_index(project["month"]),
                 "label": project["label"],
                 "count": self.__jobs.filter(category__name=project["label"])
                 .values()
@@ -325,7 +325,7 @@ class ClientDashboardQuery:
                 {
                     "id": rating["id"],
                     "year": rating["year"],
-                    "month": get_month_name(rating["month"]),
+                    "month": get_month_name_by_index(rating["month"]),
                     **self.instance.reviews.select_related()
                     .filter(_query, created_at__month=rating["month"])
                     .aggregate(
