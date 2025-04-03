@@ -1,4 +1,5 @@
 import datetime
+import logging
 from typing import List
 
 import after_response
@@ -10,7 +11,7 @@ from django.utils import timezone
 
 from jobs.models.job import Job, JobAgentProxy
 
-from .scrapper import G4SJobScraper, GamJobScraper
+logger = logging.getLogger(__name__)
 
 
 def is_admin(user: AbstractUser):
@@ -25,9 +26,26 @@ def is_admin(user: AbstractUser):
 def index(request: HttpRequest):
     global time_remaining
 
+    print(logger.info("Route hit"))
+
     if not check_is_scraping():
         # Call the function after the response is sentt
-        do_scrape.after_response()
+
+        _site: JobAgentProxy.SITE = str(request.GET.get("site", "")).lower()
+        if _site and not _site in JobAgentProxy.SITES:
+            _site = None
+
+        if not _site:
+            _site = "gamjobs"
+
+        _max_jobs = str(request.GET.get("jobs", ""))
+        if _max_jobs and _max_jobs.isdigit():
+            _max_jobs = int(_max_jobs)
+        elif _max_jobs:
+            _max_jobs = None
+
+        do_scrape.after_response(site=_site, max_jobs=_max_jobs)
+
         return HttpResponse("<h1>Scrapping in process</h1>")
 
     return HttpResponse(
@@ -99,14 +117,15 @@ def do_invalidation(job_ids: List[int]):
 
 
 @after_response.enable
-def do_scrape(max_jobs=2):
+def do_scrape(site: JobAgentProxy.SITE, max_jobs=None):
+    logger.info("Doing Scraping")
     global is_scrapping
     if check_is_scraping():
         return
     try:
         is_scrapping = True
         proxy = JobAgentProxy()
-        proxy.scrape_site(site="gamjobs", max_jobs=max_jobs)
+        proxy.scrape_site(site=site, max_jobs=max_jobs)
         last_scraped_time = datetime.datetime.now()
     except Exception as e:
-        print(e)
+        logger.error(e)

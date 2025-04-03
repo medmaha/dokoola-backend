@@ -1,125 +1,95 @@
 import re
-from datetime import datetime
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, Optional
+
+from bs4 import BeautifulSoup
+from django.utils import timezone
 
 from agent.scrapper.base import JobParser, JobScraper, ScrapedJob
 
 
 class G4SJobParser(JobParser):
-    """
-    A parser for G4S job listings.
-    """
 
     def __init__(
         self,
         job_url: Optional[str] = "",
-        page_source: Optional[str] = None,
+        page_source: Optional[str] = "",
         callback: Callable[[ScrapedJob], None] = None,
     ):
+
         super().__init__(
+            parsers=["bs4"],
             job_url=job_url,
             callback=callback,
             page_source=page_source,
-            parsers=["bs4", "percel"],
-        )
-        # Extract the title and metadata container from the HTML
-        self.title_tag = self.bs4.find("h1")
-        self.metadata_container = (
-            self.title_tag.find_next("span") if self.title_tag else None
         )
 
-    def _get_title(self) -> str:
-        title_tag = self.title_tag
-        if title_tag:
-            full_title = title_tag.get_text(strip=True)
-            parts = full_title.split("|")
-            return parts[0].strip() if parts else full_title.strip()
-        return ""
+        self.metadata_container = self.bs4.select_one("h2~span")
+
+        if not self.metadata_container:
+            self.metadata_container = self.bs4.select_one(
+                ".d-flex.flex-column.flex-lg-row.mb-2"
+            )
+
+    def _get_title(self):
+        title_tag = self.bs4.select_one("h1").text
+        if not title_tag:
+            return None
+        return title_tag.strip()
 
     def _get_company_name(self):
         return "G4S"
 
     def _get_description(self):
-        # Try multiple possible selectors for the job description
-        selectors = [
-            "#main-content > div.card.cms-content > div > div > div.col-12.col-lg-9.border-right",
-            ".card.cms-content .col-12.col-lg-9.border-right",
-            ".cms-content .col-lg-9",
-            "#main-content .card.cms-content",
-        ]
+        desc_container = self.bs4.select_one("div.col-12.border-right")
+        # desc_container = self.bs4.find("div", class_="col-12 col-lg-9 border-right")
+        if desc_container:
+            soup = self.sanitize_text(str(desc_container), elements=["img"])
+            content_div = soup.find("div")
+            return (
+                content_div.get_text(separator="\n", strip=True)
+                if content_div
+                else desc_container.get_text(separator="\n", strip=True)
+            )
+        return ""
 
-        for selector in selectors:
-            desc_elm = self.bs4.select(selector)
-            if desc_elm:
-                desc_container = desc_elm[0]
-                # First try to find the content in a nested div
-                content_div = desc_container.find("div")
-                if content_div:
-                    description = content_div.get_text(separator="\n", strip=True)
-                    if description:
-                        return description
-
-                # If no nested div or empty content, get text from container itself
-                description = desc_container.get_text(separator="\n", strip=True)
-                if description:
-                    return description
-
-        # Fallback: try to find any div with substantial content
-        main_content = self.bs4.find(id="main-content")
-        if main_content:
-            content_divs = main_content.find_all("div", class_="card")
-            for div in content_divs:
-                description = div.get_text(separator="\n", strip=True)
-                if len(description) > 100:  # Ensure we have substantial content
-                    return description
-
-        return "No description found"
-
-    def _extract_field(self, text: str, field_label: str) -> str:
-        pattern = rf"{field_label}:\s*(.*?)(?=(?:Location:|Salary:|Posted:|Closes:|Job Type:|Business Unit:|Region / Division:|Reference:)|$)"
-        match = re.search(pattern, text, re.DOTALL)
-        return match.group(1).strip() if match else ""
-
-    def _get_job_type(self) -> str:
+    def _get_job_type(self):
         if self.metadata_container:
             text = self.metadata_container.get_text(" ", strip=True)
-            return self._extract_field(text, "Job Type")
+            return self.__extract_field(text, "Job Type")
         return "Not specified"
 
-    def _get_location_info(self) -> Dict[str, str]:
+    def _get_location_info(self):
         if self.metadata_container:
             text = self.metadata_container.get_text(" ", strip=True)
-            location = self._extract_field(text, "Location")
+            location = self.__extract_field(text, "Location")
             return {
                 "address": location or "Not specified",
                 "country": location or "Not specified",
             }
         return {"address": "Not specified", "country": "Not specified"}
 
-    def _get_created_at(self) -> datetime:
-        result = None
-        try:
-            xpath_query = (
-                'string(//*[@id="main-content"]/div[2]/div/div/div[1]/span)/text()[3]'
-            )
-            result = self.get_element_by_xpath(xpath_query)
-            if result:
-                return datetime.strptime(result, "%d %b %Y")
-        except Exception as e:
-            print(f"Error parsing posted date: {result} Error: {e}")
-        return datetime.now()
+    def _get_created_at(self):
+        if self.metadata_container:
+            text = self.metadata_container.get_text(" ", strip=True)
+            date_str = self.__extract_field(text, "Posted")
+            try:
+                date_str = timezone.datetime.strptime(date_str, "%d %b %Y")
+                return date_str
+            except Exception as e:
+                print(f"Error parsing posted date: {e}")
+        return timezone.datetime.now()
 
-    def _get_application_deadline(self) -> datetime:
-        try:
-            xpath_query = 'normalize-space(//*[@id="main-content"]/div[2]/div/div/div[1]/span/text()[4])'
-            result = self.get_element_by_xpath(xpath_query)
-            if result:
-                return datetime.strptime(result, "%d %b %Y")
-        except Exception as e:
-            print(f"Error parsing closing date: {e}")
-        return datetime.now()
+    def _get_application_deadline(self):
+        if self.metadata_container:
+            text = self.metadata_container.get_text(" ", strip=True)
+            date_str = self.__extract_field(text, "Closing")
+            try:
+                return timezone.datetime.strptime(date_str, "%d %b %Y")
+            except Exception as e:
+                print(f"Error parsing closing date: {e}")
+        return timezone.datetime.now()
 
-    def _get_categories(self) -> List[str]:
+    def _get_categories(self):
         title_tag = self.bs4.find("h2", class_="text-primary h5 mb-1")
         if title_tag:
             parts = title_tag.get_text(strip=True).split("|")
@@ -127,16 +97,68 @@ class G4SJobParser(JobParser):
                 return [parts[1].strip()]
         return []
 
+    def _get_required_skills(self):
+        return []
+
+    def __extract_field(self, text: str, field_label: str) -> str:
+        pattern = rf"{field_label}:\s*(.*?)(?=(?:Location:|Salary:|Posted:|Closes:|Job Type:|Business Unit:|Region / Division:|Reference:)|$)"
+        match = re.search(pattern, text, re.DOTALL)
+        return match.group(1).replace("|", "").strip() if match else ""
+
 
 class G4SJobScraper(JobScraper):
+
     _BASE_URL = "https://careers.g4s.com/en/"
 
-    def __init__(self, base_url: str = _BASE_URL, to_json=False, max_jobs=None):
+    def __init__(
+        self,
+        to_json=False,
+        base_url: str = _BASE_URL,
+        max_jobs: Optional[int] = None,
+    ):
         super().__init__(
-            max_jobs=max_jobs,
-            base_url=base_url,
             to_json=to_json,
-            parser=G4SJobParser,
             pathname="/jobs",
+            base_url=base_url,
+            max_jobs=max_jobs,
+            parser=G4SJobParser,
             job_link_selectors=".list-group-item-action",
         )
+
+    def on_settled(self):
+        self._write_jobs_in_file()
+
+    def _update_metadata(self) -> None:
+        max_length = 300
+        qualified_sentence_length = 50
+
+        for job in self.jobs:
+            description = []
+            seen_content = set()
+            relevant_tags = ["p", "div"]
+
+            soup = BeautifulSoup(job.description, "html.parser")
+
+            content_containers = soup.find_all(
+                lambda tag: tag.name in relevant_tags
+                and len(tag.get_text(strip=True)) > qualified_sentence_length
+            )
+
+            for container in content_containers:
+                text = container.get_text(strip=True)
+
+                if text in seen_content or len(text) < qualified_sentence_length:
+                    continue
+
+                seen_content.add(text)
+                description.append(text)
+
+                if sum(len(line) for line in description) > max_length:
+                    break
+
+            job.third_party_metadata.update(
+                {
+                    "source": "gamjobs.com",
+                    "short_description": " ".join(description)[:max_length],
+                }
+            )

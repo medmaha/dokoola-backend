@@ -95,7 +95,7 @@ class Contract(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    public_id = models.CharField(null=True, blank=True, db_index=True)
+    public_id = models.CharField(null=True, blank=True, db_index=True, max_length=50)
 
     PUBLIC_ID_PREFIX = "C"
 

@@ -1,26 +1,37 @@
-from datetime import datetime
-from typing import Callable, List, Optional
+import datetime
+from typing import Callable, Optional
 
 from bs4 import BeautifulSoup
 from django.utils import timezone
 
 from agent.scrapper.base import JobParser, JobScraper, ScrapedJob
+from agent.scrapper.utils import clean_html_content
+from utilities.time import utc_datetime
 
 
 class GamJobParser(JobParser):
+
     def __init__(
         self,
         job_url: Optional[str] = "",
         page_source: Optional[str] = None,
         callback: Callable[[ScrapedJob], None] = None,
     ):
-        super().__init__(job_url=job_url, callback=callback)
+        super().__init__(
+            parsers=["bs4"],
+            job_url=job_url,
+            callback=callback,
+            page_source=page_source,
+        )
 
     def _get_title(self):
         title_elm = self.bs4.find("h1", class_="page-title")
         if title_elm:
             return (
-                list(title_elm.children)[0].text.strip().replace("(Re-Advertised)", "")
+                list(title_elm.children)[0]
+                .text.strip()
+                .replace("(Re-advertised)", "")
+                .replace("(Re-Advertised)", "")
             )
         return None
 
@@ -31,7 +42,9 @@ class GamJobParser(JobParser):
         return None
 
     def _get_description(self):
-        description = self.bs4.find("div", attrs={"itemprop": "description"})
+        soup = BeautifulSoup(str(self.bs4), "html.parser")
+        clean_html_content(soup, elems=["a"])
+        description = soup.find("div", attrs={"itemprop": "description"})
         if not description:
             return None
 
@@ -69,7 +82,7 @@ class GamJobParser(JobParser):
 
         # Sample "- March 14, 2025"
         _date = str(date_elem.text.strip()).replace("- ", "")
-        return timezone.datetime.strptime(_date, "%B %d, %Y")
+        return self.__get_utc_date(timezone.datetime.strptime(_date, "%B %d, %Y"))
 
     def _get_application_deadline(self):
         date_elem = self.bs4.find("span", class_="job-date__closing")
@@ -79,9 +92,9 @@ class GamJobParser(JobParser):
 
         # Sample "- March 14, 2025"
         _date = str(date_elem.text.strip()).replace("- ", "")
-        return datetime.strptime(_date, "%B %d, %Y")
+        return self.__get_utc_date(timezone.datetime.strptime(_date, "%B %d, %Y"))
 
-    def _required_skills(self):
+    def _get_required_skills(self):
         categories = []
         categories_elm = self.bs4.select("span.job-category a")
         if categories_elm:
@@ -101,50 +114,28 @@ class GamJobParser(JobParser):
         #             categories.append(_v)
         return categories
 
+    def __get_utc_date(self, date: datetime.datetime):
+        return utc_datetime(date.timestamp(), add_minutes=0)
+
 
 class GamJobScraper(JobScraper):
-    """
-    A scraper for gamjobs.com that extracts job listings.
-
-    This scraper inherits from the base JobScraper class and implements
-    scraping functionality specific to gamjobs.com. It handles pagination,
-    rate limiting, and parsing of job details from the site's HTML structure.
-
-    The scraper uses a ThreadPoolExecutor for concurrent requests while
-    respecting rate limits. It extracts job information like:
-    - Title
-    - Company
-    - Description
-    - Location
-    - Job type
-    - Required skills
-    - Posting date
-    - Application deadline
-
-    Usage:
-        scraper = GamJobScraper()
-        jobs = scraper.scrape()
-    """
 
     _BASE_URL = "https://gamjobs.com"
 
     def __init__(
         self,
-        max_jobs: Optional[int] = None,
-        base_url: str = _BASE_URL,
         to_json=False,
-        writefile: Optional[bool] = False,
+        base_url: str = _BASE_URL,
+        max_jobs: Optional[int] = None,
     ):
         super().__init__(
-            base_url=base_url,
             to_json=to_json,
+            pathname="/jobs",
+            base_url=base_url,
             max_jobs=max_jobs,
             parser=GamJobParser,
-            pathname="/jobs",
             job_link_selectors=".job-details-link",
         )
-
-        self.__writefile = writefile
 
     def scrape(self):
         """
@@ -153,13 +144,12 @@ class GamJobScraper(JobScraper):
             List[GamJob]: List of parsed job objects
         """
 
-        jobs = super().scrape()
+        super().scrape()
         self._update_metadata()
-
-        if self.__writefile:
-            self._write_jobs_in_file()
-
         return self.jobs
+
+    def on_settled(self):
+        self._write_jobs_in_file()
 
     def _update_metadata(self) -> None:
         max_length = 300
@@ -192,58 +182,6 @@ class GamJobScraper(JobScraper):
             job.third_party_metadata.update(
                 {
                     "source": "gamjobs.com",
-                    "description": " ".join(description)[:max_length],
+                    "short_description": " ".join(description)[:max_length],
                 }
             )
-
-    def _write_jobs_in_file(self) -> None:
-        """Inject job results into a file."""
-
-        # Create a basic HTML structure for displaying the job results
-        html_content = f"""
-            <html><body><h1>Job Results</h1>
-            <br/>
-            <p>Total Links: {len(self.links)}</p>
-            <p>Processed Links: {len(self.process_links)}</p>
-            <br/>
-            <br/>
-            <ol>
-        """
-
-        for job in self.jobs:
-            html_content += f"""
-            <li>
-                <strong>{job.title}</strong><br>
-                <b>Company:</b> {job.third_party_metadata.get('company_name', 'N/A')}<br>
-                # <b>Description:</b> {job.third_party_metadata.get('description', 'No description available')}<br>
-                <b>Location:</b> {job.address}<br>
-                <b>Job Type:</b> {job.job_type}<br>
-                <b>Job Type Other:</b> {job.job_type_other}<br>
-                <b>Application Deadline:</b> {job.application_deadline}<br>
-                <b>Application CreatedAt:</b> {job.created_at}<br>
-                <b>Source:</b> <a href="{job.url}" target="_blank">View Job</a>
-            </li>
-            <br>
-            <hr>
-            <br>
-            """
-
-        html_content += "</ol>"
-
-        js_script = f"""
-            <pre>
-                <code id='code'></code>
-            </pre>
-            <script>
-                const jobs = {[job.to_json() for jobs in self.jobs]}
-                document.getElementById('code').innerHTML = JSON.stringify(jobs, null, 4)
-            </script>
-        """
-
-        html_content += f"{js_script}</body></html>"
-        # Inject the HTML into the browser window
-        # self.driver.execute_script(f"document.body.innerHTML = `{html_content}`;")
-        # self.driver.set_script_timeout()
-
-        with open("scraper.html", "w", encoding="utf-16") as file:
-            file.write(html_content)

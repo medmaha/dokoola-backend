@@ -46,7 +46,7 @@ def get_job_type_or_other(job_type: str) -> Union[str, str | None]:
 
 
 def clean_html_content(
-    soup: BeautifulSoup, classes=None, attrs=None, remove_comments=None
+    soup: BeautifulSoup, elems=None, classes=None, attrs=None, remove_comments=None
 ) -> None:
     """
     Clean HTML content by removing unnecessary elements and attributes.
@@ -88,8 +88,11 @@ def clean_html_content(
             "img",
             "footer",
             "select",
-            "a",
+            # "a",
         ]
+
+        if elems:
+            unwanted_tags += elems
 
         for element in elements:
             # Remove unwanted tags

@@ -11,6 +11,9 @@ from .models import ScrapedJob
 from .parser import JobParser
 from .utils import get_job_type_or_other, kill_zombie_threads, logger
 
+MAXIMUN_NUMBER_JOBS = 20
+DEFAULT_SCRAPER_WORKERS = 20
+
 
 class JobScraper(ScaperWebDriver):
     def __init__(
@@ -18,7 +21,7 @@ class JobScraper(ScaperWebDriver):
         parser: JobParser,
         pathname: str,
         job_link_selectors: str,
-        max_jobs: Optional[int] = 20,
+        max_jobs: Optional[int] = None,
         to_json: Optional[bool] = False,
         base_url: Optional[str] = "https://gamjobs.com",
     ):
@@ -29,8 +32,10 @@ class JobScraper(ScaperWebDriver):
 
         self.__to_json = to_json
         self.__base_url = base_url
-        self.__max_length = max_jobs
-        self.__max_workers = int(os.getenv("MAX_SCRAPER_WORKERS", 2))
+        self.__max_length = max_jobs or MAXIMUN_NUMBER_JOBS
+        self.__max_workers = int(
+            os.getenv("MAX_SCRAPER_WORKERS", DEFAULT_SCRAPER_WORKERS)
+        )
 
         self.parser: JobParser = parser
 
@@ -84,6 +89,7 @@ class JobScraper(ScaperWebDriver):
 
         if url in self.processed_links:
             return None
+
         self.processed_links.add(url)
 
         try:
@@ -91,10 +97,9 @@ class JobScraper(ScaperWebDriver):
             job_parser = self.parser(
                 job_url=url,
                 page_source=self.driver.page_source,
-                callback=lambda x: self.jobs.append(x),
+                callback=lambda job: self.jobs.append(job),
             )
             return job_parser
-
         except Exception as e:
             logger.error(f"Error parsing job (JobScraper): {str(e)}")
             return None
@@ -121,10 +126,11 @@ class JobScraper(ScaperWebDriver):
 
         return self.jobs
 
-    def __enter__(self, on_error_callback=None):
+    def __enter__(
+        self, on_error_callback: Optional[Callable[[List[ScrapedJob]], None]] = None
+    ):
         if on_error_callback is not None:
             self.set_exeption_callback(on_error_callback)
-
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -136,7 +142,64 @@ class JobScraper(ScaperWebDriver):
                     f"[Error] while scraping jobs [{self.__class__.__name__}]: {str(exc_val)}"
                 )
         except Exception as e:
-            logger.error(f"Error in __exit__: {str(e)}")
+            logger.error(f"[Error] in __exit__: {str(e)}")
+
         finally:
             self._log_scape_timer()
             self._close_driver()
+            self.on_settled()
+
+    def on_settled(self):
+        pass
+
+    def _write_jobs_in_file(self) -> None:
+        """Inject job results into a file."""
+
+        # Create a basic HTML structure for displaying the job results
+        html_content = f"""
+            <html><body><h1>Job Results</h1>
+            <br/>
+            <p>Total Links: {len(self.links)}</p>
+            <p>Processed Links: {len(self.jobs)}</p>
+            <br/>
+            <br/>
+            <ol>
+        """
+
+        for job in self.jobs:
+            html_content += f"""
+            <li>
+                <strong>{job.title}</strong><br>
+                <b>Company:</b> {job.third_party_metadata.get('company_name', 'N/A')}<br>
+                # <b>Description:</b> {job.third_party_metadata.get('description', 'No description available')}<br>
+                <b>Location:</b> {job.address}<br>
+                <b>Job Type:</b> {job.job_type}<br>
+                <b>Job Type Other:</b> {job.job_type_other}<br>
+                <b>Application Deadline:</b> {job.application_deadline}<br>
+                <b>Application CreatedAt:</b> {job.created_at}<br>
+                <b>Source:</b> <a href="{job.url}" target="_blank">View Job</a>
+            </li>
+            <br>
+            <hr>
+            <br>
+            """
+
+        html_content += "</ol>"
+
+        js_script = f"""
+            <pre>
+                <code id='code'></code>
+            </pre>
+            <script>
+                const jobs = {[job.to_json() for jobs in self.jobs]}
+                document.getElementById('code').innerHTML = JSON.stringify(jobs, null, 4)
+            </script>
+        """
+
+        html_content += f"{js_script}</body></html>"
+        # Inject the HTML into the browser window
+        # self.driver.execute_script(f"document.body.innerHTML = `{html_content}`;")
+        # self.driver.set_script_timeout()
+
+        with open("scraper.html", "w", encoding="utf-16") as file:
+            file.write(html_content)

@@ -37,3 +37,9 @@ class ScrapedJob:
 
     def to_json(self):
         return self.ScrappedJobDict(self)
+
+    def __repr__(self):
+        return f"<[ScrapedJob]  Title: {self.title} Type: {self.job_type}>"
+
+    def __str__(self):
+        return f"Job: {self.title}"
