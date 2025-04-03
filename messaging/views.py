@@ -1,14 +1,9 @@
 from django.db.models import Q
 from rest_framework.decorators import api_view
-from rest_framework.generics import (
-    CreateAPIView,
-    DestroyAPIView,
-    ListAPIView,
-)
+from rest_framework.generics import CreateAPIView, DestroyAPIView, ListAPIView
 from rest_framework.response import Response
 
 from users.models import User
-from utilities.text import get_url_search_params
 
 from .models import Message, Thread
 from .serializer import (
@@ -74,7 +69,7 @@ class ThreadSearchAPIView(ListAPIView):
     serializer_class = ThreadListSerializer
 
     def get_queryset(self):
-        search_params = get_url_search_params(self.request.get_full_path())
+        search_params: dict = self.request.query_params
         user = self.request.user
         query = search_params.get("q")
 

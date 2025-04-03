@@ -6,7 +6,6 @@ from rest_framework.response import Response
 from users.auth.serializer import AuthUserSerializer
 from users.models import User
 from users.serializer import UserSerializer
-from utilities.text import get_url_search_params
 
 
 class UserListAPIView(ListAPIView):
@@ -14,7 +13,7 @@ class UserListAPIView(ListAPIView):
 
     def get_queryset(self):
         url = self.request.get_full_path()
-        query = get_url_search_params(url).get("q")
+        query = self.request.query_params.get("q")
 
         if query:
             queryset = User.objects.filter(
