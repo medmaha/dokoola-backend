@@ -50,7 +50,7 @@ class Project(models.Model):
 
     system_closed = models.BooleanField(default=False)
 
-    public_id = models.CharField(null=True, blank=True, db_index=True)
+    public_id = models.CharField(null=True, blank=True, db_index=True, max_length=50)
 
     PUBLIC_ID_PREFIX = "P"
 
