@@ -101,7 +101,10 @@ class TalentReadSerializer(serializers.ModelSerializer):
         r_type_list = ("mini", "detail", "edit")
         r_type = str(self.context.get("r_type", "")).lower()
 
-        if r_type not in r_type_list or r_type == "mini":
+        if r_type not in r_type_list:
+            return self.common_values(instance)
+        
+        if r_type == "mini":
             return self.mini_values(instance)
 
         if r_type == "edit":

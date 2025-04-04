@@ -1,6 +1,5 @@
 import time
 from random import randint
-from uuid import UUID
 
 from rest_framework.serializers import ReturnDict, ReturnList
 from uuid_v7.base import UUID, uuid7

@@ -1,17 +1,13 @@
 import random
-from functools import partial
-from typing import List, Literal, Optional
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.utils import timezone
 
-from agent.scrapper.base import JobScraper, ScrapedJob
 from clients.models import Client
 from core.models import Category
 from core.services.email.main import EmailService
 from utilities.generator import (
-    default_pid_generator,
     primary_key_generator,
     public_id_generator,
 )
@@ -91,21 +87,21 @@ class Job(models.Model):
     )
 
     client_last_visit = models.DateTimeField(blank=True, null=True)
-    metadata = models.JSONField(encoder=DjangoJSONEncoder, blank=True, default=dict)
+    metadata = models.JSONField(encoder=DjangoJSONEncoder, blank=True, default=dict, null=True)
 
     experience_level = models.CharField(blank=True, null=True, max_length=200)
     experience_level_other = models.CharField(blank=True, null=True, max_length=200)
 
     application_deadline = models.DateTimeField(blank=True, null=True)
     estimated_duration = models.CharField(blank=True, null=True, max_length=255)
-    additional_payment_terms = models.CharField(blank=True, default="", max_length=255)
+    additional_payment_terms = models.CharField(blank=True, default="", max_length=255, null=True)
 
     client = models.ForeignKey(
         Client, related_name="jobs", on_delete=models.CASCADE, null=False
     )
 
-    bits_amount = models.IntegerField(default=16)
-    updated_at = models.DateTimeField(auto_now=True)
+    bits_amount = models.IntegerField(default=16, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
 
     PUBLIC_ID_PREFIX = "Job"
@@ -233,122 +229,3 @@ class Job(models.Model):
         activities, _ = Activities.objects.get_or_create(job=self)
 
         return activities
-
-
-class JobAgentProxy(Job):
-    class Meta:
-        proxy = True
-
-    SITE = Literal["gamjobs", "g4s", "mrc"]
-    SITES: List[SITE] = ["gamjobs", "g4s", "mrc"]
-
-    def scrape_site(self, site: SITE, max_jobs: Optional[int] = None) -> int:
-        job_scraper = None
-
-        if site == "gamjobs":
-            from agent.scrapper import GamJobScraper
-
-            job_scraper = GamJobScraper
-
-        if site == "g4s":
-            from agent.scrapper import G4SJobScraper
-
-            job_scraper = G4SJobScraper
-
-        if site == "mrc":
-            from agent.scrapper import MRCJobScraper
-
-            job_scraper = MRCJobScraper
-
-        if not job_scraper:
-            return 1
-
-        def handle_exeptions(scrapped_jobs: List[ScrapedJob], *args, **kwargs):
-            print(
-                "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-            )
-            print(
-                "[EXECPTION]: Jobs: {} Args: {} - Kwargs: {}".format(
-                    len(scrapped_jobs), *args, **kwargs
-                )
-            )
-            print(
-                "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-            )
-
-            if len(scrapped_jobs) > 1:
-                self.save_scraped_jobs(scrapped_jobs)
-
-        with job_scraper(max_jobs=max_jobs, to_json=True) as scraper:
-            scraper.set_exeption_callback(handle_exeptions)
-            jobs = scraper.scrape()
-
-        if len(jobs) > 1:
-            self.save_scraped_jobs(scraper.jobs)
-
-        return 0
-
-    def save_scraped_jobs(self, _jobs: dict | List[ScrapedJob]) -> None:
-
-        if len(_jobs) < 1 or len(_jobs) == 0:
-            return
-
-        client = Client.objects.filter(is_agent=True).first()
-        category = Category.objects.filter(is_agent=True).first()
-
-        if not client or not category:
-            print(
-                "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-            )
-            print(
-                "[ERROR]: No client or category records to associate the scraped jobs with"
-            )
-            print(
-                "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-            )
-            return
-
-        # Remove existing jobs
-        existing_jobs = set(
-            Job.objects.only("third_party_address")
-            .filter(third_party_address__in=[job.url for job in _jobs])
-            .values_list("third_party_address", flat=True)
-        )
-
-        _jobs = [job for job in _jobs if job.url not in existing_jobs]
-        _lazy_jobs = []
-
-        for job in _jobs:
-            try:
-                _id = primary_key_generator()
-                public_id = public_id_generator(_id, "Job")
-                _lazy = Job(
-                    id=_id,
-                    public_id=public_id,
-                    published=True,
-                    client=client,
-                    title=job.title,
-                    category=category,
-                    pricing=job.pricing,
-                    address=job.address,
-                    country=job.country,
-                    is_third_party=True,
-                    benefits=job.benefits,
-                    job_type=job.job_type,
-                    created_at=job.created_at,
-                    description=job.description,
-                    third_party_address=job.url,
-                    job_type_other=job.job_type_other,
-                    status=JobStatusChoices.PUBLISHED,
-                    required_skills=job.required_skills,
-                    application_deadline=job.application_deadline,
-                    third_party_metadata=job.third_party_metadata,
-                )
-                _lazy.full_clean()
-                _lazy_jobs.append(_lazy)
-            except Exception as e:
-                # TODO: log error
-                print(f"Error cleaning job {job.url}: {e}")
-
-        if len(_lazy_jobs) > 0:
-            Job.objects.bulk_create(_lazy_jobs)

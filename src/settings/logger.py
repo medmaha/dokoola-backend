@@ -5,7 +5,7 @@ from typing import Any
 
 
 class LogConfig:
-    
+
     LOGGING_CONFIG = {
         "version": 1,
         "disable_existing_loggers": False,
@@ -19,9 +19,13 @@ class LogConfig:
     }
 
     def __init__(self):
-        from src.settings.shared import APPLICATION_IDENTIFIER, RUNTIME_ENVIRONMENT, CONSOLE_LOG_ALLOWED
+        from src.settings.shared import (
+            APPLICATION_IDENTIFIER,
+            CONSOLE_LOG_ALLOWED,
+            RUNTIME_ENVIRONMENT,
+        )
 
-        self.logger :Any = logging.getLogger("dokoola")
+        self.logger: Any = logging.getLogger("dokoola")
 
         self.app_id = APPLICATION_IDENTIFIER
         self.console_log_allowed = CONSOLE_LOG_ALLOWED
@@ -90,9 +94,7 @@ class LogConfig:
         if source_token:
             logtail_handler = LogtailHandler(source_token=source_token)
             logtail_handler.setFormatter(
-                logging.Formatter(
-                    self.LOGGING_CONFIG["formatters"]["prod"]["format"]
-                )
+                logging.Formatter(self.LOGGING_CONFIG["formatters"]["prod"]["format"])
             )
             logtail_handler.setLevel(logging.INFO)
             self.logger.addHandler(logtail_handler)
