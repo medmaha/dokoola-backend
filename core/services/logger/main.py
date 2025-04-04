@@ -48,6 +48,10 @@ class DokoolaLoggerService:
             extras = extras or message
             enriched_extras.update(message)
 
+            if "after_response" in message:
+                _after_response = True
+                message.pop("after_response")
+
             log_method = None
 
             if not hasattr(logger, log_attr.lower()):
