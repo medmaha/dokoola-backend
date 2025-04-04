@@ -7,10 +7,13 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "invalid_secret_key")
 
 APPLICATION_NAME = "Dokoola PLatform"
 
-RUNTIME_ENVIRONMENT: ENVIRONMENT = os.getenv("ENVIRONMENT", "").lower()
+env_value = os.getenv("ENVIRONMENT", "None").lower()
+if env_value not in ["development", "production"]:
+    raise ValueError(f"Invalid ENVIRONMENT value: {env_value}")
+RUNTIME_ENVIRONMENT: ENVIRONMENT = env_value  # type: ignore
 
-CONSOLE_LOG_ALLOWED = os.getenv("CONSOLE_LOG", None) != "0"
+CONSOLE_LOG_ALLOWED = bool(int(os.getenv("CONSOLE_LOG", 0)))
 
 APPLICATION_IDENTIFIER = os.getenv("APPLICATION_ID", None)
 
-DEBUG = int(os.getenv("DEBUG", 0)) > 0
+DEBUG = bool(int(os.getenv("DEBUG", 0)))
