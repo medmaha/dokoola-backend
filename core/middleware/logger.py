@@ -137,6 +137,7 @@ class DokoolaLoggerMiddleware:
             "ip_addr": request.META.get("REMOTE_ADDR"),
             "service_name": service_name,
             "consumer_id": request.headers.get("DKL-CONSUMER-ID", None),
+            "after_response": True,
             "user_agent": self.get_readable_from_user_agent(
                 request.META.get("HTTP_USER_AGENT", "")
             ),
