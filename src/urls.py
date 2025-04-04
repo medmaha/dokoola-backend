@@ -11,7 +11,6 @@ FRONTEND_URL = os.environ.get("FRONTEND_URL", "")
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/jobs/", include("jobs.urls")),
-    path("api/agent/", include("agent.urls")),
     path("api/users/", include("users.urls")),
     path("api/staffs/", include("staffs.urls")),
     path("api/clients/", include("clients.urls")),
