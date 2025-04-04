@@ -6,9 +6,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 # Install dependencies
-COPY requirements.prod.txt .
+COPY requirements.docker.txt .
 
-RUN pip install --no-cache-dir -r requirements.prod.txt
+RUN pip install --no-cache-dir -r requirements.docker.txt
 
 # Copy environment-specific files
 COPY .env.prod ./.env
@@ -20,7 +20,7 @@ COPY . .
 RUN python manage.py collectstatic --noinput
 
 # Remove the unused env file
-RUN rm -rf .env.prod
+RUN rm -rf .env.prod requirements.docker.txt
 
 # Application port
 EXPOSE 8000

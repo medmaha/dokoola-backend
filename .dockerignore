@@ -11,6 +11,7 @@ __pycache__/
 .git/
 .github/
 .gitignore
+.pre-commit-config.yaml
 
 # Ignore Docker-related files
 .dockerignore
@@ -21,27 +22,30 @@ docker-compose.yaml
 .vscode/
 *.swp
 
-# Ignore backup and log filesd
+# Ignore backup and log files
 .backups/
 .logs/
 backup.ps1
 restore.ps1
+db.sqlite3
 
 # Ignore build scripts
 build.sh
 manage.sh
 push.sh
 run.sh
+redeploy.docker.sh
 
 # Ignore configuration files
 .pre-commit-config.yaml
 .prettierignore
 .python-version
 ruff.toml
+pyproject.toml
 
 # Ignore dependency files
 requirements.dev.txt
-# requirements.prod.txt
+requirements.prod.txt
 uv.lock
 
 # Ignore documentation files
@@ -53,3 +57,8 @@ README.md
 # Ignore venv directories
 .venv/
 venv/
+
+# Binary files
+__pycache__/
+*.pyc
+*.pyo

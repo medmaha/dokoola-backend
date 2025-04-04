@@ -1,32 +1,7 @@
 [project]
-name = "dokoola-backend"
+name = "backend"
 version = "0.1.0"
-description = "The Dokoola backend server"
+description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = [
-    # Django Packages
-    "Django==5.0.2",
-    "django-after-response==0.2.2",
-    "django-cors-headers==4.3.1",
-    "django-unfold==0.34.0",
-    "djangorestframework==3.14.0",
-    "djangorestframework-simplejwt==5.3.1",
-    # Django Dev Packages
-    "django-silk==5.2.0",
-    # Environment variable reader
-    "python-dotenv==1.0.1",
-    # PostgreSQL database connector
-    "psycopg2-binary==2.9.9",
-    # Audit logger for betterstack
-    "logtail-python==0.3.1",
-    # Static files server
-    "whitenoise==6.7.0",
-    # Web server gateway interface (WSGI)
-    "gunicorn==23.0.0",
-    "drf-spectacular[sidecar]>=0.27.2",
-    "ratelimit>=2.2.1",
-    "parsel>=1.10.0",
-    "selenium>=4.30.0",
-    "webdriver-manager>=4.0.2",
-]
+dependencies = []

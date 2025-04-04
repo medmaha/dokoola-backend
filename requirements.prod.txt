@@ -13,6 +13,8 @@ python-dotenv==1.0.1
 # PostgreSQL database connector
 psycopg2-binary==2.9.9
 
+uuid_v7==1.0.0
+
 # Audit logger for betterstack
 logtail-python==0.3.1
 
@@ -21,9 +23,3 @@ whitenoise==6.7.0
 
 # Web server gateway interface (WSGI)
 gunicorn==23.0.0
-
-uuid_v7==1.0.0
-bs4==0.0.2
-ratelimit==2.2.1
-selenium==4.30.0
-webdriver-manager==4.0.2
