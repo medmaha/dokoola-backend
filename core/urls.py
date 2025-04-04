@@ -19,6 +19,7 @@ urlpatterns = [
         api_views.CategoryAPIView.as_view(),
         name="categories",
     ),
+    path("api/waitlist/", api_views.WaitlistAPIView.as_view(), name="waitlist_api"),
     #
     path("", views.index, name="index"),
 ]

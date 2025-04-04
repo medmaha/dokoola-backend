@@ -18,8 +18,8 @@ class DokoolaLoggerService:
         enriched = extras or {}
         enriched.update(
             {
-                "APP_ID": LOG_CONFIG.app_id,
-                "ENVIRONMENT": LOG_CONFIG.runtime_environment,
+                "app_id": LOG_CONFIG.app_id,
+                "environment": LOG_CONFIG.runtime_environment,
                 "timestamp": utc_datetime().__str__(),
             }
         )

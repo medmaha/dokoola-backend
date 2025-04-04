@@ -17,7 +17,7 @@ class _AfterResponseService:
         self, callback: Callable[..., Any], *args: Any, **kwargs: Any
     ) -> None:
 
-        callback()
+        callback(*args, **kwargs)
 
 
 # Singleton instance

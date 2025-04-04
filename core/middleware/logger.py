@@ -1,13 +1,12 @@
 import json
 import os
 from datetime import datetime
-from typing import Any
+from typing import Any, Callable
 
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from rest_framework.utils.serializer_helpers import ReturnDict
 
-# from core.services.after.main import AfterResponseService
 from core.services.logger import DokoolaLoggerService
 
 
@@ -88,7 +87,7 @@ class DokoolaLoggerMiddleware:
 
         return f"{device}/{platform}"
 
-    def _get_log_level(self, status_code: int) -> tuple[str, callable]:
+    def _get_log_level(self, status_code: int) -> tuple[str, Callable]:
         """Get appropriate log level based on status code"""
         for codes, level_info in self.STATUS_CODE_MAPPINGS.items():
             if status_code in codes:
@@ -127,13 +126,13 @@ class DokoolaLoggerMiddleware:
         )
 
         log_data = {
-            "path": request.path,
-            "method": request.method,
-            "duration": self._format_duration(end_time, start_time),
-            "timestamp": self._format_timestamp(start_time),
             "status": response.status_code,
-            "status_message": self.get_response_message(response),
+            "duration": self._format_duration(end_time, start_time),
+            "method": request.method,
+            "path": request.path,
             "user_id": str(request.user.pk),
+            "timestamp": self._format_timestamp(start_time),
+            "status_message": self.get_response_message(response),
             "host": request.META.get("HTTP_HOST"),
             "ip_addr": request.META.get("REMOTE_ADDR"),
             "service_name": service_name,
@@ -159,8 +158,3 @@ class DokoolaLoggerMiddleware:
     def _format_timestamp(self, timestamp: datetime) -> str:
         """Format timestamp in a consistent format"""
         return f"{timestamp.date()} {str(timestamp.time()).split('.')[0]}"
-
-        # def process_template_response(self, request: HttpRequest, response: HttpResponse) -> HttpResponse:
-        """Process template response and execute after-response tasks"""
-        # AfterResponseService.execute()
-        # return response

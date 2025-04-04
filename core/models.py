@@ -7,8 +7,14 @@ class Waitlist(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    DEFAULT_NAME = "Dear"
+
     def __str__(self):
         return f"{self.name} - {self.email}"
+
+    def save(self, *args, **kwargs):
+        self.name = self.name or self.DEFAULT_NAME
+        return super().save(*args, **kwargs)
 
 
 class Feedback(models.Model):

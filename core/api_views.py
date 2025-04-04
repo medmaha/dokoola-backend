@@ -2,11 +2,78 @@ from rest_framework import serializers
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
-from core.models import Category, Feedback
+from core.models import Category, Feedback, Waitlist
 from utilities.generator import get_serializer_error_message
+from utilities.privacy import mask_email
 
 
 # Categories ---------------------------------------------------------------------
+class WaitlistSerializer(serializers.ModelSerializer):
+
+    email = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Waitlist
+        fields = ["name", "email", "created_at", "updated_at"]
+
+    def get_email(self, instance: Waitlist):
+        return mask_email(instance.email)
+
+
+class WaitlistAPIView(GenericAPIView):
+    permission_classes = []
+    serializer_class = WaitlistSerializer
+
+    def get_queryset(self):
+        queryset = Waitlist.objects.filter()
+        return queryset
+
+    def post(self, request):
+        _message = None
+        _status = 201
+
+        name = request.data.get("name", "")
+        email = request.data.get("email")
+
+        serializer = None
+
+        try:
+            Waitlist.objects.filter().delete()
+            subscriber = Waitlist.objects.get(email=email)
+            _message = "You are already in our waitlist, Thank You!"
+            _status = 200
+
+            # Try to update the their name instead
+            if name and subscriber.name.lower().strip() != name.lower().strip():
+                subscriber.name = name
+                subscriber.save()
+                subscriber.refresh_from_db()
+
+            serializer = WaitlistSerializer(instance=subscriber)
+
+        except Waitlist.DoesNotExist:
+            subscriber = Waitlist(name=name, email=email)
+            _message = "Thank you for joining our waiting list"
+            subscriber.save()
+            serializer = WaitlistSerializer(instance=subscriber)
+
+        except Exception as e:
+            _status = 400
+            _message = str(e)
+
+        data = {
+            "message": _message,
+        }
+
+        if serializer:
+            data.update(dict(serializer.data))
+
+        return Response(
+            data,
+            status=_status,
+        )
+
+
 class CategorySerializer(serializers.ModelSerializer):
 
     parent = serializers.SerializerMethodField()
@@ -30,8 +97,8 @@ class CategoryAPIView(GenericAPIView):
     permission_classes = []
     serializer_class = CategorySerializer
 
-    def get_queryset(self):
-        child = self.request.query_params.get("child", None)
+    def get_queryset(self, query_params):
+        child = query_params.get("child", None)
         parent__isnull = True if child is None else bool(child) == False
         categories = Category.objects.filter(
             disabled=False, is_agent=False, parent__isnull=parent__isnull
@@ -47,7 +114,7 @@ class CategoryAPIView(GenericAPIView):
         #         slugs.add(_c.name)
         # Category.objects.exclude(id__in=ids).delete()
 
-        categories = self.get_queryset()
+        categories = self.get_queryset(request.query_params)
         serializers = self.get_serializer(categories, many=True)
         categories = serializers.data
 
