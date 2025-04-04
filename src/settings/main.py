@@ -62,7 +62,6 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     # The core application services and utilities
     "core",
-    "agent",
     # Users Account & Profiles apps
     "users",
     "staffs",

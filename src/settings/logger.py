@@ -10,9 +10,9 @@ class LogConfig:
         "version": 1,
         "disable_existing_loggers": False,
         "formatters": {
-            "dev": {"format": "%(asctime)s [%(levelname)s] %(message)s"},
-            "prod": {"format": "%(asctime)s [%(levelname)s] %(message)s"},
-            "console": {"format": "%(asctime)s [%(levelname)s]: %(message)s"},
+            "dev": {"format": "[%(levelname)s] %(message)s"},
+            "prod": {"format": "[%(levelname)s] %(message)s"},
+            "console": {"format": "[%(levelname)s]: %(message)s"},
         },
         "handlers": {},
         "loggers": {},
@@ -27,16 +27,16 @@ class LogConfig:
         self.console_log_allowed = CONSOLE_LOG_ALLOWED
         self.runtime_environment = RUNTIME_ENVIRONMENT.lower()
 
-        # LogConfig._setup_logging(self)
+        LogConfig._setup_logging(self)
 
-        # logging.info(
-        #     "Server up and running",
-        #     extra={
-        #         "App": self.app_id,
-        #         "Environment": self.runtime_environment,
-        #         "Console-Logging": self.console_log_allowed,
-        #     },
-        # )
+        logging.info(
+            "Server up and running",
+            extra={
+                "App": self.app_id,
+                "Environment": self.runtime_environment,
+                "Console-Logging": self.console_log_allowed,
+            },
+        )
 
     @classmethod
     def _setup_logging(cls, self: "LogConfig") -> None:
