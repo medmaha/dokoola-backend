@@ -33,14 +33,14 @@ class LogConfig:
 
         LogConfig._setup_logging(self)
 
-        self.logger.info(
-            "Server up and running",
-            extra={
-                "App": self.app_id,
-                "Environment": self.runtime_environment,
-                "Console-Logging": self.console_log_allowed,
-            },
-        )
+        # self.logger.info(
+        #     "Server up and running",
+        #     extra={
+        #         "App": self.app_id,
+        #         "Environment": self.runtime_environment,
+        #         "Console-Logging": self.console_log_allowed,
+        #     },
+        # )
 
     @classmethod
     def _setup_logging(cls, self: "LogConfig") -> None:
