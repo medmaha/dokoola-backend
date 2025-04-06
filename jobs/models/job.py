@@ -2,6 +2,7 @@ import random
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
+
 from django.utils import timezone
 
 from clients.models import Client
@@ -38,6 +39,14 @@ class JobTypeChoices(models.TextChoices):
     INTERNSHIP = "internship"
     OTHER = "other"
 
+
+class JobManager(models.manager.BaseManager):
+
+    def valid_only(self):
+        return super().filter(is_valid=True)
+
+    def filter(self, *args, **kwargs):
+        return super().filter(*args, **kwargs).distinct()
 
 class Job(models.Model):
     id = models.UUIDField(
@@ -166,6 +175,7 @@ class Job(models.Model):
 
         Proposal.objects.bulk_update(other_proposals, ["status"])
 
+
     def notify_client(self, job_status, proposal=None, new_proposal=None):
         """
         Notify the client about the job status through email
@@ -226,6 +236,8 @@ class Job(models.Model):
     def activities(self):
         from .activities import Activities
 
-        activities, _ = Activities.objects.get_or_create(job=self)
+        activities, _ = Activities.objects.get_or_create(job=self, defaults={
+            "applicants_id": [],
+        })
 
         return activities

@@ -11,7 +11,7 @@ from core.services.logger import DokoolaLoggerService
 
 
 class DokoolaLoggerMiddleware:
-    SLOW_QUERY_THRESHOLD = 0.1  # 100ms
+    SLOW_QUERY_THRESHOLD = 0.2  # 200ms
     STATUS_CODE_MAPPINGS = {
         (200, 201, 204, 304, 307): ("INFO", DokoolaLoggerService.info),
         (400, 401, 404): ("WARN", DokoolaLoggerService.warning),
@@ -114,9 +114,10 @@ class DokoolaLoggerMiddleware:
                 DokoolaLoggerService.warning(
                     {
                         "event": "slow_query",
-                        "query": query["sql"],
-                        "time": query["time"],
+                        "status": response.status_code,
+                        "duration": query["time"],
                         "path": request.path,
+                        "query": query["sql"],
                     }
                 )
 
@@ -153,7 +154,7 @@ class DokoolaLoggerMiddleware:
     def _format_duration(self, end_time: datetime, start_time: datetime) -> str:
         """Format request duration in a human-readable format"""
         minutes = end_time.minute - start_time.minute
-        milliseconds = str((end_time.microsecond - start_time.microsecond) / 1000)[:3]
+        milliseconds = abs(float(str((end_time.microsecond - start_time.microsecond) / 1000)[:3]))
         return f"{minutes}:{milliseconds}s" if minutes else f"{milliseconds}ms"
 
     def _format_timestamp(self, timestamp: datetime) -> str:

@@ -19,6 +19,11 @@ urlpatterns = [
         name="talent_route_noparam",
     ),
     path(
+        "application-ids/",
+        views.TalentApplicationIdsAPIView.as_view(),
+        name="talent_application_ids",
+    ),
+    path(
         "<public_id>/",
         views.TalentAPIView.as_view(),
         name="talent_route",

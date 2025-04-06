@@ -5,6 +5,7 @@ from rest_framework.response import Response
 
 
 class DokoolaPaginator(pagination.PageNumberPagination):
+    page_size = 15
 
     def get_paginated_response(self, data):
         response = Response(

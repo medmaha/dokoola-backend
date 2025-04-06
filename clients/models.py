@@ -60,12 +60,14 @@ class Client(models.Model):
     )
 
     company = models.OneToOneField(Company, on_delete=models.SET_NULL, null=True)
+    _company = models.JSONField(null=True, blank=True, default=dict)
 
     # About Me (The Client)
     about = models.TextField(max_length=1500, null=True, blank=True)
 
     reviews_count = models.IntegerField(default=0, blank=True, null=False)
     reviews = models.ManyToManyField(Review, blank=True, related_name="client")
+    rating = models.FloatField(default=0, blank=True, null=False, max_length=5)
 
     country = models.JSONField(encoder=DjangoJSONEncoder, null=True, max_length=500)
     address = models.CharField(max_length=1000, default="", blank=True)
@@ -80,19 +82,38 @@ class Client(models.Model):
         return self.name
 
     # Calculates the client's average rating
-    def average_rating(self):
-        return (
+    def average_rating(self, recalculate=False, db_commit=False):
+        default_rating = 3.7
+
+        if not recalculate:
+            return self.rating or default_rating
+        
+        rating = float(
             self.reviews.select_related().aggregate(rating=models.Avg("rating"))[
                 "rating"
             ]
-            or 3.6
+            or default_rating
         )
+
+        if db_commit and float(self.rating) != rating:
+            self.rating = rating
+            self.save()
+
+        return rating
 
     @property
     def name(self):
-        if self.company:
-            return self.company.name
+        if self._company:
+            return self._company.get("name")
         return self.user.name
+    
+    @property
+    def logo(self):
+        if self._company:
+            return self._company.get("logo_url")
+        return self.logo_url or self.user.avatar
+    
+
 
     @property
     def email(self):
@@ -102,4 +123,15 @@ class Client(models.Model):
         if self._state.adding or not self.public_id:
             _id = self.pk or primary_key_generator()
             self.public_id = public_id_generator(_id, self.PUBLIC_ID_PREFIX)
+
+        if self.company:
+            _company = self._company or dict()
+
+            if _company.get("updated_at") != str(self.company.updated_at):
+                _company["name"] = self.company.name
+                _company["slug"] = self.company.slug
+                _company["logo_url"] = self.company.logo_url
+                _company["updated_at"] = str(self.company.updated_at)
+                self._company = _company
+
         return super().save(*args, **kwargs)

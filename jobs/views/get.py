@@ -1,5 +1,6 @@
+from random import shuffle
 from django.db.models import Q
-from django.utils import timezone
+from django.shortcuts import get_object_or_404
 from rest_framework.generics import GenericAPIView, ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
 
@@ -11,7 +12,10 @@ from jobs.serializers import (
     JobListSerializer,
     JobRetrieveSerializer,
 )
+from jobs.serializers.retrieve import JobRelatedSerializer
+from src.features.paginator import DokoolaPaginator
 from users.models.user import User
+from utilities.time import utc_datetime, utc_timestamp
 
 active_statues = [
     JobStatusChoices.PUBLISHED,
@@ -20,6 +24,7 @@ active_statues = [
     # JobStatusChoices.SUSPENDED,
     # JobStatusChoices.CLOSED,
     # JobStatusChoices.DELETED
+    # JobStatusChoices.CONTRACTED
 ]
 
 guest_job_query = Q(is_valid=True, status__in=active_statues)
@@ -29,6 +34,7 @@ client_job_query = lambda user_id: Q(
         *active_statues,
         JobStatusChoices.CLOSED,
         JobStatusChoices.PENDING,
+        JobStatusChoices.CONTRACTED,
     ],
 )
 
@@ -37,87 +43,156 @@ class JobListAPIView(ListAPIView):
     permission_classes = []
     serializer_class = JobListSerializer
 
-    def get_queryset(self):
-        user_id = self.request.user.pk
-        if user_id:
-            query = guest_job_query & Q(published=True) | client_job_query(user_id)
-            queryset = Job.objects.filter(query).select_related("client", "category")
-            return queryset
-        else:
-            queryset = Job.objects.filter(
-                guest_job_query,
-                published=True,
-            )
+    def exclude_proposed_jobs(self, queryset, profile, profile_type):
+        if profile and profile_type == "Talent":
+            return queryset.exclude(public_id__in=profile.applications_ids)
+        return queryset
 
+    def get_queryset(self, user:User):
+        profile, profile_type = user.profile if hasattr(user, "public_id") else (None, "")
+        if user:
+            query = guest_job_query & Q(published=True) | client_job_query(user.pk)
+            queryset = Job.objects.filter(query)
+            queryset = self.exclude_proposed_jobs(queryset, profile, profile_type)
+            return queryset
+        
+        queryset = Job.objects.filter(
+            guest_job_query,
+            published=True,
+        )
+
+        queryset = self.exclude_proposed_jobs(queryset, profile, profile_type)
         return queryset.order_by("application_deadline", "-created_at", "published")
 
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
+        queryset = self.get_queryset(request.user)
 
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True, context={"request": request})
         return self.get_paginated_response(serializer.data)
+    
 
+class JobRelatedAPIView(ListAPIView):
+    serializer_class = JobRelatedSerializer
+
+    def get_queryset(self, public_id:str):
+        instance = get_object_or_404(Job, public_id=public_id)
+
+        valid_job_query = (guest_job_query & Q(application_deadline__gte=utc_datetime(add_minutes=1)) & Q(published=True))
+
+        job_type_query = Q(job_type=instance.job_type) | Q(job_type_other=instance.job_type_other)
+        location_query = Q(address__contains=instance.address) 
+        # | Q(country__code=(instance.country or dict()).get("code"))
+        category_query = Q(category=instance.category) | Q(category__parent=instance.category.parent if instance.category else None)
+        experience_level_query = Q(experience_level=instance.experience_level) | Q(experience_level_other=instance.experience_level_other)
+
+        # TODO: Filter out the jobs that user already applied to if user is a talent
+        queryset = (
+            Job.objects.filter(
+                valid_job_query,
+                Q(
+                    category_query
+                | location_query
+                | job_type_query
+                | experience_level_query
+                )
+            ).
+            order_by("application_deadline", "pricing__budget", "client__rating").exclude(pk=instance.pk)[:10]
+        )
+
+        if not queryset:
+            queryset = (
+                Job.objects.filter(
+                    valid_job_query,
+                    category_query
+                ).
+                order_by("application_deadline", "pricing__budget", "client__rating").exclude(pk=instance.pk)[:5]
+            )
+
+        return queryset
+
+    def list(self, request, public_id:str):
+        try:
+            queryset = self.get_queryset(public_id)
+            serializer = self.get_serializer(queryset, many=True, context={"request": "mini"})
+            data = list(serializer.data)
+            shuffle(data)
+            return Response(data[:6])
+        except Exception as e:
+            print("==========================================================================")
+            print(e)
+            print("==========================================================================")
+            return Response({"message": "Internal Server Error"},status=500)
+
+
+class MyJobListPaginator(DokoolaPaginator):
+    page_size = 10
 
 class MyJobListAPIView(ListAPIView):
     serializer_class = JobListSerializer
+    pagination_class = MyJobListPaginator
 
     def get_queryset(self):
         user_id = self.request.user.pk
-        queryset = Job.objects.filter(client__user__pk=user_id).order_by("-created_at")
+        queryset = Job.objects.filter(client__user__pk=user_id).order_by("-updated_at")
         return queryset
 
     def list(self, request, *args, **kwargs):
 
-        user: User = request.user
-        if not user.is_client:
+        try:
+            user: User = request.user
+            if not user.is_client:
+                return Response(
+                    {"message": "403; Only clients can access this route"},
+                    status=403,
+                )
+
+            queryset = self.get_queryset()
+            page = self.paginate_queryset(queryset)
+            serializer = self.get_serializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
+        
+        except Exception as e:
+            # TODO: log error
             return Response(
-                {"message": "403; Only clients can access this route"},
-                status=403,
+                {"message": "Internal Server Error"},
+                status=500,
             )
 
-        queryset = self.get_queryset()
-        page = self.paginate_queryset(queryset)
-        serializer = self.get_serializer(page, many=True, context={"request": request})
-        return self.get_paginated_response(serializer.data)
-
-
 class JobRetrieveAPIView(RetrieveAPIView):
-    permission_classes = []
     serializer_class = JobRetrieveSerializer
 
+    def update_last_client_visit_time(self, job_id):
+        client_last_visit=utc_datetime(add_minutes=2)
+        Activities.objects.filter(job__id=job_id).update(client_last_visit=client_last_visit)
+
     def get_queryset(self, public_id: str):
-        try:
-            user_id = self.request.user.pk
-            query = guest_job_query | client_job_query(user_id)
-            return Job.objects.get(query, public_id=public_id)
-
-        except Exception as e:
-            return None
-
-    def update_last_visit(self, job: Job):
-        job.activities.client_last_visit = timezone.now()
-        job.activities.save()
+        user_id = self.request.user.pk
+        query = guest_job_query | client_job_query(user_id)
+        return Job.objects.get(query, public_id=public_id)
 
     def retrieve(self, request, public_id, *args, **kwargs):
-        instance = self.get_queryset(public_id)
-        if instance:
+        try:
+            instance = self.get_queryset(public_id)
             serializer = self.get_serializer(instance=instance)
 
-            # for j in Job.objects.filter():
-            #     j.public_id = public_id_generator(j.id, "job")
-            #     print("Job ID: ",j.id,"Public ID: ",j.public_id)
-            #     j.save()
-
             if instance.client.user.pk == request.user.pk:
-                AfterResponseService.schedule_task(self.update_last_visit, instance)
-            return Response(serializer.data, status=200)
+                AfterResponseService.schedule_after(self.update_last_client_visit_time, instance.pk)
 
-        return Response({"message':'Resources not found"}, status=404)
+            return Response(serializer.data, status=200)
+        
+        except Job.DoesNotExist:
+            return Response({"message": "Resource not found"}, status=404)
+        
+        except Exception as e:
+            print("============================================================")
+            print(e)
+            print("============================================================")
+            return Response({"message": "Internal Server Error"}, status=500)
+
 
 
 class JobActivitiesAPIView(GenericAPIView):
-    permission_classes = []
     serializer_class = ActivitySerializer
 
     def get_queryset(self, public_id: str):

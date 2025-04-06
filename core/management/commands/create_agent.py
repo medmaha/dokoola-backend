@@ -13,11 +13,14 @@ class Command(BaseCommand):
     def __get_user(self, data, password):
 
         serializer = UserWriteSerializer(data=data)
+
         if not serializer.is_valid():
             raise ValueError("Error: Agent-User already exists")
 
         user = User(**serializer.validated_data)
         user.is_client = True
+        user.is_active = True
+        user.email_verified = True
         user.set_password(password)
         user.save()
         return user

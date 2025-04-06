@@ -5,6 +5,7 @@ from rest_framework.generics import GenericAPIView
 from core.services.email import email_service
 from users.models import User
 from users.models.ott import OTTProxy
+from utilities.privacy import mask_email
 
 
 class SignupCheckEmailAPIView(GenericAPIView):
@@ -36,6 +37,7 @@ class SignupCheckEmailAPIView(GenericAPIView):
         return Response(
             {
                 "exists": exists,
+                "email": mask_email(email),
                 "message": (
                     "An account with this email already exist"
                     if exists

@@ -71,6 +71,9 @@ class TalentEducationAPIView(GenericAPIView):
                 return Response({"message": error_message}, status=400)
 
         except Exception as e:
+            print("========================================================================")
+            print(e)
+            print("========================================================================")
             # TODO: log error
             return Response(
                 {"message": "Error: Something went wrong!"},

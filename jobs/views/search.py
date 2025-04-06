@@ -1,4 +1,5 @@
 import math
+from random import shuffle
 import re
 from datetime import datetime
 
@@ -7,15 +8,55 @@ from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 
 from jobs.models import Job
+from jobs.models.job import JobStatusChoices, JobTypeChoices
 from jobs.serializers import JobListSerializer
 from talents.models import Talent
+from users.models.user import User
+
+
+active_statues = [
+    JobStatusChoices.PUBLISHED,
+    # JobStatusChoices.SUSPENDED,
+    # JobStatusChoices.CLOSED,
+    # JobStatusChoices.DELETED
+    # JobStatusChoices.CONTRACTED
+]
+
+guest_job_query = Q(is_valid=True, status__in=active_statues)
+client_job_query = lambda user_id: Q(
+    client__user__pk=user_id,
+    status__in=[
+        *active_statues,
+        JobStatusChoices.CLOSED,
+        JobStatusChoices.PENDING,
+        JobStatusChoices.CONTRACTED,
+        JobStatusChoices.COMPLETED,
+        JobStatusChoices.IN_PROGRESS,
+    ],
+)
+
+
+def user_query(user: User|None, queryset):
+    profile, profile_type = user.profile if user else (None, "")
+    if user and user.is_authenticated:
+        queryset = queryset.filter(guest_job_query & Q(published=True) | client_job_query(user.pk))
+    else:
+        queryset = Job.objects.filter(
+            guest_job_query,
+            published=True,
+        )
+
+    if profile and profile_type == "Talent":
+        queryset = queryset.exclude(public_id__in=profile.applications_ids)
+
+    return queryset
 
 
 class JobsSearchAPIView(ListAPIView):
     permission_classes = []
     serializer_class = JobListSerializer
 
-    def get_queryset(self):
+    def get_queryset(self, user:User|None):
         search_params = self.request.query_params  # type: ignore
 
         query = search_params.get("query")
@@ -25,14 +66,9 @@ class JobsSearchAPIView(ListAPIView):
         duration = search_params.get("duration")
         budget_rate = search_params.get("budget")
         order_by = search_params.get("order", "-created_at")
+        job_type = search_params.get("type")
 
-        if self.request.user.is_authenticated:
-
-            self.queryset = Job.objects.filter(
-                Q(is_valid=True, status="PUBLISHED") | Q(client__user=self.request.user)
-            )
-        else:
-            self.queryset = Job.objects.filter(Q(is_valid=True, status="PUBLISHED"))
+        self.queryset = Job.objects.filter()
 
         if duration:
             self.filter_by_duration(duration)
@@ -42,6 +78,8 @@ class JobsSearchAPIView(ListAPIView):
             self.filter_by_address(address)
         if skills:
             self.filter_by_skills(skills)
+        if job_type:
+            self.filter_by_job_type(job_type)
         if query:
             self.filter_by_query(query)
         if order_by:
@@ -54,19 +92,59 @@ class JobsSearchAPIView(ListAPIView):
         else:
             self.queryset = self.queryset.order_by("-created_at")
 
-        return self.queryset
+        queryset = user_query(user, self.queryset)
+
+        if not queryset and category:
+            queryset = Job.objects.filter(
+                Q(title__icontains=category) |
+                Q(description__icontains=category) |
+                Q(required_skills__icontains=category) |
+                Q(third_party_metadata___short_description__icontains=category)
+            )
+            queryset = user_query(user, queryset)
+
+        # if not queryset:
+        #     queryset = user_query(user, Job.objects.filter()).order_by("public_id")[:10]
+        #     shuffle(list(queryset))
+
+        return queryset.distinct()
 
     def list(self, request, *args, **kwargs):
         try:
-            queryset = self.get_queryset()
+            queryset = self.get_queryset(request.user)
         except Exception as e:
             return Response({"message": str(e)}, status=400)
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True, context={"request": request})
-
         return self.get_paginated_response(serializer.data)
 
     # Filters queryset by skills
+    def filter_by_job_type(self, _job_type: str):
+        job_type = str(_job_type).lower()
+        value = None
+        if "full" in job_type:
+            value = JobTypeChoices.FULL_TIME.value.lower()
+        if job_type == JobTypeChoices.FULL_TIME.value.lower():
+            value = job_type
+        if "part" in job_type:
+            value = JobTypeChoices.PART_TIME.value.lower()
+        if job_type == JobTypeChoices.PART_TIME.value.lower():
+            value = job_type
+        if job_type == JobTypeChoices.CONTRACT.value.lower():
+            value = job_type
+        if job_type == JobTypeChoices.INTERNSHIP.value.lower():
+            value = job_type
+        if job_type == JobTypeChoices.FREELANCE.value.lower():
+            value = job_type
+        if job_type == JobTypeChoices.OTHER.value.lower():
+            value = job_type
+        if _job_type and isinstance(_job_type, str):
+            value = _job_type.lower()
+        if not value:
+            return
+        
+        self.queryset = self.queryset.filter(job_type__icontains=value)
+
     def filter_by_skills(self, skills: str):
         skills_filters = Q(required_skills__icontains=skills)
         self.queryset = self.queryset.filter(skills_filters)

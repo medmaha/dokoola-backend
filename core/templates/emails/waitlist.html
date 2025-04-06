@@ -1,0 +1,38 @@
+{% extends "emails/base.html" %} {% block title %} Welcome to the Waitlist! {%
+endblock %} {% block content %}
+<div style="max-width: 600px; margin: 0 auto; padding: 20px">
+  <h2 style="color: #333; margin-bottom: 20px">
+    Welcome to {{ APPLICATION_NAME }}!
+  </h2>
+
+  <p style="color: #666; line-height: 1.6; margin-bottom: 15px">
+    Hey {{ name|default:"there" }},
+  </p>
+
+  <p style="color: #666; line-height: 1.6; margin-bottom: 15px">
+    Thank you for joining our waitlist! We're thrilled to have you on board and
+    can't wait to share exciting updates with you.
+  </p>
+
+  <div
+    style="
+      background-color: #f5f5f5;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 20px 0;
+    "
+  >
+    <p style="margin: 0; color: #666">
+      Stay tuned for more information about our upcoming features and services.
+      We'll keep you updated every step of the way!
+    </p>
+  </div>
+
+  <p style="color: #666; line-height: 1.6; margin-bottom: 20px">
+    If you have any questions, feel free to reach out to us at any time. at
+    support@dokoola.com
+  </p>
+
+  <p>Best regards,<br />The {{ APPLICATION_NAME }} Team</p>
+</div>
+{% endblock %}

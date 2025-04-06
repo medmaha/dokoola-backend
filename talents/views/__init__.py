@@ -1,3 +1,4 @@
+from .application_ids import TalentApplicationIdsAPIView
 from .certificates import TalentCertificateAPIView
 from .dashboard import TalentDashboardAPIView
 from .education import TalentEducationAPIView
@@ -12,4 +13,5 @@ __all__ = [
     "TalentPortfolioAPIView",
     "TalentEducationAPIView",
     "TalentCertificateAPIView",
+    "TalentApplicationIdsAPIView",
 ]

@@ -1,49 +1,63 @@
-{% extends "emails/base.html" %}
-
-{% block title %}
-    New Proposal
-{% endblock %}
-
+{% extends "emails/base.html" %} {% block title %} New Proposal {% endblock %}
 {% block content %}
-<div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-    <h2 style="color: #333; margin-bottom: 20px;">You've Received a New Proposal!</h2>
-    
-    <p style="color: #666; line-height: 1.6; margin-bottom: 15px;">
-        Hello {{ client.name }},
+<div style="max-width: 600px; margin: 0 auto; padding: 20px">
+  <h2 style="color: #333; margin-bottom: 20px">
+    You've Received a New Proposal!
+  </h2>
+
+  <p style="color: #666; line-height: 1.6; margin-bottom: 15px">
+    Hello {{ client.name }},
+  </p>
+
+  <p style="color: #666; line-height: 1.6; margin-bottom: 15px">
+    A talent has submitted a proposal for your job: <br />
+    <strong>{{ job.title }}</strong>
+    <br />
+    <br />
+    {{ proposal.short_cover_letter }}
+  </p>
+
+  <div
+    style="
+      background-color: #f5f5f5;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 20px 0;
+    "
+  >
+    <p style="margin: 0; color: #666">
+      <strong>Talent:</strong> {{ talent.user.name }}<br />
+      <strong>Proposed Budget:</strong> {{proposal.job.pricing.currency.symbol}}
+      {{ proposal.budget }}<br />
+      <strong>Estimated Timeline:</strong> {{ proposal.duration }}
     </p>
-    
-    <p style="color: #666; line-height: 1.6; margin-bottom: 15px;">
-        A talent has submitted a proposal for your job: <br>
-        <strong>{{ job.title }}</strong>
-        <br>
-        <br>
-        {{ proposal.cover_letter|strip_html|truncatechars:200 }}
-    </p>
+  </div>
 
-    <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
-        <p style="margin: 0; color: #666;">
-            <strong>Talent:</strong> {{ talent.user.name }}<br>
-            <strong>Proposed Budget:</strong> {{proposal.job.pricing.currency.symbol}} {{ proposal.budget }}<br>
-            <strong>Estimated Timeline:</strong> {{ proposal.duration }}
-        </p>
+  <p style="color: #666; line-height: 1.6; margin-bottom: 20px">
+    To review the full proposal and contact the talent, please click the button
+    below:
+  </p>
 
+  <div style="text-align: center; margin: 30px 0">
+    <a
+      href="{{ FRONTEND_URL }}/proposals?j={{ proposal.public_id }}"
+      style="
+        background-color: #007bff;
+        color: white;
+        padding: 12px 25px;
+        text-decoration: none;
+        border-radius: 5px;
+        display: inline-block;
+      "
+    >
+      View Proposal
+    </a>
+  </div>
 
-    </div>
+  <p style="margin-top: 30px">
+    We're excited to see what you'll achieve with this project!
+  </p>
 
-    <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
-        To review the full proposal and contact the talent, please click the button below:
-    </p>
-
-    <div style="text-align: center; margin: 30px 0;">
-        <a href="{{ FRONTEND_URL }}/proposals?j={{ proposal.public_id }}" style="background-color: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block;">
-            View Proposal
-        </a>
-    </div>
-
-    <p style="margin-top: 30px;">We're excited to see what you'll achieve with this project!</p>
-        
-    <p>Best regards,<br>The {{ APPLICATION_NAME }} Team</p>
+  <p>Best regards,<br />The {{ APPLICATION_NAME }} Team</p>
 </div>
 {% endblock %}
-
-

@@ -38,7 +38,7 @@ class JobDeleteAPIView(DestroyAPIView):
     def get_queryset(self, public_id: str, client_id: str):
         queryset = Job.objects.get(public_id=public_id)
         if queryset.client.public_id != client_id:
-            return None
+            raise Job.DoesNotExist("This job does not exist")
         return queryset
 
     def delete(self, request: HttpRequest, public_id):
@@ -84,7 +84,7 @@ class JobDeleteAPIView(DestroyAPIView):
                         )
                         projects.append(project)
 
-                        _milestones = project.milestones()
+                        _milestones = project.milestones.filter()
 
                         for milestone in _milestones:
                             milestone._terminate(termination_message)
@@ -102,21 +102,21 @@ class JobDeleteAPIView(DestroyAPIView):
                     )
 
                 if projects:
-                    Project.objects.bulk_update(projects)
+                    Project.objects.bulk_update(projects, fields=["status", "termination_comment"])
 
                 if contracts:
-                    Contract.objects.bulk_update(contracts)
+                    Contract.objects.bulk_update(contracts, fields=["status", "client_comment"])
 
                 if proposals:
-                    Proposal.objects.bulk_update(proposals)
+                    Proposal.objects.bulk_update(proposals, fields=["status", "client_comment"])
 
             return Response(
                 {"message": "Job deleted successfully"},
                 status=201,
             )
-        except Job.DoesNotExist:
+        except Job.DoesNotExist as e:
             DokoolaLoggerService.error(
-                e,
+                str(e),
                 {
                     "public_id": public_id,
                     "client_id": client_id,
@@ -140,34 +140,6 @@ class JobDeleteAPIView(DestroyAPIView):
                     "request_id": request.session.__str__(),
                 },
             )
-            return Response(
-                {"message": "This request is forbidden"},
-                status=403,
-            )
-
-        try:
-            client_id = self.get_client_id(request)
-            job = self.get_queryset(public_id, client_id)
-            serializer = self.get_serializer(data=request.data, instance=job)
-
-            if serializer.is_valid():
-                serializer.save()
-                return Response(
-                    status=204,
-                )
-
-            else:
-                return Response(
-                    {"message": get_serializer_error_message(serializer.errors)},
-                    status=400,
-                )
-
-        except Job.DoesNotExist:
-            return Response(
-                {"message": "Job not found"},
-                status=404,
-            )
-        except:
             return Response(
                 {"message": "This request is forbidden"},
                 status=403,

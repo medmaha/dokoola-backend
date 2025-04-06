@@ -1,8 +1,12 @@
 from typing import Any, Callable
+import after_response
 
+@after_response.enable
+def execute_after_response(callback, *args, **kwargs):
+    callback(*args, **kwargs)
 
 class _AfterResponseService:
-    """Service for managing and executing callbacks after HTTP response"""
+    """Service for managing and executing callbacks schedule_after HTTP response"""
 
     def __init__(self):
         pass
@@ -13,11 +17,11 @@ class _AfterResponseService:
 
         callback(*args, **kwargs)
 
-    def schedule_log(
+
+    def schedule_after(
         self, callback: Callable[..., Any], *args: Any, **kwargs: Any
     ) -> None:
-
-        callback(*args, **kwargs)
+        execute_after_response.after_response(callback, *args, **kwargs)
 
 
 # Singleton instance

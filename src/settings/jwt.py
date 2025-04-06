@@ -19,5 +19,4 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(weeks=5),
 }
 
-
 __all__ = ["SIMPLE_JWT"]

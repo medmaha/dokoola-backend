@@ -8,16 +8,10 @@ from utilities.time import utc_datetime
 
 logger = LOG_CONFIG.logger
 
-
-@after_response.enable
-def log_after_http_response(log_method, message, extras):
-    AfterResponseService.schedule_task(log_method, message, extras=extras)
-
-
 class DokoolaLoggerService:
     """Enhanced logging class with structured logging support"""
 
-    lazy: Optional["DokoolaLazyLoggerService"] = None
+    lazy: "DokoolaLazyLoggerService" = None # type: ignore
 
     @staticmethod
     def __enrich_extras(extras: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -60,12 +54,12 @@ class DokoolaLoggerService:
             log_method = getattr(logger, log_attr.lower())
 
             if _after_response:
-                log_after_http_response.after_response(
+                AfterResponseService.schedule_after(
                     log_method, message, enriched_extras
                 )
                 return
 
-            AfterResponseService.schedule_log(
+            AfterResponseService.schedule_task(
                 lambda: log_method(message, extra=enriched_extras)
             )
 
@@ -105,7 +99,8 @@ class DokoolaLazyLoggerService(DokoolaLoggerService):
         cls, log_attr: str, message: Any, extras: Optional[Dict[str, Any]] = None
     ) -> None:
 
-        return cls.__log(log_attr, message, extras)
+        # return cls.__log(log_attr, message, extras)
+        pass
 
 
 DokoolaLoggerService.lazy = DokoolaLazyLoggerService(lazy=True)

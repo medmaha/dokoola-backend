@@ -12,6 +12,7 @@ class TalentWriteSerializer(MergeSerializer, serializers.ModelSerializer):
     class Meta:
         model = Talent
         fields = [
+            "dob",
             "bio",
             "title",
             "skills",

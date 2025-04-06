@@ -32,7 +32,7 @@ class WaitlistAPIView(GenericAPIView):
         _message = None
         _status = 201
 
-        name = request.data.get("name", "")
+        name = request.data.get("name")
         email = request.data.get("email")
 
         serializer = None

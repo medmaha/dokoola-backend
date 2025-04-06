@@ -12,7 +12,7 @@ if env_value not in ["development", "production"]:
     raise ValueError(f"Invalid ENVIRONMENT value: {env_value}")
 RUNTIME_ENVIRONMENT: ENVIRONMENT = env_value  # type: ignore
 
-CONSOLE_LOG_ALLOWED = bool(int(os.getenv("CONSOLE_LOG", 0)))
+CONSOLE_LOG_ALLOWED = not bool(int(os.getenv("CONSOLE_LOG", 0)))
 
 APPLICATION_IDENTIFIER = os.getenv("APPLICATION_ID", None)
 

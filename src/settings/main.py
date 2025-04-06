@@ -5,16 +5,25 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from src.settings.shared import APPLICATION_NAME, DEBUG, SECRET_KEY
-
+from .logger import LOG_CONFIG
+from .unfold import UNFOLD
+from .whitenoice import STORAGES
 from .api import REST_FRAMEWORK
+from .db import DATABASES
+from .jwt import SIMPLE_JWT
+from .cache import CACHES
+
+from src.settings.shared import (
+    APPLICATION_NAME,
+    DEBUG,
+    SECRET_KEY,
+)
 from .cors import (
     CORS_ALLOW_ALL_ORIGINS,
     CORS_ALLOW_CREDENTIALS,
     CORS_ALLOW_HEADERS,
     CORS_ALLOW_METHODS,
 )
-from .db import DATABASES
 from .email import (
     EMAIL_BACKEND,
     EMAIL_HOST,
@@ -23,10 +32,7 @@ from .email import (
     EMAIL_PORT,
     EMAIL_USE_TLS,
 )
-from .jwt import SIMPLE_JWT
-from .logger import LOG_CONFIG
-from .unfold import UNFOLD
-from .whitenoice import STORAGES
+
 
 ALLOWED_HOSTS = list(
     set(
@@ -36,6 +42,7 @@ ALLOWED_HOSTS = list(
         ]
     )
 )
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 

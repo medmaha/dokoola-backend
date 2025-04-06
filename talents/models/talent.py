@@ -44,6 +44,8 @@ class Talent(models.Model):
 
     public_id = models.CharField(max_length=50, db_index=True, blank=True)
 
+    applications_ids = models.JSONField(default=list, blank=True, null=True)
+
     PUBLIC_ID_PREFIX = "TAL"
 
     def save(self, *args, **kwargs):

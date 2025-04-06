@@ -16,9 +16,15 @@ class LoginView(TokenObtainPairView):
         email = request.data.get("email")
         password = request.data.get("password")
         user = User.objects.filter(email=email).first()
-
         if user:
+            if not user.is_active:
+                print("============================================================")
+                print(email, password, user, user.is_active)
+                print("============================================================")
+                return Response({"message": "Oops! your account is not activated"}, status=400)
+            
             auth = user.check_password(password)
+            
             if auth:
                 auth_tokens = self.jwt_token_generator.tokens(
                     user, context={"request": request}

@@ -124,7 +124,8 @@ class TalentAPIView(GenericAPIView):
                 )
                 return Response({"message": msg}, status=400)
 
-            current_username = request.user.username
+            current_avatar = request.user.username
+            current_username = request.user.avatar
             updated_user: User = user_serializer.save()
             updated_talent: Talent = talent_serializer.save()
 
@@ -133,7 +134,7 @@ class TalentAPIView(GenericAPIView):
             )
 
             # Check, to see if the username of this user was updated
-            if updated_user.username != current_username:
+            if updated_user.username != current_username or updated_user.avatar != current_avatar:
                 # Generate a new token for this user's credentials
                 token = GenerateToken().tokens(updated_user, init=True)
                 return Response(

@@ -43,6 +43,9 @@ def notification_proposals(sender, instance: Proposal, created, **kwargs):
     - Then create a new notification for the job creator
     """
 
+    if instance.status == ProposalStatusChoices.EXTERNAL:
+        return
+
     def create_hint_text(talent):
         hints = [
             "You've received a new application",

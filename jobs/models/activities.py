@@ -19,7 +19,7 @@ class Activities(models.Model):
     )
 
     job = models.OneToOneField(
-        "Job", on_delete=models.CASCADE, null=True, related_name="activity"
+        "Job", on_delete=models.CASCADE, related_name="activity"
     )
 
     bits_count = models.IntegerField(default=0)
@@ -30,6 +30,9 @@ class Activities(models.Model):
     unanswered_invites = models.IntegerField(default=0)
     hired = models.ManyToManyField(Talent, blank=True)  # Updated from Talent to Talent
     client_last_visit = models.DateTimeField(null=True, blank=True)
+
+    applicants_id = models.JSONField(default=list, null=True, blank=True)
+
 
     def save(self, *args, **kwargs):
         if self._state.adding:

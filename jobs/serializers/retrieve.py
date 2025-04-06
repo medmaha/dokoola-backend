@@ -9,28 +9,43 @@ from proposals.models import Proposal
 class JobClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
-        fields = ["public_id", "name", "logo_url"]
+        fields = ["public_id", "name", "logo"]
 
     def to_representation(self, instance: Client):
-        company = instance.company
         data = super().to_representation(instance)
-        data["rating"] = instance.average_rating()
 
-        if "detail" in self.context:
+        is_mini_view = "mini" in self.context
+
+        if is_mini_view:
+            return data
+
+        data["company"] = {}
+        is_detail_view = "detail" in self.context
+
+        data["rating"] = instance.average_rating(recalculate=is_detail_view, db_commit=True)
+
+        if not is_detail_view:
+            company = instance._company
+            if company:
+                data["company"].update({
+                    "slug": company.get("slug"),
+                    "name": company.get("name"),
+                    "logo_url": company.get("logo_url"),
+                })
+            return data
+
+        if is_detail_view:
             data["address"] = instance.address
             data["country"] = instance.country
-
-        if company:
-            data["company"] = {
-                "slug": company.slug,
-                "name": company.name,
-                "logo_url": company.logo_url,
-            }
-            if "detail" in self.context:
+            company = instance.company
+            if company and "detail" in self.context:
+                data["company"]["slug"] = company.slug
+                data["company"]["name"] = company.name
+                data["company"]["logo_url"] = company.logo_url
                 data["company"]["website"] = company.website
                 data["company"]["industry"] = company.industry
                 data["company"]["description"] = company.description
-                data["company"]["date_established"] = company.date_established
+                data["company"]["date_established"] = str(company.date_established or "")
 
         return data
 
@@ -93,12 +108,38 @@ class JobListSerializer(serializers.ModelSerializer):
     # Check if the user has proposed to the job
     def to_representation(self, instance: Job):
         representation = super().to_representation(instance)
-        if instance.is_third_party and "description" in instance.third_party_metadata:
+        if instance.third_party_metadata and "description" in instance.third_party_metadata:
             representation["description"] = instance.third_party_metadata["description"]
         else:
             representation["description"] = instance.description[:500]
         return representation
+    
+class JobRelatedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Job
+        fields = [
+            "public_id",
+            "title",
+            "country",
+            "address",
+            "pricing",
+            "application_deadline",
+            "client",
+        ]
 
+    client = serializers.SerializerMethodField()
+
+    def get_client(self, instance:Job):
+        data = {
+            "public_id": instance.client.public_id,
+            "name": instance.client.name,
+            "logo": instance.client.logo,
+            "rating": instance.client.rating
+        }
+        if instance.third_party_metadata:
+            data["name"] = instance.third_party_metadata.get("company_name") or data["name"]
+
+        return data
 
 class JobRetrieveSerializer(serializers.ModelSerializer):
 

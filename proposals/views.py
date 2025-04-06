@@ -369,26 +369,6 @@ class ProposalCreateAPIView(CreateAPIView):
             # Get the attachment data of the request
             attachment_data = data.pop("attachments", [])  # TODO: Handle attachments
 
-            def after_response(proposal: Proposal):
-                # Update the job's activity
-                activity, _ = Activities.objects.get_or_create(job=job)
-                activity.proposal_count = activity.proposal_count + 1
-                activity.save()
-
-                # Update the job's metadata
-                metdata_data = job.metadata
-                metdata_data["has_proposal"] = True
-                Job.objects.filter(id=job.pk).update(metdata_data=metdata_data)
-
-                # Update the talent's bits
-                bits = F("bits") - proposal.bits_amount
-                Talent.objects.filter(id=talent.pk).update(bits=bits)
-
-                # Notify the client
-                proposal.job.notify_client(
-                    JobStatusChoices.PUBLISHED, new_proposal=proposal
-                )
-
             serializer = self.get_serializer(data=data, context={"request": request})
             if serializer.is_valid():
 
@@ -398,9 +378,6 @@ class ProposalCreateAPIView(CreateAPIView):
                     talent=talent,
                     service_fee=DokoolaConstants.get_service_fee(),
                 )
-
-                # AfterResponseService.schedule_email(after_response, proposal)
-                after_response(proposal)
                 return Response(
                     {
                         "public_id": proposal.public_id,

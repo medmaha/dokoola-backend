@@ -33,7 +33,7 @@ class LogConfig:
 
         LogConfig._setup_logging(self)
 
-        logging.info(
+        self.logger.info(
             "Server up and running",
             extra={
                 "App": self.app_id,

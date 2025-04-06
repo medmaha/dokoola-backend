@@ -1,4 +1,5 @@
 from functools import partial
+import re
 
 from django.db import models
 
@@ -16,6 +17,7 @@ class ProposalStatusChoices(models.TextChoices):
     REVIEW = "REVIEW"
     PENDING = "PENDING"
     ACCEPTED = "ACCEPTED"
+    EXTERNAL = "EXTERNAL"
     CONTRACTED = "CONTRACTED"
     DECLINED = "DECLINED"
     WITHDRAWN = "WITHDRAWN"
@@ -50,7 +52,7 @@ class Proposal(models.Model):
     status = models.CharField(
         max_length=200,
         choices=ProposalStatusChoices.choices,
-        default="PENDING",
+        default=ProposalStatusChoices.PENDING
     )
 
     updated_at = models.DateTimeField(auto_now=True)
@@ -63,6 +65,14 @@ class Proposal(models.Model):
             ProposalStatusChoices.PENDING,
             ProposalStatusChoices.ACCEPTED,
         ]
+    
+    @property
+    def short_cover_letter(self):
+        value = re.sub(r'<[^>]*>', '', self.cover_letter)[:200]
+        if len(self.cover_letter) > 200:
+            value += "..."
+        return value
+
 
     def _terminate(self, reason=None, commit_save=True):
         self.status = ProposalStatusChoices.TERMINATED

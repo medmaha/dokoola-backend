@@ -17,6 +17,8 @@ class AttachmentSerializer(serializers.ModelSerializer):
 
 class ProposalListSerializer(serializers.ModelSerializer):
     attachments = AttachmentSerializer(many=True)
+    job = serializers.SerializerMethodField()
+    talent = serializers.SerializerMethodField()
 
     class Meta:
         model = Proposal
@@ -32,14 +34,30 @@ class ProposalListSerializer(serializers.ModelSerializer):
             "is_reviewed",
             "created_at",
             "updated_at",
+            "job", "talent"
         ]
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-
-        data.update({"talent": get_talent(instance), "job": get_job(instance)})
-
-        return data
+        
+    def get_job(self, instance:Proposal):
+        return {
+            "public_id": instance.job.public_id,
+            "title": instance.job.title,
+            "status": instance.job.status,
+            "client":{
+                "public_id": instance.job.client.public_id,
+                "avatar": instance.job.client.logo,
+                "name": instance.job.client.name,
+                "rating": instance.job.client.rating,
+            }
+        }
+        
+    def get_talent(self, instance:Proposal):
+        return {
+            "public_id": instance.talent.public_id,
+            "name": instance.talent.name,
+            "title": instance.talent.title,
+            "rating": instance.talent.rating,
+            "badge": instance.talent.badge,
+        }
 
 
 class ProposalDetailSerializer(serializers.ModelSerializer):
@@ -86,6 +104,33 @@ class ProposalUpdateSerializer(serializers.ModelSerializer):
             "status",
             "created_at",
         ]
+
+class ProposalReadSerializer(serializers.ModelSerializer):
+    job = serializers.SerializerMethodField()
+    attachments = AttachmentSerializer(many=True)
+
+    class Meta:
+        readonly = True
+        model = Proposal
+        fields = [
+            "public_id",
+            "budget",
+            "service_fee",
+            "bits_amount",
+            "attachments",
+            "duration",
+            "cover_letter",
+            "job",
+            "status",
+            "created_at",
+        ]
+
+    def get_job(self, instance:Proposal):
+        return {
+            "public_id": instance.job.public_id,
+            "title": instance.job.title,
+            "status": instance.job.status,
+        }
 
 
 class ProposalEditSerializer(serializers.ModelSerializer):
