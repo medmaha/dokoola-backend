@@ -38,7 +38,6 @@ class WaitlistAPIView(GenericAPIView):
         serializer = None
 
         try:
-            Waitlist.objects.filter().delete()
             subscriber = Waitlist.objects.get(email=email)
             _message = "You are already in our waitlist, Thank You!"
             _status = 200
