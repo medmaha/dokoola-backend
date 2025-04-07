@@ -57,7 +57,7 @@ class User(AbstractUser):
     def profile(self):
         return self.get_profile()
 
-    def get_profile(self) -> Tuple[Any, str]:
+    def get_profile(self) -> "ProfileType":
         if self.is_client:
             return (self.client_profile, "Client")  # type: ignore
         if self.is_talent:
@@ -139,3 +139,10 @@ class User(AbstractUser):
 
         _profile = profile.objects.filter(public_id=public_id).first()
         return [_profile, profile.__name__ if _profile else ""]
+
+
+ProfileType = Union[
+    tuple[Staff, Literal["Staff"]],
+    tuple[Client, Literal["Client"]],
+    tuple[Talent, Literal["Talent"]],
+]

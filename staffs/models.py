@@ -37,3 +37,7 @@ class Staff(models.Model):
             _id = self.id or primary_key_generator()
             self.public_id = public_id_generator(_id, self.PUBLIC_ID_PREFIX)
         return super().save(*args, **kwargs)
+
+    @property
+    def rating(self):
+        return 3

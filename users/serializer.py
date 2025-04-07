@@ -20,6 +20,38 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ("avatar", "name", "username", "profile")
 
 
+class UserSearchSerializer(serializers.ModelSerializer):
+    """Serializer for the user object"""
+
+    class Meta:
+        model = User
+        fields = ("avatar", "name")
+
+
+    def to_representation(self, instance:User):
+        data = super().to_representation(instance)
+        profile = instance.profile
+
+        if profile[1] == "Talent":
+            talent = profile[0]
+            data.update({
+                "title": talent.title,
+            })
+        elif profile[1] == "Client":
+            client = profile[0]
+            data.update({
+                "company_name": client.name,
+            })
+
+        data["rating"] = profile[0].rating
+        data["public_id"] = profile[0].public_id
+        data["profile_type"] = profile[1]
+        data["date_joined"] = instance.date_joined
+
+        return data
+
+
+
 class UserWriteSerializer(MergeSerializer, serializers.ModelSerializer):
     class Meta:
         model = User
