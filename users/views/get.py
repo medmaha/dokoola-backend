@@ -1,7 +1,6 @@
 from django.db.models import Q
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
-from rest_framework.request import Request
 
 from users.auth.serializer import AuthUserSerializer
 from users.models import User
@@ -11,7 +10,7 @@ from users.serializer import UserSearchSerializer, UserSerializer
 class UserListAPIView(ListAPIView):
     permission_classes = []
 
-    def get_queryset(self, query:str):
+    def get_queryset(self, query: str):
         if query:
             self.serializer_class = UserSearchSerializer
             queryset = User.objects.filter(
@@ -19,17 +18,19 @@ class UserListAPIView(ListAPIView):
                 | Q(first_name__startswith=query)
                 | Q(last_name__startswith=query),
                 is_active=True,
-                is_staff=False
+                is_staff=False,
             )
             return queryset
 
         self.serializer_class = UserSerializer
-        queryset = User.objects.filter(is_active=True,  is_staff=False)
+        queryset = User.objects.filter(is_active=True, is_staff=False)
 
         return queryset
 
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset(request.query_params.get("q")).order_by("-date_joined")
+        queryset = self.get_queryset(request.query_params.get("q")).order_by(
+            "-date_joined"
+        )
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)

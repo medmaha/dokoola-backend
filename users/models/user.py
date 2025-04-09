@@ -1,4 +1,4 @@
-from typing import Any, Literal, Optional, Tuple, Union
+from typing import Any, Literal, Union
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -12,14 +12,16 @@ from talents.models import Talent
 class User(AbstractUser):
     "The base User model of this application"
 
-    email = models.EmailField(max_length=100, unique=True)
-    username = models.CharField(unique=True, max_length=32)
+    email = models.EmailField(max_length=100, unique=True, db_index=True)
+    username = models.CharField(unique=True, max_length=32, db_index=True)
+    public_id = models.CharField(max_length=100, default="", blank=True, db_index=True)
+
     avatar = models.CharField(null=True, blank=True, max_length=1000)
 
     first_name = models.CharField(default="", blank=True, max_length=100)
     last_name = models.CharField(default="", blank=True, max_length=100)
 
-    gender = models.CharField(max_length=100, default="", blank=True)
+    gender = models.CharField(max_length=100, default="", blank=True, db_index=True)
 
     is_active = models.BooleanField(default=False)
     is_client = models.BooleanField(default=False)
@@ -103,15 +105,6 @@ class User(AbstractUser):
             "city": self.city,
             "zip_code": self.zip_code,
         }
-
-    @property
-    def public_id(self) -> str | None:
-        profile, _ = self.profile
-
-        if hasattr(profile, "public_id"):
-            return profile.public_id
-
-        return None
 
     @classmethod
     def get_profile_by_username_or_public_id(cls, public_id: str):
