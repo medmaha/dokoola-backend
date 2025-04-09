@@ -1,0 +1,12 @@
+#!/bin/bash
+
+pytest --junit-xml=junit.xml
+
+
+
+#  colorama==0.4.6
+#  iniconfig==2.1.0
+#  packaging==24.2
+#  pluggy==1.5.0
+#  pytest==8.3.5
+#  pytest-django==4.11.1

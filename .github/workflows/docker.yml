@@ -1,13 +1,13 @@
 name: Dockerize CI/CD
 
 on:
-  # workflow_run:
-  #   workflows: ["Scaffolding CI/CD"]
-  #   types:
-  #     - completed
-  #   branches: ["main"]
-  push:
+  workflow_run:
+    workflows: ["Scaffolding CI/CD"]
+    types:
+      - completed
     branches: ["main"]
+  # push:
+  #   branches: ["main"]
 
 jobs:
   docker-image:
