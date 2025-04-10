@@ -5,25 +5,17 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from .logger import LOG_CONFIG
-from .unfold import UNFOLD
-from .whitenoice import STORAGES
-from .api import REST_FRAMEWORK
-from .db import DATABASES
-from .jwt import SIMPLE_JWT
-from .cache import CACHES
+from src.settings.shared import APPLICATION_NAME, DEBUG, SECRET_KEY
 
-from src.settings.shared import (
-    APPLICATION_NAME,
-    DEBUG,
-    SECRET_KEY,
-)
+from .api import REST_FRAMEWORK
+from .cache import CACHES
 from .cors import (
     CORS_ALLOW_ALL_ORIGINS,
     CORS_ALLOW_CREDENTIALS,
     CORS_ALLOW_HEADERS,
     CORS_ALLOW_METHODS,
 )
+from .db import DATABASES
 from .email import (
     EMAIL_BACKEND,
     EMAIL_HOST,
@@ -32,7 +24,10 @@ from .email import (
     EMAIL_PORT,
     EMAIL_USE_TLS,
 )
-
+from .jwt import SIMPLE_JWT
+from .logger import LOG_CONFIG
+from .unfold import UNFOLD
+from .whitenoice import STORAGES
 
 ALLOWED_HOSTS = list(
     set(
@@ -102,19 +97,19 @@ MIDDLEWARE = [
     # "core.middleware.csrf.DokoolaCSRFMiddleware",
 ]
 
-# if DEBUG:
-#     INSTALLED_APPS.append("silk")
-#     INSTALLED_APPS.append("drf_spectacular")
-#     INSTALLED_APPS.append("drf_spectacular_sidecar")
-#     MIDDLEWARE.append("silk.middleware.SilkyMiddleware")
+if DEBUG:
+    INSTALLED_APPS.append("silk")
+    INSTALLED_APPS.append("drf_spectacular")
+    INSTALLED_APPS.append("drf_spectacular_sidecar")
+    MIDDLEWARE.append("silk.middleware.SilkyMiddleware")
 
-#     from .spectacular import SPECTACULAR_SETTINGS
+    from .spectacular import SPECTACULAR_SETTINGS
 
-#     REST_FRAMEWORK.update(
-#         {
-#             "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-#         }
-#     )
+    REST_FRAMEWORK.update(
+        {
+            "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+        }
+    )
 
 
 ROOT_URLCONF = "src.urls"

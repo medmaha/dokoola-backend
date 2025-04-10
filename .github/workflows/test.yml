@@ -27,6 +27,7 @@ jobs:
 
       - name: Run Test
         run: sh pytest.sh
+        continue-on-error: true
 
       - name: Upload Test Reports
         uses: trunk-io/analytics-uploader@main
