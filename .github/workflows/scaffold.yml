@@ -1,39 +1,17 @@
 name: Scaffolding CI/CD
 
 on:
-  push:
-    branches: ["main"]
-  # pull_request:
-  #   branches: ["main"]
+  workflow_run:
+    workflows: ["Testing CI/CD"]
+    types:
+      - completed
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    name: Test App
-
-    container: python:3.12-slim
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Install dependencies
-        run: pip install --no-cache-dir -r requirements.dev.txt
-
-      - name: Run Test
-        run: sh pytest.sh
-
-      - name: Upload Test
-        uses: trunk-io/analytics-uploader@main
-        with:
-          junit-paths: ./*.xml
-          org-slug: dokoola
-          token: ${{ secrets.TRUNK_API_TOKEN }}
-
   scaffold:
     runs-on: ubuntu-latest
     name: Scaffold
-    needs: test
-    if: success()
+
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     container: python:3.12-slim
 

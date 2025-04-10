@@ -1,0 +1,25 @@
+
+# Django Packages
+Django==5.0.2
+django-after-response==0.2.2
+django-cors-headers==4.3.1
+django-unfold==0.34.0
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.3.1
+
+# Environment variable reader
+python-dotenv==1.0.1
+
+# PostgreSQL database connector
+psycopg2-binary==2.9.9
+
+uuid_v7==1.0.0
+
+
+# Pytesting Libs
+colorama==0.4.6
+iniconfig==2.1.0
+packaging==24.2
+pluggy==1.5.0
+pytest==8.3.5
+pytest-django==4.11.1
