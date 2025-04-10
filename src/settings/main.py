@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from src.settings.shared import APPLICATION_NAME, DEBUG, SECRET_KEY
+from src.settings.shared import APPLICATION_NAME, DEBUG, ENVIRONMENT, SECRET_KEY
 
 from .api import REST_FRAMEWORK
 from .cache import CACHES
@@ -97,7 +97,7 @@ MIDDLEWARE = [
     # "core.middleware.csrf.DokoolaCSRFMiddleware",
 ]
 
-if DEBUG:
+if DEBUG and ENVIRONMENT == "development":
     INSTALLED_APPS.append("silk")
     INSTALLED_APPS.append("drf_spectacular")
     INSTALLED_APPS.append("drf_spectacular_sidecar")
