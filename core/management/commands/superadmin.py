@@ -31,7 +31,7 @@ class Command(BaseCommand):
                 user.is_staff = True
                 user.is_active = True
                 user.is_superuser = True
-                user.password = password
+                user.set_password(password)
                 user.save()
                 self.stdout.write(
                     self.style.SUCCESS(
@@ -51,7 +51,7 @@ class Command(BaseCommand):
             user.last_name = last_name
             user.gender = gender
             user.username = "super-admin" + str(random.randint(10000, 99999))
-            user.password = password
+            user.set_password(password)
             user.save()
 
         except Exception as e:
