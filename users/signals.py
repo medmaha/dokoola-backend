@@ -33,6 +33,7 @@ def talent_profile(sender, instance: Talent, created, **kwargs):
 
 @receiver(post_save, sender=Client)
 def client_profile(sender, instance: Client, created, **kwargs):
+
     __update_user_public_id(instance.public_id, instance.user)
 
 
@@ -42,5 +43,6 @@ def staff_profile(sender, instance: Staff, created, **kwargs):
 
 
 def __update_user_public_id(public_id: str, user: User):
-    if public_id and not user.public_id:
-        User.objects.filter(pk=user.pk).update(public_id=public_id)
+    if public_id and public_id != user.public_id:
+        user.public_id = public_id
+        User.objects.filter(pk=user.pk).bulk_update([user], fields=["public_id"])

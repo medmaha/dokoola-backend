@@ -8,18 +8,17 @@ from users.serializer import UserSearchSerializer, UserSerializer
 
 
 class UserListAPIView(ListAPIView):
-    permission_classes = []
 
     def get_queryset(self, query: str):
         if query:
             self.serializer_class = UserSearchSerializer
             queryset = User.objects.filter(
-                Q(username__startswith=query)
-                | Q(first_name__startswith=query)
-                | Q(last_name__startswith=query),
+                Q(username__icontains=query)
+                | Q(first_name__icontains=query)
+                | Q(last_name__icontains=query),
                 is_active=True,
                 is_staff=False,
-            )
+            ).exclude(pk=self.request.user.pk)
             return queryset
 
         self.serializer_class = UserSerializer
