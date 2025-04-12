@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e  # Fail on error
 
-exposed_port=8000
+host_port=8000
 container_port=8000
 container_name="dokoola-backend"
 image_tag="intrasoft0/dokoola-backend:latest"
@@ -13,7 +13,7 @@ sudo docker rm $container_name
 
 sudo docker run -d \
     --restart unless-stopped \
-    -p $exposed_port:$container_port \
+    -p $host_port:$container_port \
     --name "$container_name" \
     "$image_tag"
 
