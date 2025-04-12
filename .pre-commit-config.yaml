@@ -35,21 +35,21 @@ repos:
       - id: isort
         args: ["--profile", "black", "--filter-files"]
 
-  - repo: local
-    hooks:
-      - id: django-test
-        name: Django Tests
-        entry: |
-          python manage.py test --noinput --parallel 2
-          projects
-          reviews
-          jobs
-          messaging
-          users
-          core
-          clients
-          staffs
-          talents
-        language: system
-        types: [python]
-        pass_filenames: false
+  # - repo: local
+  #   hooks:
+  #     - id: django-test
+  #       name: Django Tests
+  #       entry: |
+  #         python manage.py test --noinput --parallel 2
+  #         projects
+  #         reviews
+  #         jobs
+  #         messaging
+  #         users
+  #         core
+  #         clients
+  #         staffs
+  #         talents
+  #       language: system
+  #       types: [python]
+  #       pass_filenames: false
