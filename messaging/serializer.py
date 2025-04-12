@@ -3,26 +3,25 @@ from rest_framework import serializers
 from .models import Message, Thread
 
 
-class messagingCreateSerializer(serializers.ModelSerializer):
+class MessagingCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = ["content"]
 
 
 class MessagingListSerializer(serializers.ModelSerializer):
-    from_me = serializers.SerializerMethodField()
-    created_at = serializers.SerializerMethodField()
+    sender_id = serializers.SerializerMethodField()
 
-    def get_from_me(self, instance: Message):
-        request = self.context.get("request")
-        return request is not None and instance.sender == request.user
+    def get_sender_id(self, instance: Message):
+        return instance.sender.public_id
 
-    def get_created_at(self, instance: Message):
-        return instance.updated_at
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        return response
 
     class Meta:
         model = Message
-        fields = ["id", "content", "from_me", "created_at"]
+        fields = ["id", "content", "created_at", "sender_id"]
 
 
 class ThreadListSerializer(serializers.ModelSerializer):
@@ -37,18 +36,13 @@ class ThreadListSerializer(serializers.ModelSerializer):
         }
 
     def get_messaging(self, instance: Thread):
-        last_message = instance.messaging.all().latest("created_at")
+        last_message: Message = instance.messaging.latest("created_at")
 
         if not last_message:
             return [{}]
+        last_message_data = MessagingListSerializer(instance=last_message).data
 
-        return [
-            {
-                "content": last_message.content,
-                "created_at": last_message.created_at,
-                "from_me": (instance.owner == last_message.sender),
-            }
-        ]
+        return [last_message_data]
 
     class Meta:
         model = Thread

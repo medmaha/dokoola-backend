@@ -3,7 +3,7 @@ from django.urls import path, re_path
 from . import views
 
 urlpatterns = [
-    path("create/", views.messagingCreateAPIView.as_view(), name="m_create"),
+    path("create/", views.MessagingCreateAPIView.as_view(), name="m_create"),
     path("threads/", views.ThreadListAPIView.as_view(), name="threads_list"),
     path(
         "threads/delete/",

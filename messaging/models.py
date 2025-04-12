@@ -19,6 +19,12 @@ class Message(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    is_read = models.BooleanField(default=False)
+    is_seen = models.BooleanField(default=False)
+    is_edited = models.BooleanField(default=False)
+    is_deleted = models.BooleanField(default=False)
+    is_delivered = models.BooleanField(default=False)
+
     def __str__(self) -> str:
         return self.content[:20]
 
@@ -35,7 +41,7 @@ class Thread(models.Model):
     )
 
     messaging = models.ManyToManyField(Message, related_name="thread")
-    # updated_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     unique_id = models.CharField(max_length=100, default="")
