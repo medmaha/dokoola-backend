@@ -73,8 +73,8 @@ class UserDashboardAPIView(RetrieveAPIView):
             data["projects_count"] = 1
             status = 200
 
-        if profile_name == "Client":
-            data["projects_count"] = profile.jobs.count()
-            status = 200
+        # if profile_name == "Client":
+        #     data["projects_count"] = profile.jobs.count()
+        #     status = 200
 
         return Response(data, status=status)

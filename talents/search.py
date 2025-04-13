@@ -52,7 +52,7 @@ class TalentsSearchAPIView(ListAPIView):
                 | Q(user__address__icontains=location)
                 | Q(user__zip_code__icontains=location)
             )
-        return queryset.distinct()
+        return queryset.select_related("user")
 
     def get_queryset(self):
         return TalentsSearchAPIView.make_query(self.request.query_params)  # type: ignore

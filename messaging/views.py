@@ -113,7 +113,11 @@ class ThreadMessagesAPIView(ListAPIView):
         thread = Thread.objects.filter(owner=user, unique_id=thread_unique_id).first()
 
         if thread:
-            queryset = thread.messaging.filter().order_by("created_at")
+            queryset = (
+                thread.messaging.filter()
+                .select_related("sender")
+                .order_by("created_at")
+            )
             return queryset
         return
 

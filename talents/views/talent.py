@@ -22,7 +22,7 @@ class TalentAPIView(GenericAPIView):
         r_type = context.get("r_type")
 
         if not r_type:
-            r_type = self.request.query_params.get("r_type")
+            r_type = self.request.query_params.get("r_type")  # type: ignore
             context["r_type"] = str(r_type)
             kwargs["context"] = context
 
@@ -34,7 +34,7 @@ class TalentAPIView(GenericAPIView):
                 if not request.user.is_authenticated:
                     return Response({"message": "Unauthorized Request"}, status=401)
 
-                talent = Talent.objects.prefetch_related("user").get(
+                talent = Talent.objects.select_related("user").get(
                     models.Q(public_id=public_id) | models.Q(user__username=public_id)
                 )
 
@@ -134,7 +134,10 @@ class TalentAPIView(GenericAPIView):
             )
 
             # Check, to see if the username of this user was updated
-            if updated_user.username != current_username or updated_user.avatar != current_avatar:
+            if (
+                updated_user.username != current_username
+                or updated_user.avatar != current_avatar
+            ):
                 # Generate a new token for this user's credentials
                 token = GenerateToken().tokens(updated_user, init=True)
                 return Response(

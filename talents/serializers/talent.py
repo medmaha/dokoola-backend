@@ -27,7 +27,7 @@ class TalentReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Talent
-        fields = []
+        fields = ["user"]
 
     def mini_values(self, instance: Talent):
         return {
@@ -104,7 +104,7 @@ class TalentReadSerializer(serializers.ModelSerializer):
 
         if r_type not in r_type_list:
             return self.common_values(instance)
-        
+
         if r_type == "mini":
             return self.mini_values(instance)
 

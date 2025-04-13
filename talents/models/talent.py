@@ -20,7 +20,7 @@ class Talent(models.Model):
         "users.User", on_delete=models.CASCADE, related_name="talent_profile"
     )
 
-    title = models.CharField(max_length=1500, default="", blank=True)
+    title = models.CharField(max_length=1500, default="", blank=True, db_index=True)
     bio = models.TextField(max_length=1500, default="", blank=True)
 
     skills = models.CharField(max_length=1000, default="", blank=True)
@@ -33,9 +33,9 @@ class Talent(models.Model):
         Certificate, related_name="talent", blank=True
     )
 
-    rating = models.FloatField(default=3.5, blank=True)
+    rating = models.FloatField(default=3.5, blank=True, db_index=True)
     jobs_completed = models.IntegerField(default=0)
-    badge = models.CharField(max_length=200, default="basic")
+    badge = models.CharField(max_length=200, default="basic", db_index=True)
     bits = models.IntegerField(default=60, blank=True)
 
     dob = models.DateTimeField(null=True, blank=True)
