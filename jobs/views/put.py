@@ -39,14 +39,14 @@ class JobUpdateAPIView(UpdateAPIView):
                     instance.client.public_id == request.user.public_id
                 ), "403: Forbidden request!"
 
-                if "published" in request.query_params:
+                if "publish" in request.query_params:
 
                     if not self.check_can_publish(instance):
                         return Response(
                             {"message": "This action is forbidden"}, status=403
                         )
 
-                    published = data.get("published", False) == True
+                    published = not instance.published
                     if published:
                         status = JobStatusChoices.PUBLISHED
                     else:
@@ -58,7 +58,9 @@ class JobUpdateAPIView(UpdateAPIView):
                     return Response(
                         {
                             "message": "Job updated successfully",
-                            "data": {"published": instance.published, "_id": public_id},
+                            "published": instance.published,
+                            "status": instance.status,
+                            "_id": public_id,
                         },
                         status=200,
                     )

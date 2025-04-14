@@ -22,16 +22,20 @@ class JobClientSerializer(serializers.ModelSerializer):
         data["company"] = {}
         is_detail_view = "detail" in self.context
 
-        data["rating"] = instance.average_rating(recalculate=is_detail_view, db_commit=True)
+        data["rating"] = instance.average_rating(
+            recalculate=is_detail_view, db_commit=True
+        )
 
         if not is_detail_view:
             company = instance._company
             if company:
-                data["company"].update({
-                    "slug": company.get("slug"),
-                    "name": company.get("name"),
-                    "logo_url": company.get("logo_url"),
-                })
+                data["company"].update(
+                    {
+                        "slug": company.get("slug"),
+                        "name": company.get("name"),
+                        "logo_url": company.get("logo_url"),
+                    }
+                )
             return data
 
         if is_detail_view:
@@ -45,7 +49,9 @@ class JobClientSerializer(serializers.ModelSerializer):
                 data["company"]["website"] = company.website
                 data["company"]["industry"] = company.industry
                 data["company"]["description"] = company.description
-                data["company"]["date_established"] = str(company.date_established or "")
+                data["company"]["date_established"] = str(
+                    company.date_established or ""
+                )
 
         return data
 
@@ -61,15 +67,6 @@ class JobActivitiesSerializer(serializers.ModelSerializer):
             "interview_count",
             "unanswered_invites",
             "client_last_visit",
-            "applicant_ids",
-        ]
-
-    applicant_ids = serializers.SerializerMethodField()
-
-    def get_applicant_ids(self, instance: Activities):
-        return [
-            p.talent.user.public_id
-            for p in Proposal.objects.only("talent__public_id").filter(job=instance.job)
         ]
 
 
@@ -108,12 +105,16 @@ class JobListSerializer(serializers.ModelSerializer):
     # Check if the user has proposed to the job
     def to_representation(self, instance: Job):
         representation = super().to_representation(instance)
-        if instance.third_party_metadata and "description" in instance.third_party_metadata:
+        if (
+            instance.third_party_metadata
+            and "description" in instance.third_party_metadata
+        ):
             representation["description"] = instance.third_party_metadata["description"]
         else:
             representation["description"] = instance.description[:500]
         return representation
-    
+
+
 class JobRelatedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
@@ -129,17 +130,20 @@ class JobRelatedSerializer(serializers.ModelSerializer):
 
     client = serializers.SerializerMethodField()
 
-    def get_client(self, instance:Job):
+    def get_client(self, instance: Job):
         data = {
             "public_id": instance.client.public_id,
             "name": instance.client.name,
             "logo": instance.client.logo,
-            "rating": instance.client.rating
+            "rating": instance.client.rating,
         }
         if instance.third_party_metadata:
-            data["name"] = instance.third_party_metadata.get("company_name") or data["name"]
+            data["name"] = (
+                instance.third_party_metadata.get("company_name") or data["name"]
+            )
 
         return data
+
 
 class JobRetrieveSerializer(serializers.ModelSerializer):
 
@@ -177,16 +181,15 @@ class JobRetrieveSerializer(serializers.ModelSerializer):
             "updated_at",
             "created_at",
             "client",
-            "activities",
+            "applicant_ids",
         ]
 
     category = JobCategorySerializer()
-    activities = JobActivitiesSerializer()
     client = JobClientSerializer(context={"detail": True})
 
     def to_representation(self, instance: Job):
         representation = super().to_representation(instance)
-
-        Activities.objects.get_or_create(job=instance)
-
+        representation["activities"] = JobActivitiesSerializer(
+            instance=instance.get_activities
+        ).data
         return representation

@@ -2,16 +2,12 @@ import random
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
-
 from django.utils import timezone
 
 from clients.models import Client
 from core.models import Category
 from core.services.email.main import EmailService
-from utilities.generator import (
-    primary_key_generator,
-    public_id_generator,
-)
+from utilities.generator import primary_key_generator, public_id_generator
 
 
 class JobStatusChoices(models.TextChoices):
@@ -47,6 +43,7 @@ class JobManager(models.manager.BaseManager):
 
     def filter(self, *args, **kwargs):
         return super().filter(*args, **kwargs).distinct()
+
 
 class Job(models.Model):
     id = models.UUIDField(
@@ -96,14 +93,18 @@ class Job(models.Model):
     )
 
     client_last_visit = models.DateTimeField(blank=True, null=True)
-    metadata = models.JSONField(encoder=DjangoJSONEncoder, blank=True, default=dict, null=True)
+    metadata = models.JSONField(
+        encoder=DjangoJSONEncoder, blank=True, default=dict, null=True
+    )
 
     experience_level = models.CharField(blank=True, null=True, max_length=200)
     experience_level_other = models.CharField(blank=True, null=True, max_length=200)
 
     application_deadline = models.DateTimeField(blank=True, null=True)
     estimated_duration = models.CharField(blank=True, null=True, max_length=255)
-    additional_payment_terms = models.CharField(blank=True, default="", max_length=255, null=True)
+    additional_payment_terms = models.CharField(
+        blank=True, default="", max_length=255, null=True
+    )
 
     client = models.ForeignKey(
         Client, related_name="jobs", on_delete=models.CASCADE, null=False
@@ -114,6 +115,8 @@ class Job(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     PUBLIC_ID_PREFIX = "Job"
+
+    applicant_ids = models.JSONField(null=True, default=list, blank=True)
 
     def __str__(self):
         return self.title[:50]
@@ -175,7 +178,6 @@ class Job(models.Model):
 
         Proposal.objects.bulk_update(other_proposals, ["status"])
 
-
     def notify_client(self, job_status, proposal=None, new_proposal=None):
         """
         Notify the client about the job status through email
@@ -233,11 +235,5 @@ class Job(models.Model):
         )
 
     @property
-    def activities(self):
-        from .activities import Activities
-
-        activities, _ = Activities.objects.get_or_create(job=self, defaults={
-            "applicants_id": [],
-        })
-
-        return activities
+    def get_activities(self):
+        return self.activity  # type: ignore

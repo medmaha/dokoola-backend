@@ -4,5 +4,8 @@ from core.models import Category
 
 
 def get_category(slug: str):
-    category = Category.objects.filter(Q(slug=slug) | Q(name=slug)).first()
+    _slug = slug.lower() if slug else None
+    category = Category.objects.filter(
+        Q(slug__iexact=_slug) | Q(name__iexact=_slug)
+    ).first()
     return category
