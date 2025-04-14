@@ -24,7 +24,7 @@ class Talent(models.Model):
     bio = models.TextField(max_length=1500, default="", blank=True)
 
     skills = models.CharField(max_length=1000, default="", blank=True)
-    pricing = models.CharField(max_length=20, default="100", blank=True)
+    pricing = models.CharField(max_length=20, default="", blank=True)
 
     reviews = models.ManyToManyField(Review, blank=True, related_name="talent_reviews")
     education = models.ManyToManyField(Education, related_name="talent", blank=True)

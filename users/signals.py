@@ -7,6 +7,7 @@ from django.dispatch import receiver
 from clients.models import Client
 from staffs.models import Staff
 from talents.models.talent import Talent
+from users.models.preference import UserSettings
 
 from .models import User
 
@@ -24,6 +25,14 @@ def encrypt_passwords(sender, instance: User, **kwargs):
         instance.password = make_password(instance.password)
 
     return instance
+
+
+@receiver(post_save, sender=User)
+def user_init(sender, instance: User, created, **kwargs):
+    if created:
+        preference = UserSettings(user=instance)
+        preference.full_clean()
+        preference.save()
 
 
 @receiver(post_save, sender=Talent)
