@@ -172,7 +172,7 @@ class ContractCreateAPIView(GenericAPIView):
                     )
 
                     # update job activities
-                    job_activity = proposal.job.activities
+                    job_activity = proposal.job.get_activities
                     job_activity.hired.add(proposal.talent)
 
                     # Save notifications
