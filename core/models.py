@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
@@ -25,6 +26,27 @@ class Feedback(models.Model):
     rating = models.IntegerField(default=1, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     blacklisted = models.BooleanField(default=False)
+
+    def clean(self):
+        # Ensure rating is between 1 and 5
+        if self.rating is not None and (self.rating < 1 or self.rating > 5):
+            raise ValidationError({"rating": "Rating must be between 1 and 5."})
+
+        if not self.message or len(self.message) < 10:
+            raise ValidationError(
+                {"message": "Feedback message is required with 10 characters minimum"}
+            )
+        if not self.author_name or len(self.author_name) < 3:
+            raise ValidationError(
+                {
+                    "author_name": "Feedback author_name is required with 3 characters minimum"
+                }
+            )
+
+    def save(self, *args, **kwargs):
+        # Call clean method before saving
+        self.full_clean()
+        super().save(*args, **kwargs)
 
 
 class Category(models.Model):

@@ -37,6 +37,9 @@ class WaitlistAPIView(GenericAPIView):
 
         serializer = None
 
+        if not email:
+            return Response({"message": "Email field is required"}, status=400)
+
         try:
             subscriber = Waitlist.objects.get(email=email)
             _message = "You are already in our waitlist, Thank You!"
@@ -98,7 +101,7 @@ class CategoryAPIView(GenericAPIView):
 
     def get_queryset(self, query_params):
         child = query_params.get("child", None)
-        parent__isnull = True if child is None else bool(child) == False
+        parent__isnull = True if child is None else not bool(child)
         categories = Category.objects.filter(
             disabled=False, is_agent=False, parent__isnull=parent__isnull
         )
@@ -126,6 +129,34 @@ class FeedbackCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Feedback
         fields = ["message", "author_name", "author_email", "rating"]
+
+    def validate_rating(self, value: int):
+        if not isinstance(value, int):
+            raise serializers.ValidationError("Rating must be an integer.")
+        if value < 1 or value > 5:
+            raise serializers.ValidationError("Rating must be between 1 and 5.")
+        return value
+
+    def validate_message(self, value: str):
+        if not value or not value.strip():
+            raise serializers.ValidationError("Message is required.")
+        if len(value.strip()) < 10:
+            raise serializers.ValidationError(
+                "Message must be at least 10 characters long."
+            )
+        return value.strip()
+
+    def validate_author_name(self, value: str):
+        if not value or not value.strip():
+            raise serializers.ValidationError("Author name is required.")
+        return value.strip()
+
+    def validate_author_email(self, value: str):
+        if not value or not value.strip():
+            raise serializers.ValidationError("Author email is required.")
+        if "@" not in value or "." not in value:
+            raise serializers.ValidationError("Enter a valid email address.")
+        return value.strip()
 
 
 class FeedbackAPIView(GenericAPIView):
@@ -182,6 +213,6 @@ class FeedbackAPIView(GenericAPIView):
         if feedback.is_valid():
             instance = feedback.save()
             return Response({"id": instance.pk, "ok": True}, status=200)
-        else:
-            error_message = get_serializer_error_message(feedback.errors)
-            return Response({"message": error_message}, status=400)
+
+        error_message = get_serializer_error_message(feedback.errors)
+        return Response({"message": error_message}, status=400)
