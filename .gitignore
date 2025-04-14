@@ -5,6 +5,4 @@ venv/
 .logs/
 .backups/
 public/
-**/migrations/
-!**/migrations/__init__.py
 __pycache__
