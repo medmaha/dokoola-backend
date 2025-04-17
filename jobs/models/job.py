@@ -22,9 +22,7 @@ class JobStatusChoices(models.TextChoices):
 
     @classmethod
     def verify_status(cls, status: str):
-        if status not in cls.values:
-            return False
-        return True
+        return status in cls.values
 
 
 class JobTypeChoices(models.TextChoices):
@@ -128,11 +126,11 @@ class Job(models.Model):
         ordering = ["is_valid", "-created_at", "published"]
 
     def budget(self):
-        if not self.pricing or not not self.pricing.get("budget", None):
+        if not self.pricing or not self.pricing.get("budget", None):
             return "N/A"
 
-        currency = self.pricing.get("currency", "USD")
-        return f"{currency} {self.pricing.get('budget')}"
+        currency = self.pricing.get("currency", "")
+        return f"{currency} {self.pricing.get('budget')}".strip()
 
     def deadline(self):
         return self.application_deadline
