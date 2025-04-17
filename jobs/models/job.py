@@ -234,4 +234,11 @@ class Job(models.Model):
 
     @property
     def get_activities(self):
-        return self.activity  # type: ignore
+        try:
+            activity = self.activity  # type: ignore
+        except:
+            from .activities import Activities
+
+            activity, _ = Activities.objects.get_or_create(job=self)
+
+        return activity
