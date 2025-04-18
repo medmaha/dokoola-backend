@@ -189,7 +189,8 @@ class JobRetrieveSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance: Job):
         representation = super().to_representation(instance)
-        representation["activities"] = JobActivitiesSerializer(
-            instance=instance.get_activities
-        ).data
+
+        activity = instance.get_activities
+        representation["activities"] = JobActivitiesSerializer(instance=activity).data
+
         return representation
