@@ -4,7 +4,9 @@ from rest_framework.response import Response
 
 from clients.models import Client
 from core.models import Category
+from jobs.models.activities import Activities
 from jobs.models.job import Job, JobStatusChoices
+from utilities.generator import primary_key_generator, public_id_generator
 
 
 class JobScrapperAPIView(ListAPIView):
@@ -58,23 +60,39 @@ class JobScrapperAPIView(ListAPIView):
                 status = JobStatusChoices.DRAFT
 
             # Filter out jobs that already exist and prepare new job objects
-            filtered_jobs = [
-                Job(
-                    **job_data,
-                    client=client,
-                    is_valid=True,
-                    status=status,
-                    category=category,
-                    published=published,
-                    is_third_party=True,
-                )
-                for job_data in _data
-                if job_data.get("third_party_address") not in existing_jobs
-            ]
+            filtered_jobs = []
+            activities = []
+            for job_data in _data:
+                third_party_address = job_data.get("third_party_address")
+                if third_party_address and third_party_address not in existing_jobs:
+                    _id = primary_key_generator()
+                    self.public_id = public_id_generator(_id, Job.PUBLIC_ID_PREFIX)
+                    try:
+                        job = Job(
+                            **job_data,
+                            id=_id,
+                            status=status,
+                            client=client,
+                            category=category,
+                            published=published,
+                            public_id=self.public_id,
+                        )
+                        job.full_clean()
+                        filtered_jobs.append(job)
+
+                        # Create an activity for each new job
+                        activity = Activities(
+                            job=job, public_id=public_id_generator(_id, "ATV")
+                        )
+                        activity.clean()
+                        activities.append(activity)
+                    except Exception as e:
+                        print("ERROR:", e)
 
             # Use a database transaction to bulk create the new jobs
             with transaction.atomic():
                 jobs = Job.objects.bulk_create(filtered_jobs)
+                Activities.objects.bulk_create(activities)
                 return Response(
                     {"message": "Jobs created successfully", "count": len(jobs)},
                     status=200,
@@ -82,4 +100,5 @@ class JobScrapperAPIView(ListAPIView):
 
         except Exception as e:
             # TODO: log error
+            print("Error:", e)
             return Response({"message": str(e)}, status=500)
