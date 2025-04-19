@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns = [
     path("", views.JobListAPIView.as_view(), name="job_list"),
+    path("scraper/", views.JobScrapperAPIView.as_view(), name="job_scraper"),
     path("my-jobs/", views.MyJobListAPIView.as_view(), name="my_job_list"),
     path("create/", views.JobCreateAPIView.as_view(), name="job_create"),
     path("search/", views.JobsSearchAPIView.as_view(), name="job_searching"),
